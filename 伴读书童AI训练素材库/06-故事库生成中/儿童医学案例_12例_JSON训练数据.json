@@ -1,0 +1,571 @@
+{
+  "metadata": {
+    "title": "伴读书童AI·儿童医学训练案例库",
+    "version": "1.0",
+    "created_date": "2026-05-17",
+    "creator": "灵觉/Prome",
+    "total_cases": 12,
+    "age_range": "3-18岁",
+    "source": "炁脉医学病案库·儿童专科",
+    "purpose": "为书童AI提供儿童体质辨识、五维诊断、54牌选方的医学训练数据"
+  },
+  "training_cases": [
+    {
+      "case_id": "PT-2009-2018-001",
+      "patient_name": "尹善怡",
+      "gender": "女",
+      "age_at_treatment": 9,
+      "birth_year": 2009,
+      "condition_primary": "自闭症",
+      "condition_secondary": ["言语障碍", "情绪失控", "饮食极端", "长期便秘"],
+      "diagnosis_western": "自闭症谱系障碍",
+      "diagnosis_tcm": "毒深脉痹神离",
+      "five_dimensions": {
+        "qi": {"level": 4, "description": "炁弱", "details": "9岁生发期本应炁足，但挑食少食导致炁虚"},
+        "toxin": {"level": 6, "description": "毒深", "details": "长期便秘、偏爱荤食，肝毒肠毒深积"},
+        "vessel": {"level": 5, "description": "脉痹", "details": "自闭症儿童常见经络堵痹，神魂不守"},
+        "pathogen": {"level": 3, "description": "邪在经", "details": "不与人交流，实为磁毒扰神"},
+        "addiction": {"level": 7, "description": "神离", "details": "情绪极不稳定、频繁哭闹，神魂散乱"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠5-7", "focus": "清府排毒，重点肠道、肝胆"},
+        "diamonds": {"range": "♦4-6", "focus": "疏通督脉、膀胱经，通调神志"},
+        "hearts": {"range": "♥4-6", "focus": "培补脾胃，增强运化"},
+        "clubs": {"range": "♣4-5", "focus": "祛磁毒，安神定志"}
+      },
+      "treatment_phases": [
+        {"phase": "启动期", "sessions": "1-10次", "focus": "背部排毒、疏通督脉、调理脾胃", "expected": "开始排异反应（白色泡沫痰）"},
+        {"phase": "排毒期", "sessions": "11-20次", "focus": "深层排毒、疏通经络、培补元炁", "expected": "背部黑颗粒排出，情绪开始平稳"},
+        {"phase": "巩固期", "sessions": "21-30次", "focus": "系统清理、脉道修复、体质提升", "expected": "饮食正常，情绪自控，便秘改善"}
+      ],
+      "key_milestones": [
+        {"milestone": "白色泡沫痰外排", "significance": "肺毒、痰毒外排"},
+        {"milestone": "背部黑颗粒毒出", "significance": "深层毒邪外透，毒素沉积已久"},
+        {"milestone": "饮食从荤食偏食转为素食接纳", "significance": "脾胃功能恢复"},
+        {"milestone": "情绪从暴躁哭闹转为平和自控", "significance": "神魂归位"}
+      ],
+      "outcome": {
+        "status": "成功案例",
+        "follow_up": "2025年回访，已上高中，状态稳定，学业正常",
+        "total_sessions": "约20-30次（3个月密集调理）"
+      },
+      "training_insights": {
+        "key_learning": "儿童自闭症典型格局——毒深脉痹神离。表面是精神行为问题，实则是体内毒素蓄积、经络堵痹、神魂失所的综合结果。",
+        "age_factor": "9岁生发期，本可塑性强，及时调理可逆。",
+        "family_role": "需家长持续配合，调整饮食、作息、家庭环境。"
+      }
+    },
+    {
+      "case_id": "PT-2016-2024-001",
+      "patient_name": "伊珩",
+      "gender": "男",
+      "age_at_treatment": 9,
+      "birth_year": 2016,
+      "condition_primary": "ADHD（注意缺陷多动障碍）",
+      "condition_secondary": ["注意力不集中", "眼神涣散", "多动", "自语", "手指黏腻", "语言表达差"],
+      "diagnosis_western": "ADHD",
+      "diagnosis_tcm": "火旺神明不宁，肝风内动，脾虚湿困，脑髓不足",
+      "five_dimensions": {
+        "qi": {"level": 4, "description": "炁弱", "details": "心火亢盛；肝风内动；脾虚湿困"},
+        "toxin": {"level": 5, "description": "毒盛", "details": "心→热毒（川崎病史）；脾→湿毒；肝→肝毒"},
+        "vessel": {"level": 5, "description": "脉痹", "details": "膀胱经、督脉、胆经、心包经堵痹"},
+        "pathogen": {"level": 4, "description": "邪在腑", "details": "饮食油炸甜食；电子设备注意力分散"},
+        "addiction": {"level": 3, "description": "神浮", "details": "电子设备依赖；口味偏好"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠4-6", "focus": "背部刮痧排湿毒热毒"},
+        "diamonds": {"range": "♦4-6", "focus": "疏通背部膀胱经、头部胆经、心包经"},
+        "hearts": {"range": "♥5-6", "focus": "清心火+健脾，艾灸心俞/肝俞/脾俞"},
+        "clubs": {"range": "♣3-4", "focus": "断磁毒（限制电子设备）+饮食调整"}
+      },
+      "treatment_phases": [
+        {"phase": "清心肝之火", "sessions": "持续", "focus": "火清湿化则神明安宁", "expected": "注意力集中、多动减少"},
+        {"phase": "补肾填精", "sessions": "第2-4周", "focus": "针对脑髓不足、语言表达", "expected": "语言表达提升"},
+        {"phase": "专注力训练", "sessions": "持续", "focus": "语言训练+专注力培训", "expected": "学习改善"}
+      ],
+      "key_milestones": [
+        {"milestone": "注意力显著改善", "significance": "能对视，眼神有神"},
+        {"milestone": "多动改善", "significance": "手指黏腻感消失"},
+        {"milestone": "332次长期调理", "significance": "ADHD需长期调理+家庭配合+断磁毒"}
+      ],
+      "outcome": {
+        "status": "显著改善",
+        "follow_up": "332次调理（2024.1-2026.3），注意力显著改善，眼神有神，能对视，多动改善，手指黏腻感消失，语言表达能力待提升",
+        "total_sessions": 332
+      },
+      "training_insights": {
+        "key_learning": "ADHD核心病机：火旺神明不宁，肝风内动，脾虚湿困，脑髓不足。需长期调理+家庭配合+断磁毒+专注力培训辅助。",
+        "age_factor": "9岁丙申年生（火旺之年），心火易亢，神明不宁。",
+        "family_role": "家长需配合断磁毒（限制电子设备）、调整饮食（清淡少油炸）、持续调理。"
+      }
+    },
+    {
+      "case_id": "PT-2014-20XX-XXX",
+      "patient_name": "珊珊",
+      "gender": "女",
+      "age_at_treatment": 10,
+      "birth_year": 2004,
+      "condition_primary": "哮喘",
+      "condition_secondary": ["免疫系统问题", "咳喘", "有痰咳不出", "体味重", "反应迟缓"],
+      "diagnosis_western": "哮喘（6年病史）",
+      "diagnosis_tcm": "体毒壅塞至经脉，致阳气不升",
+      "five_dimensions": {
+        "qi": {"level": 4, "description": "炁弱", "details": "长期哮喘耗炁，阳气不升"},
+        "toxin": {"level": 5, "description": "毒盛", "details": "体毒壅塞至经脉，痰湿内蕴"},
+        "vessel": {"level": 5, "description": "脉痹", "details": "经络堵痹得厉害，背部痧暗黑无光泽"},
+        "pathogen": {"level": 3, "description": "邪在经", "details": "激素类药物副作用，热毒内蕴"},
+        "addiction": {"level": 2, "description": "神浮", "details": "反应迟缓，不爱与人交流"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠5-7", "focus": "排毒通脉是关键"},
+        "diamonds": {"range": "♦4-6", "focus": "疏通背部膀胱经、督脉"},
+        "hearts": {"range": "♥4-5", "focus": "培补元炁，增强免疫"},
+        "clubs": {"range": "♣3-4", "focus": "祛外邪，调整饮食"}
+      },
+      "treatment_phases": [
+        {"phase": "排毒启动", "sessions": "1-10次", "focus": "背部行罐排毒", "expected": "咳出白痰"},
+        {"phase": "排毒深化", "sessions": "11-50次", "focus": "持续排毒通脉", "expected": "痰增多易咳出，白色泡沫"},
+        {"phase": "巩固稳定", "sessions": "51-100次", "focus": "系统调理", "expected": "发脾气后也不哮喘，性格开朗"}
+      ],
+      "key_milestones": [
+        {"milestone": "咳出白痰", "significance": "排毒开始"},
+        {"milestone": "痰增多易咳出", "significance": "痰湿外排通道打开"},
+        {"milestone": "发脾气后也不哮喘", "significance": "情绪不再触发哮喘，体质根本改善"},
+        {"milestone": "考上高中", "significance": "完全康复，正常生活"}
+      ],
+      "outcome": {
+        "status": "完全康复",
+        "follow_up": "完全康复，正常生活，顺利考上高中，特意打电话感谢炁脉学校",
+        "total_sessions": "约100次"
+      },
+      "training_insights": {
+        "key_learning": "哮喘不是病，归类于免疫系统问题。体毒壅塞至经脉，致阳气不升，排毒通脉是关键。",
+        "age_factor": "10岁生发期，休学一年专门治疗，可塑性强。",
+        "family_role": "父母反馈在家坚持泡脚时情况稳定，家庭配合至关重要。"
+      }
+    },
+    {
+      "case_id": "PT-2008-2026-001",
+      "patient_name": "金石",
+      "gender": "男",
+      "age_at_treatment": 18,
+      "birth_year": 2008,
+      "condition_primary": "抽动症",
+      "condition_secondary": ["鼻炎", "焦虑", "AI磁毒综合征"],
+      "diagnosis_western": "抽动症+鼻炎+焦虑症",
+      "diagnosis_tcm": "磁毒扰神，肝风内动，脾虚湿困",
+      "five_dimensions": {
+        "qi": {"level": 4, "description": "炁弱", "details": "长期电子设备耗炁，肝肾不足"},
+        "toxin": {"level": 5, "description": "毒盛", "details": "磁毒+湿毒+肝毒"},
+        "vessel": {"level": 5, "description": "脉痹", "details": "肝经、胆经、督脉堵痹"},
+        "pathogen": {"level": 4, "description": "邪在腑", "details": "AI时代磁毒扰神"},
+        "addiction": {"level": 4, "description": "神浮", "details": "电子设备依赖严重"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠5-7", "focus": "深层排毒，清除磁毒"},
+        "diamonds": {"range": "♦5-7", "focus": "疏通肝经、胆经、督脉"},
+        "hearts": {"range": "♥4-6", "focus": "培补肝肾，安神定志"},
+        "clubs": {"range": "♣4-6", "focus": "断磁毒，远离电子设备"}
+      },
+      "treatment_phases": [
+        {"phase": "断磁毒", "sessions": "第1周", "focus": "远离电子设备", "expected": "减少磁毒输入"},
+        {"phase": "排毒通脉", "sessions": "1-20次", "focus": "深层排毒，疏通经络", "expected": "抽动减少"},
+        {"phase": "培补安神", "sessions": "21-40次", "focus": "培补肝肾，安神定志", "expected": "焦虑缓解，睡眠改善"}
+      ],
+      "key_milestones": [
+        {"milestone": "断磁毒", "significance": "减少磁毒输入是治疗基础"},
+        {"milestone": "抽动减少", "significance": "肝风平息"},
+        {"milestone": "焦虑缓解", "significance": "神魂归位"}
+      ],
+      "outcome": {
+        "status": "调理中",
+        "follow_up": "18岁AI磁毒综合征，需长期调理",
+        "total_sessions": "进行中"
+      },
+      "training_insights": {
+        "key_learning": "AI时代磁毒综合征：抽动症、鼻炎、焦虑，核心为磁毒扰神，肝风内动。",
+        "age_factor": "18岁青春期，情绪波动大，磁毒影响显著。",
+        "family_role": "必须断磁毒（限制电子设备），这是治疗基础。"
+      }
+    },
+    {
+      "case_id": "PT-1709-2025-001",
+      "patient_name": "蔡斯幽",
+      "gender": "女",
+      "age_at_treatment": 8,
+      "birth_year": 2017,
+      "condition_primary": "挑食无食欲",
+      "condition_secondary": ["喉间清痰", "食欲不振", "脾胃功能紊乱"],
+      "diagnosis_western": "儿童厌食症",
+      "diagnosis_tcm": "脾虚湿困，痰湿内蕴",
+      "five_dimensions": {
+        "qi": {"level": 3, "description": "炁虚", "details": "脾虚运化无力，炁生乏源"},
+        "toxin": {"level": 4, "description": "毒积", "details": "湿毒内蕴，喉间清痰"},
+        "vessel": {"level": 4, "description": "脉堵", "details": "脾经、胃经堵痹"},
+        "pathogen": {"level": 3, "description": "邪在经", "details": "饮食不节，外邪入侵"},
+        "addiction": {"level": 2, "description": "神浮", "details": "口味偏好，挑食"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠3-5", "focus": "健脾化湿，祛除痰湿"},
+        "diamonds": {"range": "♦3-5", "focus": "疏通脾经、胃经"},
+        "hearts": {"range": "♥3-5", "focus": "培补脾胃，增强运化"},
+        "clubs": {"range": "♣2-4", "focus": "调整饮食，规律作息"}
+      },
+      "treatment_phases": [
+        {"phase": "健脾化湿", "sessions": "1-10次", "focus": "祛除痰湿，改善食欲", "expected": "喉间清痰减少"},
+        {"phase": "培补脾胃", "sessions": "11-20次", "focus": "增强运化能力", "expected": "食欲改善"},
+        {"phase": "巩固体质", "sessions": "21-30次", "focus": "稳定脾胃功能", "expected": "饮食正常"}
+      ],
+      "key_milestones": [
+        {"milestone": "喉间清痰减少", "significance": "痰湿外排"},
+        {"milestone": "食欲改善", "significance": "脾胃功能恢复"}
+      ],
+      "outcome": {
+        "status": "调理中",
+        "follow_up": "8岁挑食无食欲，需家长配合调整饮食",
+        "total_sessions": "进行中"
+      },
+      "training_insights": {
+        "key_learning": "儿童挑食厌食，核心为脾虚湿困。需健脾化湿+饮食调整+家长配合。",
+        "age_factor": "8岁生发期，脾胃功能尚未完善，易受饮食影响。",
+        "family_role": "家长需调整饮食结构，避免零食，规律三餐。"
+      }
+    },
+    {
+      "case_id": "PT-1704-2026-XXX",
+      "patient_name": "汪再晨",
+      "gender": "男",
+      "age_at_treatment": 9,
+      "birth_year": 2017,
+      "condition_primary": "注意力不集中",
+      "condition_secondary": ["湿疹", "湿毒扰神"],
+      "diagnosis_western": "注意力缺陷",
+      "diagnosis_tcm": "湿毒扰神，脾虚湿困",
+      "five_dimensions": {
+        "qi": {"level": 3, "description": "炁虚", "details": "脾虚湿困，炁生乏源"},
+        "toxin": {"level": 4, "description": "毒积", "details": "湿毒内蕴，湿疹反复"},
+        "vessel": {"level": 4, "description": "脉堵", "details": "脾经、心经堵痹"},
+        "pathogen": {"level": 3, "description": "邪在经", "details": "湿毒扰神，注意力不集中"},
+        "addiction": {"level": 2, "description": "神浮", "details": "注意力涣散"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠3-5", "focus": "祛湿排毒，清除湿毒"},
+        "diamonds": {"range": "♦3-5", "focus": "疏通脾经、心经"},
+        "hearts": {"range": "♥3-5", "focus": "培补心脾，安神定志"},
+        "clubs": {"range": "♣2-4", "focus": "调整饮食，避免湿毒"}
+      },
+      "treatment_phases": [
+        {"phase": "祛湿排毒", "sessions": "1-10次", "focus": "清除湿毒，改善湿疹", "expected": "湿疹减轻"},
+        {"phase": "通脉安神", "sessions": "11-20次", "focus": "疏通心经，安神定志", "expected": "注意力改善"},
+        {"phase": "巩固体质", "sessions": "21-30次", "focus": "稳定心脾功能", "expected": "注意力稳定"}
+      ],
+      "key_milestones": [
+        {"milestone": "湿疹减轻", "significance": "湿毒外排"},
+        {"milestone": "注意力改善", "significance": "神魂归位"}
+      ],
+      "outcome": {
+        "status": "调理中",
+        "follow_up": "9岁注意力不集中+湿疹，湿毒扰神",
+        "total_sessions": "进行中"
+      },
+      "training_insights": {
+        "key_learning": "儿童注意力不集中+湿疹，核心为湿毒扰神。需祛湿排毒+通脉安神。",
+        "age_factor": "9岁生发期，心脾功能尚未完善，易受湿毒影响。",
+        "family_role": "家长需调整饮食，避免湿毒食物（甜食、油腻）。"
+      }
+    },
+    {
+      "case_id": "PT-1605-2025-001",
+      "patient_name": "许伯源",
+      "gender": "男",
+      "age_at_treatment": 7,
+      "birth_year": 2018,
+      "condition_primary": "鼻炎",
+      "condition_secondary": ["助长", "生长发育迟缓", "免疫力低下"],
+      "diagnosis_western": "儿童鼻炎",
+      "diagnosis_tcm": "肺脾气虚，邪毒壅鼻",
+      "five_dimensions": {
+        "qi": {"level": 3, "description": "炁虚", "details": "肺脾气虚，生长发育受影响"},
+        "toxin": {"level": 4, "description": "毒积", "details": "鼻毒内蕴，反复感染"},
+        "vessel": {"level": 4, "description": "脉堵", "details": "肺经、脾经堵痹"},
+        "pathogen": {"level": 3, "description": "邪在经", "details": "外邪反复入侵，鼻炎反复发作"},
+        "addiction": {"level": 2, "description": "神浮", "details": "睡眠不安，影响生长"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠3-5", "focus": "宣肺排毒，清除鼻毒"},
+        "diamonds": {"range": "♦3-5", "focus": "疏通肺经、脾经"},
+        "hearts": {"range": "♥3-5", "focus": "培补肺脾，增强免疫力"},
+        "clubs": {"range": "♣2-4", "focus": "避免外邪，调整作息"}
+      },
+      "treatment_phases": [
+        {"phase": "宣肺排毒", "sessions": "1-10次", "focus": "清除鼻毒，改善鼻塞", "expected": "鼻塞减轻"},
+        {"phase": "培补肺脾", "sessions": "11-20次", "focus": "增强免疫力，促进生长", "expected": "鼻炎发作减少"},
+        {"phase": "助长巩固", "sessions": "21-30次", "focus": "稳定体质，促进生长发育", "expected": "身高增长"}
+      ],
+      "key_milestones": [
+        {"milestone": "鼻塞减轻", "significance": "鼻毒外排"},
+        {"milestone": "鼻炎发作减少", "significance": "免疫力增强"},
+        {"milestone": "身高增长", "significance": "肺脾功能恢复，助长成功"}
+      ],
+      "outcome": {
+        "status": "调理中",
+        "follow_up": "7岁鼻炎+助长，第21次调理",
+        "total_sessions": 21
+      },
+      "training_insights": {
+        "key_learning": "儿童鼻炎+助长，核心为肺脾气虚。需宣肺排毒+培补肺脾+增强免疫力。",
+        "age_factor": "7岁生发期，肺脾功能尚未完善，易受外邪影响。",
+        "family_role": "家长需避免外邪（保暖、防寒），调整作息（早睡助长）。"
+      }
+    },
+    {
+      "case_id": "PT-2011-2026-003",
+      "patient_name": "袁梦",
+      "gender": "女",
+      "age_at_treatment": 14,
+      "birth_year": 2012,
+      "condition_primary": "青春期湿毒痤疮",
+      "condition_secondary": ["面部痤疮", "油脂分泌旺盛", "情绪波动"],
+      "diagnosis_western": "青春期痤疮",
+      "diagnosis_tcm": "湿毒内蕴，肝郁化火",
+      "five_dimensions": {
+        "qi": {"level": 3, "description": "炁虚", "details": "青春期炁机紊乱，内分泌失调"},
+        "toxin": {"level": 5, "description": "毒盛", "details": "湿毒内蕴，面部痤疮"},
+        "vessel": {"level": 4, "description": "脉堵", "details": "肝经、胆经堵痹"},
+        "pathogen": {"level": 4, "description": "邪在腑", "details": "青春期激素变化，湿热内生"},
+        "addiction": {"level": 3, "description": "神浮", "details": "情绪波动，急躁易怒"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠4-6", "focus": "清热解毒，祛湿排毒"},
+        "diamonds": {"range": "♦4-6", "focus": "疏通肝经、胆经"},
+        "hearts": {"range": "♥3-5", "focus": "疏肝解郁，调和气血"},
+        "clubs": {"range": "♣3-5", "focus": "调整饮食，避免湿热"}
+      },
+      "treatment_phases": [
+        {"phase": "清热解毒", "sessions": "1-10次", "focus": "清除湿热，改善痤疮", "expected": "痤疮减轻"},
+        {"phase": "疏肝解郁", "sessions": "11-20次", "focus": "调和肝脾，稳定情绪", "expected": "情绪平稳"},
+        {"phase": "巩固体质", "sessions": "21-30次", "focus": "稳定内分泌，预防复发", "expected": "痤疮消退"}
+      ],
+      "key_milestones": [
+        {"milestone": "痤疮减轻", "significance": "湿热外排"},
+        {"milestone": "情绪平稳", "significance": "肝郁疏解"}
+      ],
+      "outcome": {
+        "status": "调理中",
+        "follow_up": "14岁青春期湿毒痤疮",
+        "total_sessions": "进行中"
+      },
+      "training_insights": {
+        "key_learning": "青春期痤疮，核心为湿毒内蕴+肝郁化火。需清热解毒+疏肝解郁+饮食调整。",
+        "age_factor": "14岁青春期，激素变化大，情绪波动明显。",
+        "family_role": "家长需理解青春期变化，避免过度指责，配合饮食调整。"
+      }
+    },
+    {
+      "case_id": "PT-2012-2026-001",
+      "patient_name": "袁云翔",
+      "gender": "男",
+      "age_at_treatment": 14,
+      "birth_year": 2012,
+      "condition_primary": "AI磁毒综合征",
+      "condition_secondary": ["注意力不集中", "睡眠障碍", "情绪不稳"],
+      "diagnosis_western": "电子设备依赖综合征",
+      "diagnosis_tcm": "磁毒扰神，心神不宁",
+      "five_dimensions": {
+        "qi": {"level": 3, "description": "炁虚", "details": "长期电子设备耗炁"},
+        "toxin": {"level": 4, "description": "毒积", "details": "磁毒内蕴，扰神不安"},
+        "vessel": {"level": 4, "description": "脉堵", "details": "心经、肝经堵痹"},
+        "pathogen": {"level": 4, "description": "邪在腑", "details": "AI时代磁毒扰神"},
+        "addiction": {"level": 5, "description": "神离", "details": "电子设备依赖严重"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠4-6", "focus": "清除磁毒，安神定志"},
+        "diamonds": {"range": "♦4-6", "focus": "疏通心经、肝经"},
+        "hearts": {"range": "♥3-5", "focus": "培补心肾，安神助眠"},
+        "clubs": {"range": "♣4-6", "focus": "断磁毒，远离电子设备"}
+      },
+      "treatment_phases": [
+        {"phase": "断磁毒", "sessions": "第1周", "focus": "远离电子设备", "expected": "减少磁毒输入"},
+        {"phase": "排毒安神", "sessions": "1-5次", "focus": "清除磁毒，安神定志", "expected": "睡眠改善"}
+      ],
+      "key_milestones": [
+        {"milestone": "断磁毒", "significance": "减少磁毒输入是治疗基础"},
+        {"milestone": "睡眠改善", "significance": "心神安宁"}
+      ],
+      "outcome": {
+        "status": "调理中",
+        "follow_up": "14岁AI磁毒综合征，5次调理",
+        "total_sessions": 5
+      },
+      "training_insights": {
+        "key_learning": "AI时代磁毒综合征：注意力不集中、睡眠障碍、情绪不稳，核心为磁毒扰神。",
+        "age_factor": "14岁青春期，电子设备依赖严重。",
+        "family_role": "必须断磁毒（限制电子设备），这是治疗基础。"
+      }
+    },
+    {
+      "case_id": "PT-201608-2020-001",
+      "patient_name": "周思言",
+      "gender": "女",
+      "age_at_treatment": 5,
+      "birth_year": 2016,
+      "condition_primary": "儿童过敏性体质",
+      "condition_secondary": ["反复过敏", "湿疹", "鼻炎", "免疫力低下"],
+      "diagnosis_western": "儿童过敏性体质",
+      "diagnosis_tcm": "肺脾气虚，邪毒内蕴",
+      "five_dimensions": {
+        "qi": {"level": 3, "description": "炁虚", "details": "肺脾气虚，免疫力低下"},
+        "toxin": {"level": 4, "description": "毒积", "details": "湿毒内蕴，反复过敏"},
+        "vessel": {"level": 4, "description": "脉堵", "details": "肺经、脾经堵痹"},
+        "pathogen": {"level": 3, "description": "邪在经", "details": "外邪反复入侵，过敏体质"},
+        "addiction": {"level": 2, "description": "神浮", "details": "睡眠不安"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠3-5", "focus": "排毒祛湿，清除过敏源"},
+        "diamonds": {"range": "♦3-5", "focus": "疏通肺经、脾经"},
+        "hearts": {"range": "♥3-5", "focus": "培补肺脾，增强免疫力"},
+        "clubs": {"range": "♣2-4", "focus": "避免过敏原，调整饮食"}
+      },
+      "treatment_phases": [
+        {"phase": "排毒祛湿", "sessions": "1-50次", "focus": "清除湿毒，改善过敏", "expected": "过敏发作减少"},
+        {"phase": "培补肺脾", "sessions": "51-150次", "focus": "增强免疫力", "expected": "体质改善"},
+        {"phase": "巩固体质", "sessions": "151-244次", "focus": "稳定体质，预防复发", "expected": "过敏基本控制"}
+      ],
+      "key_milestones": [
+        {"milestone": "过敏发作减少", "significance": "湿毒外排"},
+        {"milestone": "体质改善", "significance": "肺脾功能恢复"},
+        {"milestone": "244次逆修典范", "significance": "长期调理，过敏性体质可逆"}
+      ],
+      "outcome": {
+        "status": "显著改善",
+        "follow_up": "5岁过敏性体质，244次调理，逆修典范",
+        "total_sessions": 244
+      },
+      "training_insights": {
+        "key_learning": "儿童过敏性体质，核心为肺脾气虚+湿毒内蕴。需长期调理（244次），过敏性体质可逆。",
+        "age_factor": "5岁生发期，体质可塑性强，早期调理效果好。",
+        "family_role": "家长需避免过敏原，配合饮食调整，长期坚持调理。"
+      }
+    },
+    {
+      "case_id": "PT-2018-2025-001",
+      "patient_name": "叶婉晴",
+      "gender": "女",
+      "age_at_treatment": 8,
+      "birth_year": 2018,
+      "condition_primary": "脂肪瘤",
+      "condition_secondary": ["情绪急躁", "脾虚湿困", "痰湿内蕴"],
+      "diagnosis_western": "儿童脂肪瘤",
+      "diagnosis_tcm": "脾虚湿困，痰湿凝结",
+      "five_dimensions": {
+        "qi": {"level": 3, "description": "炁虚", "details": "脾虚运化无力，痰湿内生"},
+        "toxin": {"level": 4, "description": "毒积", "details": "湿毒内蕴，痰湿凝结成瘤"},
+        "vessel": {"level": 4, "description": "脉堵", "details": "脾经、肝经堵痹"},
+        "pathogen": {"level": 3, "description": "邪在经", "details": "饮食不节，湿热内生"},
+        "addiction": {"level": 3, "description": "神浮", "details": "情绪急躁，肝郁化火"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠3-5", "focus": "健脾化湿，祛除痰湿"},
+        "diamonds": {"range": "♦3-5", "focus": "疏通脾经、肝经"},
+        "hearts": {"range": "♥3-5", "focus": "疏肝解郁，调和气血"},
+        "clubs": {"range": "♣2-4", "focus": "调整饮食，避免湿热"}
+      },
+      "treatment_phases": [
+        {"phase": "健脾化湿", "sessions": "1-20次", "focus": "祛除痰湿，改善脂肪瘤", "expected": "脂肪瘤缩小"},
+        {"phase": "疏肝解郁", "sessions": "21-40次", "focus": "调和肝脾，稳定情绪", "expected": "情绪平稳"},
+        {"phase": "巩固体质", "sessions": "41-60次", "focus": "稳定体质，预防复发", "expected": "脂肪瘤基本消退"}
+      ],
+      "key_milestones": [
+        {"milestone": "脂肪瘤缩小", "significance": "痰湿外排"},
+        {"milestone": "情绪平稳", "significance": "肝郁疏解"}
+      ],
+      "outcome": {
+        "status": "显著改善",
+        "follow_up": "8岁脂肪瘤+情绪急躁，60次调理",
+        "total_sessions": 60
+      },
+      "training_insights": {
+        "key_learning": "儿童脂肪瘤，核心为脾虚湿困+痰湿凝结。需健脾化湿+疏肝解郁+饮食调整。",
+        "age_factor": "8岁生发期，脾功能尚未完善，易受饮食影响。",
+        "family_role": "家长需调整饮食，避免湿热食物（甜食、油腻），配合情绪疏导。"
+      }
+    },
+    {
+      "case_id": "PT-2015-2025-013",
+      "patient_name": "邓睿安",
+      "gender": "男",
+      "age_at_treatment": 10,
+      "birth_year": 2015,
+      "condition_primary": "鼻炎+便秘+睡眠障碍",
+      "condition_secondary": ["鼻塞", "排便困难", "入睡困难", "肺脾气虚"],
+      "diagnosis_western": "儿童鼻炎+功能性便秘+睡眠障碍",
+      "diagnosis_tcm": "肺脾气虚，肠燥津亏，心神不宁",
+      "five_dimensions": {
+        "qi": {"level": 3, "description": "炁虚", "details": "肺脾气虚，运化无力"},
+        "toxin": {"level": 4, "description": "毒积", "details": "肠毒内蕴，鼻毒壅塞"},
+        "vessel": {"level": 4, "description": "脉堵", "details": "肺经、大肠经、心经堵痹"},
+        "pathogen": {"level": 3, "description": "邪在经", "details": "外邪入侵，饮食不节"},
+        "addiction": {"level": 3, "description": "神浮", "details": "入睡困难，睡眠不安"}
+      },
+      "treatment_strategy": {
+        "spades": {"range": "♠4-6", "focus": "宣肺排毒，润肠通便"},
+        "diamonds": {"range": "♦4-6", "focus": "疏通肺经、大肠经、心经"},
+        "hearts": {"range": "♥3-5", "focus": "培补肺脾，养心安神"},
+        "clubs": {"range": "♣3-5", "focus": "调整饮食，规律作息"}
+      },
+      "treatment_phases": [
+        {"phase": "宣肺排毒", "sessions": "1-10次", "focus": "清除鼻毒，改善鼻塞", "expected": "鼻塞减轻"},
+        {"phase": "润肠通便", "sessions": "11-20次", "focus": "疏通大肠经，改善便秘", "expected": "排便顺畅"},
+        {"phase": "养心安神", "sessions": "21-27次", "focus": "疏通心经，改善睡眠", "expected": "入睡改善"}
+      ],
+      "key_milestones": [
+        {"milestone": "鼻塞减轻", "significance": "鼻毒外排"},
+        {"milestone": "排便顺畅", "significance": "大肠经疏通"},
+        {"milestone": "入睡改善", "significance": "心神安宁"}
+      ],
+      "outcome": {
+        "status": "调理中",
+        "follow_up": "10岁鼻炎+便秘+睡眠障碍，第27次调理",
+        "total_sessions": 27
+      },
+      "training_insights": {
+        "key_learning": "儿童鼻炎+便秘+睡眠障碍，核心为肺脾气虚+肠燥津亏+心神不宁。需宣肺排毒+润肠通便+养心安神。",
+        "age_factor": "10岁生发期，肺脾功能尚未完善，易受外邪和饮食影响。",
+        "family_role": "家长需调整饮食（多喝水、多吃蔬菜），规律作息（早睡），配合调理。"
+      }
+    }
+  ],
+  "training_schema": {
+    "json_structure": {
+      "case_id": "病例唯一标识符",
+      "patient_demographics": "患者基本信息（姓名、性别、年龄）",
+      "condition": "主诉和兼症",
+      "five_dimensions": "炁、毒、脉、邪、瘾五维评估",
+      "treatment_strategy": "54牌选方策略",
+      "treatment_phases": "分阶段治疗方案",
+      "milestones": "关键里程碑",
+      "outcome": "治疗结果",
+      "insights": "训练要点"
+    },
+    "ai_training_applications": [
+      "儿童体质辨识",
+      "五维诊断辅助",
+      "54牌选方推荐",
+      "治疗方案生成",
+      "疗效预测",
+      "家长指导建议"
+    ],
+    "data_quality_notes": {
+      "completeness": "所有案例包含完整的五维诊断和治疗方案",
+      "standardization": "采用统一的JSON格式，便于AI训练",
+      "anonymization": "患者姓名已保留（经授权用于内部训练）",
+      "validation": "所有案例均来自实际临床档案"
+    }
+  },
+  "usage_guidelines": {
+    "for_ai_training": "此JSON文件可直接用于训练书童AI的医学模块",
+    "for_reference": "可作为儿童五维诊断的参考标准",
+    "for_research": "可用于炁脉医学儿童专科的研究分析",
+    "restrictions": "仅限内部使用，不得外传"
+  }
+}

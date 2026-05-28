@@ -1,0 +1,4 @@
+.DS_Store
+# Large data files
+*.zip
+tinydialogue_train_ordered.txt
