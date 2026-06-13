@@ -1,0 +1,166 @@
+{
+  "test_001": {
+    "child_id": "test_001",
+    "name": "小明",
+    "birth_date": "2016-03-15",
+    "stage": "S4",
+    "schedule_prefs": {
+      "wake_time": "07:00",
+      "sleep_time": "21:30",
+      "nap_time": null,
+      "meal_times": [
+        "07:30",
+        "12:00",
+        "18:30"
+      ],
+      "homework_time": "19:00",
+      "outdoor_time": "16:00",
+      "bedtime_ritual_duration": 30
+    },
+    "growth_data": {
+      "运动": [],
+      "睡眠": [],
+      "饮食": [],
+      "情绪": [],
+      "认知": []
+    },
+    "warning_history": [],
+    "tags": [],
+    "family_id": null,
+    "siblings": []
+  },
+  "test_002": {
+    "child_id": "test_002",
+    "name": "小花",
+    "birth_date": "2020-01-10",
+    "stage": "S4",
+    "schedule_prefs": {
+      "wake_time": "07:00",
+      "sleep_time": "21:30",
+      "nap_time": null,
+      "meal_times": [
+        "07:30",
+        "12:00",
+        "18:30"
+      ],
+      "homework_time": "19:00",
+      "outdoor_time": "16:00",
+      "bedtime_ritual_duration": 30
+    },
+    "growth_data": {
+      "运动": [],
+      "睡眠": [],
+      "饮食": [],
+      "情绪": [],
+      "认知": []
+    },
+    "warning_history": [],
+    "tags": [],
+    "family_id": null,
+    "siblings": []
+  },
+  "test_003": {
+    "child_id": "test_003",
+    "name": "嘟嘟",
+    "birth_date": "2012-09-01",
+    "stage": "S5",
+    "schedule_prefs": {
+      "wake_time": "07:00",
+      "sleep_time": "21:30",
+      "nap_time": null,
+      "meal_times": [
+        "07:30",
+        "12:00",
+        "18:30"
+      ],
+      "homework_time": "19:00",
+      "outdoor_time": "16:00",
+      "bedtime_ritual_duration": 30
+    },
+    "growth_data": {
+      "运动": [],
+      "睡眠": [],
+      "饮食": [],
+      "情绪": [],
+      "认知": []
+    },
+    "warning_history": [],
+    "tags": [],
+    "family_id": null,
+    "siblings": []
+  },
+  "archive_嘟嘟_嘟嘟档案": {
+    "child_id": "archive_嘟嘟_嘟嘟档案",
+    "name": "嘟嘟",
+    "birth_date": "2013-07-12",
+    "stage": "S5",
+    "schedule_prefs": {
+      "wake_time": "07:00",
+      "sleep_time": "21:30",
+      "nap_time": null,
+      "meal_times": [
+        "07:30",
+        "12:00",
+        "18:30"
+      ],
+      "homework_time": "19:00",
+      "outdoor_time": "16:00",
+      "bedtime_ritual_duration": 30
+    },
+    "growth_data": {
+      "运动": [],
+      "睡眠": [],
+      "饮食": [],
+      "情绪": [],
+      "认知": []
+    },
+    "warning_history": [],
+    "tags": [
+      "价值观成熟",
+      "性格健康"
+    ],
+    "family_id": null,
+    "siblings": []
+  },
+  "archive_橙子_橙子档案": {
+    "child_id": "archive_橙子_橙子档案",
+    "name": "橙子",
+    "birth_date": "2018-06-01",
+    "stage": "S3",
+    "schedule_prefs": {
+      "wake_time": "07:00",
+      "sleep_time": "21:30",
+      "nap_time": null,
+      "meal_times": [
+        "07:30",
+        "12:00",
+        "18:30"
+      ],
+      "homework_time": "19:00",
+      "outdoor_time": "16:00",
+      "bedtime_ritual_duration": 30
+    },
+    "growth_data": {
+      "运动": [],
+      "睡眠": [
+        {
+          "date": "2026-06-08",
+          "value": 8.0
+        }
+      ],
+      "饮食": [],
+      "情绪": [],
+      "认知": []
+    },
+    "warning_history": [],
+    "tags": [
+      "语文较弱",
+      "数学优秀",
+      "动手优秀",
+      "睡眠不足",
+      "社交良好"
+    ],
+    "family_id": null,
+    "siblings": []
+  }
+}

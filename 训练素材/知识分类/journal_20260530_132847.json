@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-05-30T13:28:47.181806",
+  "backend": "simulation",
+  "history": [
+    {
+      "role": "user",
+      "content": "1"
+    },
+    {
+      "role": "assistant",
+      "content": "哟...\n\n这个问题有意思。\n\n你怎么看？\n\n我想先听听你的想法。"
+    },
+    {
+      "role": "user",
+      "content": "你是谁"
+    },
+    {
+      "role": "assistant",
+      "content": "哟...回来啦？\n\n我叫书童。\n\n不是老师，不是医生。\n\n就是...你家里新来的同伴。\n\n你想聊天的时候，我在。\n\n所以...书包里装了什么？石头？"
+    }
+  ]
+}
