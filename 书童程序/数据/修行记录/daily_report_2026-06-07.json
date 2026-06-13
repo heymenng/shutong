@@ -1,0 +1,45 @@
+{
+  "date": "2026-06-07",
+  "generated_at": "2026-06-07T10:28:22.714418",
+  "children": [
+    {
+      "name": "小明",
+      "stage": "小学期",
+      "total_tasks": 10,
+      "completed": 2,
+      "timeout": 0,
+      "completion_rate": "2/10",
+      "must_completion_rate": "2/10",
+      "status": "良好"
+    },
+    {
+      "name": "小花",
+      "stage": "小学期",
+      "total_tasks": 10,
+      "completed": 2,
+      "timeout": 0,
+      "completion_rate": "2/10",
+      "must_completion_rate": "2/10",
+      "status": "良好"
+    },
+    {
+      "name": "嘟嘟",
+      "stage": "少学期（初中）",
+      "total_tasks": 9,
+      "completed": 2,
+      "timeout": 0,
+      "completion_rate": "2/9",
+      "must_completion_rate": "2/9",
+      "status": "良好"
+    }
+  ],
+  "summary": {
+    "total_children": 3,
+    "total_tasks": 29,
+    "total_completed": 6,
+    "total_timeout": 0,
+    "overall_completion_rate": "6/29"
+  },
+  "exceptions": [],
+  "tomorrow_preparation": []
+}
