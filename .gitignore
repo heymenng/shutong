@@ -53,8 +53,10 @@ ENV/
 # Daily records
 /每日陪伴记录/
 
-# Docker (optional, if not actively used)
-/docker/
+# Docker build artifacts
+**/docker-compose.override.yml
+**/.dockerignore
+**/*.dockerfile.cache
 
 # IDE
 .idea/
