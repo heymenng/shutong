@@ -7,8 +7,9 @@
 设计原则：
 - 符合0-18岁各阶段发育规律
 - 覆盖观察/记录/预警/陪伴/引导五大职责
-- 包含必须完成的任务和可选任务
-- 睡前仪式是核心（30分钟+慢节奏引导）
+- must=True 仅用于关键健康/安全/心力底线任务：婴儿喂养记录、情绪检查、睡前仪式
+- 其他陪伴/学习/运动任务均为 must=False，避免书童变成监工或制造焦虑
+- 给孩子和家长留出真实的自主空间和人际空间
 """
 
 from typing import List, Dict
@@ -23,11 +24,11 @@ DAILY_TEMPLATES = {
     "S0": {  # 孕育期
         "name": "孕育期",
         "tasks": [
-            {"id": "S0_morning", "name": "早安问候", "time": "08:00", "type": "陪伴", "duration": 5, "must": True},
-            {"id": "S0_movement", "name": "提醒准妈妈运动", "time": "10:00", "type": "观察", "duration": 5, "must": True},
-            {"id": "S0_nutrition", "name": "饮食记录提醒", "time": "12:00", "type": "记录", "duration": 3, "must": True},
-            {"id": "S0_emotion", "name": "情绪陪伴", "time": "15:00", "type": "陪伴", "duration": 10, "must": True},
-            {"id": "S0_relax", "name": "放松音乐", "time": "20:00", "type": "陪伴", "duration": 15, "must": True},
+            {"id": "S0_morning", "name": "早安问候", "time": "08:00", "type": "陪伴", "duration": 5, "must": False},
+            {"id": "S0_movement", "name": "提醒准妈妈运动", "time": "10:00", "type": "观察", "duration": 5, "must": False},
+            {"id": "S0_nutrition", "name": "饮食记录提醒", "time": "12:00", "type": "记录", "duration": 3, "must": False},
+            {"id": "S0_emotion", "name": "情绪陪伴", "time": "15:00", "type": "陪伴", "duration": 10, "must": False},
+            {"id": "S0_relax", "name": "放松音乐", "time": "20:00", "type": "陪伴", "duration": 15, "must": False},
             {"id": "S0_sleep", "name": "睡前仪式", "time": "21:30", "type": "睡前", "duration": 20, "must": True},
         ]
     },
@@ -35,12 +36,12 @@ DAILY_TEMPLATES = {
     "S1": {  # 襁褓期 0-1岁
         "name": "襁褓期",
         "tasks": [
-            {"id": "S1_wake", "name": "早安唤醒", "time": "07:00", "type": "陪伴", "duration": 10, "must": True},
+            {"id": "S1_wake", "name": "早安唤醒", "time": "07:00", "type": "陪伴", "duration": 10, "must": False},
             {"id": "S1_feed", "name": "喂养记录", "time": "09:00", "type": "记录", "duration": 3, "must": True},
-            {"id": "S1_tummy", "name": "提醒俯卧练习", "time": "10:00", "type": "观察", "duration": 5, "must": True},
-            {"id": "S1_nap", "name": "午睡陪伴", "time": "13:00", "type": "陪伴", "duration": 15, "must": True},
-            {"id": "S1_massage", "name": "抚触提醒", "time": "16:00", "type": "陪伴", "duration": 10, "must": True},
-            {"id": "S1_bath", "name": "洗澡准备", "time": "19:00", "type": "陪伴", "duration": 10, "must": True},
+            {"id": "S1_tummy", "name": "提醒俯卧练习", "time": "10:00", "type": "观察", "duration": 5, "must": False},
+            {"id": "S1_nap", "name": "午睡陪伴", "time": "13:00", "type": "陪伴", "duration": 15, "must": False},
+            {"id": "S1_massage", "name": "抚触提醒", "time": "16:00", "type": "陪伴", "duration": 10, "must": False},
+            {"id": "S1_bath", "name": "洗澡准备", "time": "19:00", "type": "陪伴", "duration": 10, "must": False},
             {"id": "S1_bedtime", "name": "睡前仪式（抚触+音乐）", "time": "20:00", "type": "睡前", "duration": 30, "must": True},
         ]
     },
@@ -48,14 +49,14 @@ DAILY_TEMPLATES = {
     "S2": {  # 幼童期 1-3岁
         "name": "幼童期",
         "tasks": [
-            {"id": "S2_wake", "name": "早安唤醒", "time": "07:30", "type": "陪伴", "duration": 10, "must": True},
-            {"id": "S2_breakfast", "name": "早餐陪伴", "time": "08:00", "type": "陪伴", "duration": 15, "must": True},
-            {"id": "S2_outdoor", "name": "户外时间提醒", "time": "10:00", "type": "观察", "duration": 5, "must": True},
-            {"id": "S2_lunch", "name": "午餐陪伴", "time": "12:00", "type": "陪伴", "duration": 15, "must": True},
-            {"id": "S2_nap", "name": "午睡陪伴（故事）", "time": "13:30", "type": "陪伴", "duration": 15, "must": True},
-            {"id": "S2_play", "name": "游戏陪伴", "time": "15:30", "type": "陪伴", "duration": 20, "must": True},
-            {"id": "S2_dinner", "name": "晚餐陪伴", "time": "18:00", "type": "陪伴", "duration": 15, "must": True},
-            {"id": "S2_bath", "name": "洗澡时间", "time": "19:30", "type": "陪伴", "duration": 15, "must": True},
+            {"id": "S2_wake", "name": "早安唤醒", "time": "07:30", "type": "陪伴", "duration": 10, "must": False},
+            {"id": "S2_breakfast", "name": "早餐陪伴", "time": "08:00", "type": "陪伴", "duration": 15, "must": False},
+            {"id": "S2_outdoor", "name": "户外时间提醒", "time": "10:00", "type": "观察", "duration": 5, "must": False},
+            {"id": "S2_lunch", "name": "午餐陪伴", "time": "12:00", "type": "陪伴", "duration": 15, "must": False},
+            {"id": "S2_nap", "name": "午睡陪伴（故事）", "time": "13:30", "type": "陪伴", "duration": 15, "must": False},
+            {"id": "S2_play", "name": "游戏陪伴", "time": "15:30", "type": "陪伴", "duration": 20, "must": False},
+            {"id": "S2_dinner", "name": "晚餐陪伴", "time": "18:00", "type": "陪伴", "duration": 15, "must": False},
+            {"id": "S2_bath", "name": "洗澡时间", "time": "19:30", "type": "陪伴", "duration": 15, "must": False},
             {"id": "S2_bedtime", "name": "睡前仪式（故事+音乐+引导）", "time": "20:30", "type": "睡前", "duration": 30, "must": True},
         ]
     },
@@ -63,16 +64,16 @@ DAILY_TEMPLATES = {
     "S3": {  # 蒙学期 3-6岁
         "name": "蒙学期",
         "tasks": [
-            {"id": "S3_wake", "name": "早安唤醒", "time": "07:30", "type": "陪伴", "duration": 10, "must": True},
-            {"id": "S3_morning", "name": "晨起检查（穿衣/书包）", "time": "08:00", "type": "观察", "duration": 5, "must": True},
-            {"id": "S3_poem", "name": "晨读（古诗/经典）", "time": "08:30", "type": "文化传承", "duration": 10, "must": True},
-            {"id": "S3_outdoor", "name": "户外活动提醒", "time": "10:00", "type": "观察", "duration": 5, "must": True},
-            {"id": "S3_lunch", "name": "午餐陪伴", "time": "12:00", "type": "陪伴", "duration": 15, "must": True},
+            {"id": "S3_wake", "name": "早安唤醒", "time": "07:30", "type": "陪伴", "duration": 10, "must": False},
+            {"id": "S3_morning", "name": "晨起检查（穿衣/书包）", "time": "08:00", "type": "观察", "duration": 5, "must": False},
+            {"id": "S3_poem", "name": "晨读（古诗/经典）", "time": "08:30", "type": "文化传承", "duration": 10, "must": False},
+            {"id": "S3_outdoor", "name": "户外活动提醒", "time": "10:00", "type": "观察", "duration": 5, "must": False},
+            {"id": "S3_lunch", "name": "午餐陪伴", "time": "12:00", "type": "陪伴", "duration": 15, "must": False},
             {"id": "S3_nap", "name": "午睡引导", "time": "13:30", "type": "陪伴", "duration": 10, "must": False},  # 可选
-            {"id": "S3_homework", "name": "学习陪伴", "time": "15:30", "type": "引导", "duration": 30, "must": True},
-            {"id": "S3_play", "name": "自由游戏", "time": "16:30", "type": "陪伴", "duration": 30, "must": True},
-            {"id": "S3_dinner", "name": "晚餐陪伴", "time": "18:00", "type": "陪伴", "duration": 15, "must": True},
-            {"id": "S3_family", "name": "家庭互动", "time": "19:30", "type": "陪伴", "duration": 20, "must": True},
+            {"id": "S3_homework", "name": "学习陪伴", "time": "15:30", "type": "引导", "duration": 30, "must": False},
+            {"id": "S3_play", "name": "自由游戏", "time": "16:30", "type": "陪伴", "duration": 30, "must": False},
+            {"id": "S3_dinner", "name": "晚餐陪伴", "time": "18:00", "type": "陪伴", "duration": 15, "must": False},
+            {"id": "S3_family", "name": "家庭互动", "time": "19:30", "type": "陪伴", "duration": 20, "must": False},
             {"id": "S3_bedtime", "name": "睡前仪式（冥想+音乐+引导）", "time": "20:30", "type": "睡前", "duration": 30, "must": True},
         ]
     },
@@ -80,15 +81,15 @@ DAILY_TEMPLATES = {
     "S4": {  # 小学期 6-12岁
         "name": "小学期",
         "tasks": [
-            {"id": "S4_wake", "name": "早安唤醒", "time": "07:00", "type": "陪伴", "duration": 10, "must": True},
-            {"id": "S4_morning", "name": "晨起检查", "time": "07:30", "type": "观察", "duration": 5, "must": True},
-            {"id": "S4_poem", "name": "晨读（古诗/经典）", "time": "07:45", "type": "文化传承", "duration": 10, "must": True},
-            {"id": "S4_school", "name": "上学前鼓励", "time": "08:00", "type": "陪伴", "duration": 5, "must": True},
-            {"id": "S4_return", "name": "放学问候", "time": "16:00", "type": "陪伴", "duration": 10, "must": True},
-            {"id": "S4_homework", "name": "作业陪伴", "time": "16:30", "type": "引导", "duration": 60, "must": True},
-            {"id": "S4_outdoor", "name": "户外运动提醒", "time": "17:30", "type": "观察", "duration": 5, "must": True},
-            {"id": "S4_dinner", "name": "晚餐陪伴", "time": "18:30", "type": "陪伴", "duration": 15, "must": True},
-            {"id": "S4_review", "name": "今日回顾", "time": "19:30", "type": "引导", "duration": 10, "must": True},
+            {"id": "S4_wake", "name": "早安唤醒", "time": "07:00", "type": "陪伴", "duration": 10, "must": False},
+            {"id": "S4_morning", "name": "晨起检查", "time": "07:30", "type": "观察", "duration": 5, "must": False},
+            {"id": "S4_poem", "name": "晨读（古诗/经典）", "time": "07:45", "type": "文化传承", "duration": 10, "must": False},
+            {"id": "S4_school", "name": "上学前鼓励", "time": "08:00", "type": "陪伴", "duration": 5, "must": False},
+            {"id": "S4_return", "name": "放学问候", "time": "16:00", "type": "陪伴", "duration": 10, "must": False},
+            {"id": "S4_homework", "name": "作业陪伴", "time": "16:30", "type": "引导", "duration": 60, "must": False},
+            {"id": "S4_outdoor", "name": "户外运动提醒", "time": "17:30", "type": "观察", "duration": 5, "must": False},
+            {"id": "S4_dinner", "name": "晚餐陪伴", "time": "18:30", "type": "陪伴", "duration": 15, "must": False},
+            {"id": "S4_review", "name": "今日回顾", "time": "19:30", "type": "引导", "duration": 10, "must": False},
             {"id": "S4_bedtime", "name": "睡前仪式（冥想+音乐+引导）", "time": "21:00", "type": "睡前", "duration": 30, "must": True},
         ]
     },
@@ -96,14 +97,14 @@ DAILY_TEMPLATES = {
     "S5": {  # 少学期（初中）12-15岁
         "name": "少学期（初中）",
         "tasks": [
-            {"id": "S5_wake", "name": "早安唤醒", "time": "06:45", "type": "陪伴", "duration": 5, "must": True},
-            {"id": "S5_check", "name": "晨起状态检查", "time": "07:00", "type": "观察", "duration": 3, "must": True},
-            {"id": "S5_school", "name": "上学前鼓励", "time": "07:30", "type": "陪伴", "duration": 5, "must": True},
-            {"id": "S5_return", "name": "放学问候", "time": "17:00", "type": "陪伴", "duration": 10, "must": True},
+            {"id": "S5_wake", "name": "早安唤醒", "time": "06:45", "type": "陪伴", "duration": 5, "must": False},
+            {"id": "S5_check", "name": "晨起状态检查", "time": "07:00", "type": "观察", "duration": 3, "must": False},
+            {"id": "S5_school", "name": "上学前鼓励", "time": "07:30", "type": "陪伴", "duration": 5, "must": False},
+            {"id": "S5_return", "name": "放学问候", "time": "17:00", "type": "陪伴", "duration": 10, "must": False},
             {"id": "S5_emotion", "name": "情绪检查", "time": "17:30", "type": "观察", "duration": 10, "must": True},
-            {"id": "S5_homework", "name": "作业陪伴", "time": "18:00", "type": "引导", "duration": 60, "must": True},
-            {"id": "S5_sport", "name": "运动提醒", "time": "19:30", "type": "观察", "duration": 5, "must": True},
-            {"id": "S5_dinner", "name": "晚餐陪伴", "time": "20:00", "type": "陪伴", "duration": 15, "must": True},
+            {"id": "S5_homework", "name": "作业陪伴", "time": "18:00", "type": "引导", "duration": 60, "must": False},
+            {"id": "S5_sport", "name": "运动提醒", "time": "19:30", "type": "观察", "duration": 5, "must": False},
+            {"id": "S5_dinner", "name": "晚餐陪伴", "time": "20:00", "type": "陪伴", "duration": 15, "must": False},
             {"id": "S5_bedtime", "name": "睡前仪式（排毒冥想+音乐+引导）", "time": "21:30", "type": "睡前", "duration": 30, "must": True},
         ]
     },
@@ -111,14 +112,14 @@ DAILY_TEMPLATES = {
     "S6": {  # 少学期（高中）15-18岁
         "name": "少学期（高中）",
         "tasks": [
-            {"id": "S6_wake", "name": "早安唤醒", "time": "06:30", "type": "陪伴", "duration": 5, "must": True},
-            {"id": "S6_check", "name": "晨起状态检查", "time": "06:45", "type": "观察", "duration": 3, "must": True},
-            {"id": "S6_morning", "name": "晨间鼓励", "time": "07:00", "type": "陪伴", "duration": 5, "must": True},
-            {"id": "S6_return", "name": "放学问候", "time": "18:00", "type": "陪伴", "duration": 10, "must": True},
+            {"id": "S6_wake", "name": "早安唤醒", "time": "06:30", "type": "陪伴", "duration": 5, "must": False},
+            {"id": "S6_check", "name": "晨起状态检查", "time": "06:45", "type": "观察", "duration": 3, "must": False},
+            {"id": "S6_morning", "name": "晨间鼓励", "time": "07:00", "type": "陪伴", "duration": 5, "must": False},
+            {"id": "S6_return", "name": "放学问候", "time": "18:00", "type": "陪伴", "duration": 10, "must": False},
             {"id": "S6_emotion", "name": "情绪检查", "time": "18:30", "type": "观察", "duration": 10, "must": True},
-            {"id": "S6_homework", "name": "学习陪伴", "time": "19:00", "type": "引导", "duration": 90, "must": True},
-            {"id": "S6_sport", "name": "运动提醒", "time": "20:30", "type": "观察", "duration": 5, "must": True},
-            {"id": "S6_dinner", "name": "晚餐陪伴", "time": "21:00", "type": "陪伴", "duration": 15, "must": True},
+            {"id": "S6_homework", "name": "学习陪伴", "time": "19:00", "type": "引导", "duration": 90, "must": False},
+            {"id": "S6_sport", "name": "运动提醒", "time": "20:30", "type": "观察", "duration": 5, "must": False},
+            {"id": "S6_dinner", "name": "晚餐陪伴", "time": "21:00", "type": "陪伴", "duration": 15, "must": False},
             {"id": "S6_bedtime", "name": "睡前仪式（排毒冥想+音乐+引导）", "time": "22:00", "type": "睡前", "duration": 30, "must": True},
         ]
     },

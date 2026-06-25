@@ -12,7 +12,7 @@
 
 设计原则：
 - 不丢任务：每个任务必须有结果（完成/超时/跳过）
-- 及时提醒：到点前5分钟预提醒，到点时正式触发
+- 及时提醒：到点前10分钟预提醒，每10秒扫描一次，到点时正式触发
 -  Escalation：孩子无回应→提醒家长→记录异常
 - 闭环追踪：任务开始→执行→确认→记录
 """
@@ -103,15 +103,17 @@ class TimeScheduler:
     书童的心脏。每分钟扫描一次任务队列，到时间触发。
     """
     
-    def __init__(self, profile_manager, template_engine, bedtime_guide, 
-                 journal_dir, check_interval=60):
+    def __init__(self, profile_manager, template_engine, bedtime_guide,
+                 journal_dir, check_interval=10, task_executor=None, voice=None):
         """
         Args:
             profile_manager: 多用户管理器
             template_engine: 作息模板引擎
             bedtime_guide: 睡前引导系统
             journal_dir: 修行记录目录
-            check_interval: 扫描间隔（秒，默认60秒）
+            check_interval: 扫描间隔（秒，默认10秒）
+            task_executor: 外部任务执行器回调，接收 (task, child) 参数
+            voice: 语音引擎，用于主动语音提醒
         """
         self.profile_manager = profile_manager
         self.template_engine = template_engine
@@ -123,17 +125,25 @@ class TimeScheduler:
         self.running = False
         self.lock = Lock()
         self.timers = []
-        
+
+        # 外部任务执行器（由每日工作流传入）
+        self.task_executor = task_executor
+        # 语音引擎
+        self.voice = voice
+
         # 今日任务队列 {child_id: [ScheduledTask, ...]}
         self.today_tasks: Dict[str, List[ScheduledTask]] = {}
-        
+
         # 预提醒提前时间（分钟）
-        self.pre_remind_minutes = 5
+        self.pre_remind_minutes = 10
         # 超时判定时间（任务开始后N分钟无确认视为超时）
         self.timeout_minutes = 15
         # Escalation时间（超时后N分钟提醒家长）
         self.escalation_minutes = 10
-        
+
+        # 当前任务日期，用于跨天自动刷新
+        self.current_task_date = datetime.now().strftime("%Y-%m-%d")
+
         # 加载今日任务（如果已生成）
         self._load_today_tasks()
     
@@ -187,6 +197,7 @@ class TimeScheduler:
         print(f"[调度] 扫描间隔: {self.check_interval}秒")
         print(f"[调度] 预提醒提前: {self.pre_remind_minutes}分钟")
         print(f"[调度] 超时判定: {self.timeout_minutes}分钟")
+        print(f"[调度] 语音提醒: {'已启用' if self.voice else '未启用'}")
         
         # 如果没有今日任务，生成
         if not self.today_tasks:
@@ -204,14 +215,27 @@ class TimeScheduler:
         print("[调度] 时间调度引擎已停止")
     
     def _scheduler_loop(self):
-        """调度主循环：每分钟扫描一次"""
+        """调度主循环：每10秒扫描一次，同时检测跨天"""
+        scan_count = 0
         while self.running:
             try:
+                # 每30次扫描检查一次日期（约5分钟）
+                if scan_count % 30 == 0:
+                    self._check_day_rollover()
                 self._scan_tasks()
             except Exception as e:
                 print(f"[调度] 扫描异常: {e}")
-            
+
+            scan_count += 1
             time.sleep(self.check_interval)
+
+    def _check_day_rollover(self):
+        """检测是否跨天，跨天则自动刷新今日任务"""
+        today = datetime.now().strftime("%Y-%m-%d")
+        if today != self.current_task_date:
+            print(f"\n[调度] 新的一天开始：{today}，自动刷新任务队列")
+            self.current_task_date = today
+            self.generate_today_tasks()
     
     def _scan_tasks(self):
         """扫描所有任务，处理到期的"""
@@ -252,16 +276,26 @@ class TimeScheduler:
     # ═══════════════════════════════════════════
     
     def _pre_remind(self, task, child):
-        """预提醒：到点前5分钟"""
+        """预提醒：到点前10分钟"""
         task.status = TaskStatus.REMINDED
+        message = f"{child.name}，还有10分钟就是{task.name}的时间啦。"
         task.reminders.append({
             "time": datetime.now().isoformat(),
             "type": "pre",
             "to": "child",
-            "message": f"{child.name}，还有5分钟就是{task.name}的时间啦。",
+            "message": message,
         })
-        
-        print(f"\n⏰ [预提醒] {child.name} | {task.scheduled_time} {task.name} (还有5分钟)")
+
+        print(f"\n⏰ [预提醒] {child.name} | {task.scheduled_time} {task.name} (还有10分钟)")
+
+        # 语音播报预提醒
+        if self.voice:
+            try:
+                self.voice.speak(message)
+                print(f"  [语音] 预提醒已播报")
+            except Exception as e:
+                print(f"  [语音] 预提醒播报失败: {e}")
+
         self._save_today_tasks()
     
     def _trigger_task(self, task, child):
@@ -274,8 +308,11 @@ class TimeScheduler:
         print(f"{'='*60}")
         
         # 根据任务类型执行不同操作
+        # 睡前仪式保留内部完整流程；其他任务优先使用外部执行器
         if task.task_type == "睡前":
             self._execute_bedtime_task(task, child)
+        elif self.task_executor:
+            self.task_executor(task, child)
         elif task.task_type == "陪伴":
             self._execute_companion_task(task, child)
         elif task.task_type == "观察":
@@ -380,9 +417,17 @@ class TimeScheduler:
     def _handle_timeout(self, task, child):
         """处理任务超时"""
         task.status = TaskStatus.TIMEOUT
-        
+
+        message = f"{child.name}的{task.name}还没有完成哦。"
         print(f"\n⚠️ [超时] {child.name} | {task.name} 未在{self.timeout_minutes}分钟内完成")
-        
+
+        # 语音播报超时提醒
+        if self.voice:
+            try:
+                self.voice.speak(message)
+            except Exception as e:
+                print(f"  [语音] 超时提醒播报失败: {e}")
+
         # 如果是必须完成的任务，记录异常
         if task.must:
             print(f"  [异常记录] 必须任务超时: {task.name}")
@@ -390,14 +435,23 @@ class TimeScheduler:
     
     def _escalate_to_parent(self, task, child):
         """升级提醒家长"""
+        message = f"提醒家长，{child.name}的{task.name}尚未完成，请协助。"
         task.reminders.append({
             "time": datetime.now().isoformat(),
             "type": "escalation",
             "to": "parent",
-            "message": f"{child.name}的{task.name}尚未完成，请协助。",
+            "message": message,
         })
-        
+
         print(f"\n📢 [提醒家长] {child.name} | {task.name} 未完成，请家长协助")
+
+        # 语音播报家长提醒
+        if self.voice:
+            try:
+                self.voice.speak(message)
+            except Exception as e:
+                print(f"  [语音] 家长提醒播报失败: {e}")
+
         self._save_today_tasks()
     
     # ═══════════════════════════════════════════
@@ -687,12 +741,28 @@ class TimeScheduler:
     def _load_today_tasks(self):
         """加载今日任务队列"""
         file_path = self.journal_dir / f"tasks_{datetime.now().strftime('%Y%m%d')}.json"
-        if file_path.exists():
+        if not file_path.exists():
+            return
+        
+        # 容错：空文件或损坏文件自动忽略，让后续重新生成
+        try:
             with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                for child_id, tasks_data in data.items():
-                    self.today_tasks[child_id] = [ScheduledTask.from_dict(t) for t in tasks_data]
+                content = f.read().strip()
+            if not content:
+                print(f"[调度] ⚠️ 今日任务文件为空，将重新生成")
+                file_path.unlink()
+                return
+            
+            data = json.loads(content)
+            for child_id, tasks_data in data.items():
+                self.today_tasks[child_id] = [ScheduledTask.from_dict(t) for t in tasks_data]
             print(f"[调度] 已加载今日任务队列: {len(self.today_tasks)} 个孩子")
+        except (json.JSONDecodeError, KeyError, TypeError) as e:
+            print(f"[调度] ⚠️ 今日任务文件损坏: {e}，将重新生成")
+            try:
+                file_path.unlink()
+            except OSError:
+                pass
     
     def _save_daily_report(self, report):
         """保存每日工作报告"""

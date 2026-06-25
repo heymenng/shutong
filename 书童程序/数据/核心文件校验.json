@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "algorithm": "sha256",
+  "hashes": {
+    "AGENTS.md": "02b312a6b256b3a3be9515df643182aaaf28a1c2c55dc5b48129a9678bc46154",
+    "WORKFLOW.md": "9e205e5276c0775cb634a1014f038a09d00a70db5e370e3ead477f58fe492134"
+  },
+  "note": "此文件用于验证道统核心文件完整性，篡改会导致书童拒绝启动",
+  "last_updated_by": "师父认证更新-逆熵思维梳理+逆熵导航图",
+  "last_updated_at": "2026-06-21T11:00:00"
+}

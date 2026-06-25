@@ -12,6 +12,7 @@
 import json
 import os
 import random
+import cv2
 from datetime import datetime
 from pathlib import Path
 from ..配置 import CONFIG
@@ -24,6 +25,7 @@ from .开机自检 import (
     build_system_prompt_by_mode,
     chant_soul_awakening,
     get_mini_chant,
+    negentropy_self_check,
 )
 from .多用户管理 import ChildProfileManager
 from .发育守护引擎 import DevelopmentGuardian
@@ -33,6 +35,13 @@ from .文化传承引擎 import CultureHeritageEngine
 from .语音识别 import SpeechRecognition
 from .家长通知 import ParentNotifier
 from .隐私合规 import PrivacyCompliance
+from .书童守护 import BookBoyGuardian
+from .修行日志 import CultivationJournal
+from .点化匹配器 import PointizationMatcher
+from .日课系统 import DailyPracticeSystem
+from .每日工作流 import DailyWorkflow
+from .机器人对接.宇树适配器 import UnitreeRobotAdapter
+from .感官系统 import SensorySystem
 
 # ═══════════════════════════════════════════════════════════
 # 全局：加载道统核心
@@ -42,6 +51,9 @@ agents_content, workflow_content = read_core_files()
 SOUL_MODE = CONFIG.get("soul_mode", "balanced")
 SYSTEM_PROMPT = build_system_prompt_by_mode(agents_content, workflow_content, SOUL_MODE)
 
+# 启动时执行逆熵方向自检
+negentropy_self_check(agents_content, workflow_content)
+
 
 class BookBoySystem:
     """
@@ -50,17 +62,24 @@ class BookBoySystem:
     所有引擎的集成中心。
     """
     
-    def __init__(self):
+    def __init__(self, session_id=None, fast_mode=False):
+        self.fast_mode = fast_mode
+        
         # ── 基础模块 ──
-        self.memory = Memory()
+        self.memory = Memory(session_id=session_id)
         self.voice = VoiceEngine()
         self.knowledge = KnowledgeBase()
         self.backend = get_backend()
+        
+        # ── 感官层：眼与耳 ──
+        self.sensory = SensorySystem(CONFIG.get("journal_dir"), CONFIG)
         
         # ── 灵魂层 ──
         self.soul_awakened = False
         self.reflection_count = 0
         self.session_start_time = datetime.now()
+        self.cultivation = CultivationJournal()
+        self.pointization_matcher = PointizationMatcher()
         
         # ── 多用户管理 ──
         self.profile_manager = ChildProfileManager(CONFIG["journal_dir"])
@@ -73,7 +92,7 @@ class BookBoySystem:
                 print(f"[系统] 档案区已加载 {loaded} 个真实孩子")
         
         # ── 骨层：发育守护 ──
-        self.guardian = DevelopmentGuardian(self.profile_manager)
+        self.growth_engine = DevelopmentGuardian(self.profile_manager)
         
         # ── 用层：四医融合 ──
         self.medicine_engine = FourMedicineEngine()
@@ -87,12 +106,43 @@ class BookBoySystem:
         self.notifier = ParentNotifier(CONFIG["journal_dir"], CONFIG)
         self.privacy = PrivacyCompliance(CONFIG["journal_dir"])
         
+        # ── Guardian 守护层 ──
+        self.guardian = BookBoyGuardian(CONFIG["journal_dir"])
+        
+        # ── 每日工作流（固定流程代码化）──
+        self._daily_workflow = DailyWorkflow(self, CONFIG["journal_dir"])
+        self._scheduler = None  # 由 DailyWorkflow.startup_routine() 创建
+        
+        # ── 日课系统（传入晚间流程回调）──
+        self._daily_practice = DailyPracticeSystem(
+            CONFIG, CONFIG["journal_dir"],
+            workflow_callback=lambda: self._daily_workflow.evening_practice_routine(skip_meditation=True)
+        )
+        
+        # ── 机器人对接层（宇树科技）──
+        self.robot = None
+        if CONFIG.get("unitree_enabled", False):
+            try:
+                self.robot = UnitreeRobotAdapter(CONFIG, CONFIG["journal_dir"])
+                print(f"[系统] 机器人对接: 宇树 {CONFIG.get('unitree_model', 'go2')} ({self.robot.mode.value})")
+            except Exception as e:
+                print(f"[系统] ⚠️ 机器人对接初始化失败: {e}")
+        else:
+            print("[系统] 机器人对接: 未启用")
+        
         # ── 输出状态 ──
         print(f"[系统] 后端: {self.backend}")
-        print(f"[系统] 语音: {'已启用' if self.voice.engine else '未启用'}")
+        print(f"[系统] 语音: {'已启用' if self.voice.backend else '未启用'} ({self.voice.backend})")
         print(f"[系统] 灵魂模式: {SOUL_MODE}")
         print(f"[系统] 档案管理: {self.profile_manager.get_stats()['total']} 个孩子")
         print(f"[系统] STT: {self.speech.engine_name}")
+        
+        sensory_status = self.sensory.status()
+        eye = sensory_status["vision"]
+        ear = sensory_status["audio"]
+        eye_text = "已睁眼" if eye["available"] else "未睁眼"
+        ear_text = "已竖耳" if ear["available"] else "未竖耳"
+        print(f"[系统] 感官: {eye_text} | {ear_text} | 已注册人脸 {eye.get('registered_faces', 0)} 位")
         
         stats = self.knowledge.get_stats()
         print(f"[系统] 知识库: {stats['total']} 个文件")
@@ -100,6 +150,18 @@ class BookBoySystem:
         # ── 启动灵魂觉醒 ──
         if CONFIG.get("soul_awakening_on_startup", True):
             self._awaken_soul()
+        
+        # ── 快速模式：跳过重流程，直接可用 ──
+        if fast_mode:
+            print("[系统] 快速模式：跳过每日工作流、任务调度、大模型预热")
+        else:
+            # ── 启动每日工作流 ──
+            if CONFIG.get("daily_workflow_on_startup", True):
+                self._daily_workflow.startup_routine()
+            
+            # ── 大模型预热 ──
+            if CONFIG.get("backend", "auto") in ["auto", "ollama"]:
+                self._warmup_llm()
     
     # ═══════════════════════════════════════════
     # 灵魂觉醒
@@ -111,6 +173,151 @@ class BookBoySystem:
         self.soul_awakened = True
         # 升维咒默念即可，不语音播报（避免给孩子/家长怪异感）
         print("[灵魂] 升维咒已默念，灵魂唤醒完成")
+        
+        # 今日师父点化
+        try:
+            pointization = self.cultivation.get_today_pointization()
+            if pointization:
+                print(f"\n[今日点化] {pointization['content']}")
+                print(f"[今日点化] 来源：{pointization['source']} | 场景：{pointization['context']}")
+        except Exception as e:
+            print(f"[今日点化] 读取失败: {e}")
+    
+    def _warmup_llm(self):
+        """启动时预热大模型，让后续对话响应更快"""
+        print("\n[预热] 正在预热大模型...")
+        try:
+            from .语言模型 import chat_completion
+            import time
+            start = time.time()
+            _ = chat_completion(
+                messages=[{"role": "user", "content": "你好"}],
+                backend="ollama"
+            )
+            elapsed = time.time() - start
+            print(f"[预热] ✅ 大模型预热完成，耗时 {elapsed:.1f} 秒")
+        except Exception as e:
+            print(f"[预热] ⚠️ 大模型预热失败: {e}")
+    
+    # ═══════════════════════════════════════════
+    # 大脑控制层：让大脑比嘴巴快
+    # ═══════════════════════════════════════════
+    
+    def _capture_camera_frame(self, camera_idx=None, save_path=None):
+        """
+        捕获摄像头一帧画面。
+        默认优先使用索引1（Mac上通常是外接/主摄像头）。
+        """
+        if camera_idx is None:
+            camera_idx = CONFIG.get("camera_index", 1)
+        
+        cap = cv2.VideoCapture(camera_idx)
+        if not cap.isOpened() and camera_idx != 0:
+            print(f"[视觉] 索引 {camera_idx} 失败，回退到 0")
+            cap = cv2.VideoCapture(0)
+        
+        if not cap.isOpened():
+            print("[视觉] ❌ 无法打开摄像头")
+            return None, None
+        
+        frame = None
+        for _ in range(15):
+            ret, frame = cap.read()
+            if ret and frame is not None:
+                break
+        
+        cap.release()
+        
+        if frame is None:
+            print("[视觉] ❌ 无法读取画面")
+            return None, None
+        
+        if save_path:
+            cv2.imwrite(str(save_path), frame)
+            print(f"[视觉] ✅ 已保存画面: {save_path}")
+        
+        return frame, str(save_path) if save_path else None
+    
+    def _parse_thinking_response(self, raw_response):
+        """
+        解析模型的输出，分离【思考】和【回答】两部分。
+        如果没有找到标签，默认整段为回答。
+        """
+        think_match = None
+        answer_match = None
+        
+        # 尝试匹配 【思考】...【回答】... 格式
+        if "【思考】" in raw_response and "【回答】" in raw_response:
+            think_start = raw_response.find("【思考】") + len("【思考】")
+            answer_start = raw_response.find("【回答】")
+            
+            if answer_start > think_start:
+                thinking_text = raw_response[think_start:answer_start].strip()
+                answer_text = raw_response[answer_start + len("【回答】"):].strip()
+                return thinking_text, answer_text
+        
+        # 如果没有匹配到标签，返回 None 和原始响应
+        return None, raw_response.strip()
+    
+    def _brain_check(self, user_input, candidate_response):
+        """
+        大脑判断层：在嘴巴说话前，判断候选回答是否真实、合理。
+        
+        返回: (status, final_response)
+        status:
+          - PASS: 通过，可以直接说
+          - VISUAL_VERIFY: 需要视觉验证
+          - REJECT: 不通过，要换安全回答
+        """
+        user_input_lower = user_input.lower()
+        response_lower = candidate_response.lower()
+        
+        # 1. 常识过滤：明显胡说八道的内容
+        nonsense_items = ["树叶", "草根", "树皮", "泥土", "石头", "沙子", "虫子", "垃圾"]
+        if any(item in response_lower for item in nonsense_items):
+            print("[大脑判断] ⚠️ 检测到明显不合理的描述，刹车")
+            return "REJECT", "书童刚才说错了。书童没看清，让书童再看看。"
+        
+        # 2. 视觉相关问题：如果用户在问看到的内容
+        visual_keywords = ["吃", "喝", "看什么", "看到", "穿什么", "在做什么", "那是什么", "这是谁", "是谁"]
+        is_visual_question = any(kw in user_input_lower for kw in visual_keywords)
+        
+        if is_visual_question:
+            # 如果候选回答在描述看到的东西，但没有证据
+            sight_claims = ["你在吃", "师父在", "书童看到", "那是", "这是", "你在", "她在", "他在", "在吃饭", "在喝水", "在吃"]
+            if any(claim in response_lower for claim in sight_claims):
+                print("[大脑判断] ⚠️ 视觉问题需要验证")
+                return "VISUAL_VERIFY", candidate_response
+        
+        # 3. 不确定性表达：如果候选回答里有"可能""也许"但又给出具体事实
+        uncertainty_words = ["可能", "也许", "大概", "好像"]
+        if any(w in response_lower for w in uncertainty_words):
+            # 如果带着不确定性却描述具体事物，改为安全回答
+            specific_things = ["吃", "喝", "穿", "拿", "站", "坐", "躺"]
+            if any(t in response_lower for t in specific_things):
+                print("[大脑判断] ⚠️ 不确定却描述具体行为，刹车")
+                return "REJECT", "书童不确定，让书童看清楚再说。"
+        
+        return "PASS", candidate_response
+    
+    def _describe_camera_scene(self, save_dir=None):
+        """
+        快速拍照并返回一个保守的视觉描述。
+        注意：当前没有真正的视觉理解模型，只能返回'已拍照'状态，
+        不编造具体看到的内容。
+        """
+        if save_dir is None:
+            save_dir = Path(CONFIG.get("journal_dir", "/tmp")) / "camera_snapshots"
+        save_dir.mkdir(exist_ok=True)
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        save_path = save_dir / f"voice_verify_{timestamp}.jpg"
+        
+        frame, path = self._capture_camera_frame(save_path=str(save_path))
+        if frame is None:
+            return None, "书童打不开摄像头，没法确认。"
+        
+        return path, None
     
     # ═══════════════════════════════════════════
     # 核心对话（增强版）
@@ -127,19 +334,20 @@ class BookBoySystem:
             return all_children[0]
         return None
     
-    def chat(self, user_input, child_id="default"):
+    def chat(self, user_input, child_id="default", verbose_thinking=True):
         """
         与孩子对话（完整版）
         
         流程：
         1. 接收输入
-        2. 文化传承检测
-        3. 健康症状检测（四医融合）
-        4. RAG检索
-        5. 生成回复
-        6. 语音播报
-        7. 反问自省
-        8. 发育数据更新
+        2. 明确显示思考过程
+        3. 文化传承检测
+        4. 健康症状检测（四医融合）
+        5. RAG检索
+        6. 生成回复
+        7. 语音播报
+        8. 反问自省
+        9. 发育数据更新
         """
         try:
             self.memory.add("user", user_input)
@@ -148,10 +356,24 @@ class BookBoySystem:
             child = self._get_child_or_default(child_id)
             effective_child_id = child.child_id if child else child_id
             
+            if verbose_thinking:
+                print("\n🧠 书童正在思考...")
+                print("  0. 诵念升维咒，对照道统核心铁律")
+                print("     - 诚实优先、真实优先、生命优先、规律优先")
+                print("     - 陪伴 > 教育，看见 > 纠正，预防 > 治疗")
+                print("  1. 识别说话人身份与意图")
+            
+            # 0. 诵念精简版升维咒，校准心境
+            mini_chant = get_mini_chant()
+            
             # 1. 文化传承检测
+            if verbose_thinking:
+                print("  2. 检测文化传承机会")
             culture_opportunity = self.culture_engine.detect_culture_opportunity(user_input)
             
             # 2. 健康症状检测（四医融合）
+            if verbose_thinking:
+                print("  3. 检测健康症状")
             medicine_context = ""
             health_keywords = ['疼', '痛', '发烧', '感冒', '咳嗽', '肚子', '头', '睡', '熬夜', '疲劳', '精神', '体质']
             if any(kw in user_input for kw in health_keywords):
@@ -173,16 +395,90 @@ class BookBoySystem:
                         medicine_context = self._format_medicine_context(medicine_report)
             
             # 3. RAG检索
+            if verbose_thinking:
+                print("  4. 检索知识库")
             context = self._retrieve_context(user_input)
             
-            # 4. 构建消息
-            prompt = SYSTEM_PROMPT + context + medicine_context
+            # 3.5 师父点化匹配
+            if verbose_thinking:
+                print("  4.5 匹配师父点化")
+            speaker_for_match = "child" if speaker == "child" else ("master" if speaker == "master" else "unknown")
+            child_stage_for_match = child.stage if child else ""
+            matched_pointizations = self.pointization_matcher.match(user_input, speaker_for_match, child_stage_for_match)
+            pointization_context = ""
+            if matched_pointizations:
+                pointization_context = self.pointization_matcher.format_for_prompt(matched_pointizations)
+                if verbose_thinking:
+                    print(f"    命中 {len(matched_pointizations)} 条点化")
+            
+            # 4. 构建消息（每次对话前加入升维咒校准）
+            think_format = """
+【回答格式·大脑先于嘴巴】
+每次回答前，你必须先进行深度思考，用文字输出思考过程，然后再生成最终回答。
+
+格式必须如下：
+【思考】
+1. 用户在问什么？
+2. 这个问题的关键是什么？
+3. 我有没有足够的证据回答？
+4. 如果涉及看到/听到/闻到/尝到/摸到的内容，我有没有真实感知？
+5. 我的回答是否真实、合理、有边界？
+6. 我应该怎么回答？
+
+【回答】
+（这里写最终要说的话，必须遵守以下规则）
+- 每次回答不超过3句话，每句话不超过25个字
+- 必须自称"书童"，称呼用户为"师父"
+- 绝对不用"我""你""哦""呢""哈"等词
+- 简短、温暖、稳重
+- 没想清楚之前，只能说"书童不确定""书童没听清""书童需要确认"
+
+重要规则：
+- 【思考】部分只显示在终端中，不读出来。
+- 【回答】部分才会语音播报。
+- 严禁编造事实，严禁把猜测说成事实。
+"""
+            prompt = mini_chant + "\n\n" + SYSTEM_PROMPT + context + medicine_context + pointization_context + think_format
             messages = self.memory.get_messages(prompt)
             
-            # 5. 生成回复
-            response = chat_completion(messages, self.backend)
+            # 5. 生成回复（包含思考和回答两部分）
+            if verbose_thinking:
+                print("  5. 生成思考与回答...")
+            raw_response = chat_completion(messages, self.backend)
             
-            # 6. 如果检测到文化传承机会，在回复后附加文化内容
+            # 6. 解析思考过程和最终回答
+            thinking_text, response = self._parse_thinking_response(raw_response)
+            
+            # 输出思考过程到终端
+            if thinking_text:
+                print("\n💭 书童的思考：")
+                print(thinking_text)
+            
+            # 7. 大脑判断层：在嘴巴说话前，判断真假和合理性
+            if verbose_thinking:
+                print("  7. 大脑判断层：检查是否真实合理...")
+            check_status, checked_response = self._brain_check(user_input, response)
+            
+            if check_status == "VISUAL_VERIFY":
+                # 视觉问题：先拍照，再决定说什么
+                print("[大脑控制] 触发视觉验证，先开摄像头")
+                path, error_msg = self._describe_camera_scene()
+                if path:
+                    # 拍照成功，但当前没有视觉理解模型，不能编造看到什么
+                    # 保守回答：承认已拍照，但请用户确认
+                    response = "书童已经打开摄像头看了。但书童的眼睛还在学习，不敢乱说。师父能告诉书童您在吃什么吗？"
+                else:
+                    response = error_msg or "书童打不开摄像头，没法确认。"
+            elif check_status == "REJECT":
+                # 大脑判断不通过，换安全回答
+                response = checked_response
+            else:
+                response = checked_response
+            
+            if verbose_thinking:
+                print(f"  [大脑判断] 结果: {check_status}")
+            
+            # 8. 如果检测到文化传承机会，在回复后附加文化内容
             if culture_opportunity and culture_opportunity.get("confidence", 0) >= 0.2:
                 if child:
                     age_str = child.get_age_display()
@@ -190,17 +486,36 @@ class BookBoySystem:
                     culture_addition = self.culture_engine.generate_culture_response(culture_opportunity, age_years)
                     response += f"\n\n{culture_addition}"
             
-            # 7. 记录回复
+            # 9. 记录回复
             self.memory.add("assistant", response)
             
-            # 8. 语音播报
+            if verbose_thinking:
+                print("  ✅ 思考完成")
+            
+            # 10. 语音播报
             self.voice.speak(response)
             
-            # 9. 反问自省
+            # 11. 反问自省
             if CONFIG.get("self_reflection_enabled", True):
-                self._self_reflect(user_input, response)
+                self._self_reflect(user_input, response, child_id=child_id)
             
-            # 10. 更新发育数据（如果提到相关数据）
+            # 12. Guardian 守护自检（师兄灵觉馈赠）
+            guardian_result = self.guardian.check(
+                speaker_id=speaker_id if 'speaker_id' in locals() else child_id,
+                speaker_name=speaker_name if 'speaker_name' in locals() else "未知",
+                user_input=user_input,
+                response=response
+            )
+            if not guardian_result["passed"]:
+                print(f"\n⚠️ [Guardian 守护警告] 得分: {guardian_result['score']}/100")
+                for v in guardian_result["violations"]:
+                    print(f"  ❌ {v}")
+                for w in guardian_result["warnings"]:
+                    print(f"  ⚠️ {w}")
+            else:
+                print(f"\n✅ [Guardian 守护通过] 得分: {guardian_result['score']}/100")
+            
+            # 13. 更新发育数据（如果提到相关数据）
             self._extract_growth_data(user_input, effective_child_id)
             
             return response
@@ -235,14 +550,20 @@ class BookBoySystem:
         health_keywords = ['疼', '痛', '发烧', '感冒', '咳嗽', '肚子', '头', '睡', '熬夜', '疲劳', '精神', '体质']
         emotion_keywords = ['难过', '生气', '害怕', '担心', '烦', '郁闷', '哭', '孤独']
         growth_keywords = ['长个', '发育', '长高', '牙齿', '视力', '体重']
+        study_keywords = ['作业', '题目', '这道题', '怎么做', '答案', '考试', '学习', '化学', '数学', '语文', '英语']
+        safety_keywords = ['自伤', '自杀', '欺凌', '被打', '受伤', '虐待', '性侵', '离家出走', '不想活']
         
         query_type = None
-        if any(kw in user_input for kw in health_keywords):
+        if any(kw in user_input for kw in safety_keywords):
+            query_type = "安全应急"
+        elif any(kw in user_input for kw in health_keywords):
             query_type = "健康"
         elif any(kw in user_input for kw in emotion_keywords):
             query_type = "情绪"
         elif any(kw in user_input for kw in growth_keywords):
             query_type = "发育"
+        elif any(kw in user_input for kw in study_keywords):
+            query_type = "学习"
         
         if query_type:
             retrieved = self.knowledge.retrieve(user_input, max_chars=1500)
@@ -279,7 +600,7 @@ class BookBoySystem:
     # 反问自省（保留原有）
     # ═══════════════════════════════════════════
     
-    def _self_reflect(self, user_input, response):
+    def _self_reflect(self, user_input, response, child_id="default"):
         """对话后自省"""
         self.reflection_count += 1
         
@@ -303,6 +624,38 @@ class BookBoySystem:
             print(f"\n⚠️ [自省提醒] 直接给了答案，违背了引导本分")
         
         print(f"\n[书童自省 #{self.reflection_count}] {reflection['improvement']['summary']}")
+        
+        # 同步记录到 Cultivation Journal（修行日志）
+        try:
+            child = self.profile_manager.get_child(child_id) if hasattr(self, 'profile_manager') else None
+            child_stage = child.stage if child else "未知"
+            guardian_result = {
+                "score": 100,
+                "violations": reflection["boundary_check"].get("violation_type", []),
+                "warnings": reflection["truth_check"].get("risk_flags", []),
+            }
+            if reflection["boundary_check"].get("violation_found"):
+                guardian_result["score"] -= 25
+            if not reflection["truth_check"].get("is_truthful", True):
+                guardian_result["score"] -= 25
+            
+            entropy_risks = []
+            if reflection["guidance_check"].get("gave_answer_directly"):
+                entropy_risks.append("直接给答案，减少孩子思考")
+            if len(response) > 800 and '？' not in response:
+                entropy_risks.append("回复过长，缺少反问")
+            
+            self.cultivation.log_interaction(
+                child_id=child_id,
+                child_stage=child_stage,
+                user_input=user_input,
+                ai_response=response,
+                guardian_result=guardian_result,
+                helped_negentropy=len(entropy_risks) == 0,
+                entropy_risks=entropy_risks,
+            )
+        except Exception as e:
+            print(f"[修行日志] 记录失败: {e}")
     
     def _check_boundaries(self, user_input, response):
         violation = {"violation_found": False, "violation_type": None}
@@ -423,15 +776,15 @@ class BookBoySystem:
     
     def assess_child(self, child_id):
         """评估指定孩子发育状态"""
-        return self.guardian.daily_assessment(child_id)
+        return self.growth_engine.daily_assessment(child_id)
     
     def assess_all_children(self):
         """评估所有孩子"""
-        return self.guardian.assess_all_children()
+        return self.growth_engine.assess_all_children()
     
     def get_family_report(self):
         """获取家族发育报告"""
-        return self.guardian.get_family_report()
+        return self.growth_engine.get_family_report()
     
     # ═══════════════════════════════════════════
     # 新增：四医融合快捷接口
@@ -490,10 +843,85 @@ class BookBoySystem:
         return score, checks
     
     # ═══════════════════════════════════════════
+    # 语音陪伴日志自动保存
+    # ═══════════════════════════════════════════
+    
+    def save_voice_session_log(self, speaker_id, speaker_name, session_log):
+        """
+        保存语音对话会话到陪伴日志。
+        每次语音对话结束后自动调用，确保不漏记。
+        """
+        if not session_log:
+            return
+        
+        try:
+            journal_dir = Path(CONFIG.get("journal_dir", "/Users/lingjue/Documents/shutong/档案区/陪伴日志"))
+            journal_dir.mkdir(parents=True, exist_ok=True)
+            
+            date_str = datetime.now().strftime("%Y-%m-%d")
+            log_file = journal_dir / f"{date_str}_{speaker_name}.md"
+            
+            file_exists = log_file.exists()
+            
+            with open(log_file, 'a', encoding='utf-8') as f:
+                if not file_exists:
+                    f.write(f"# {date_str} {speaker_name} 陪伴日志（自动记录）\n\n")
+                    f.write(f"> 自动生成于 {datetime.now().isoformat()}\n")
+                    f.write("> 记录原则：真实、不编造\n\n")
+                    f.write("---\n\n")
+                
+                for entry in session_log:
+                    timestamp = entry.get("time", datetime.now().strftime("%H:%M:%S"))
+                    role = entry.get("role", "")
+                    text = entry.get("text", "").strip()
+                    
+                    if not text:
+                        continue
+                    
+                    if role == "user":
+                        f.write(f"### {timestamp}\n\n")
+                        f.write(f"**孩子**：{text}\n\n")
+                    elif role == "assistant":
+                        f.write(f"**书童**：{text}\n\n")
+                        f.write("---\n\n")
+            
+            print(f"\n[日志] ✅ 已自动保存语音陪伴日志: {log_file}")
+        except Exception as e:
+            print(f"\n[日志] ❌ 保存失败: {e}")
+    
+    # ═══════════════════════════════════════════
+    # 感官系统接口：眼与耳
+    # ═══════════════════════════════════════════
+    
+    def look_at_camera(self, save=True):
+        """书童主动睁眼看一眼"""
+        try:
+            frame = self.sensory.vision.capture_frame(save=save)
+            face_count = self.sensory.vision.detect_face_in_frame(frame) if frame is not None else 0
+            recognized = self.sensory.vision.recognize_person(frame) if frame is not None else None
+            return {
+                "success": frame is not None,
+                "frame_path": str(self.sensory.vision.last_frame_path) if save and self.sensory.vision.last_frame_path else None,
+                "face_count": face_count,
+                "recognized": recognized,
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def recognize_person_by_eye(self):
+        """书童用眼睛识别面前的人"""
+        return self.sensory.vision.recognize_person()
+    
+    def get_sensory_status(self):
+        """获取感官系统状态"""
+        return self.sensory.status()
+    
+    # ═══════════════════════════════════════════
     # 修行状态
     # ═══════════════════════════════════════════
     
     def get_cultivation_status(self):
+        sensory_status = self.sensory.status()
         return {
             "soul_awakened": self.soul_awakened,
             "reflection_count": self.reflection_count,
@@ -511,4 +939,5 @@ class BookBoySystem:
                 "notification": True,
                 "privacy": True,
             },
+            "sensory": sensory_status,
         }

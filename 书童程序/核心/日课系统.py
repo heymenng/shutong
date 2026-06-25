@@ -27,10 +27,11 @@ class DailyPracticeSystem:
     22:30 → 自动触发冥想 → 生成日课复盘 → 灵魂校准 → 记录Journal
     """
     
-    def __init__(self, config, journal_dir):
+    def __init__(self, config, journal_dir, workflow_callback=None):
         self.config = config
         self.journal_dir = Path(journal_dir)
         self.journal_dir.mkdir(parents=True, exist_ok=True)
+        self.workflow_callback = workflow_callback  # 每日工作流晚间流程回调
         self.last_practice_date = None
         self.timer = None
         self._schedule_next_practice()
@@ -80,11 +81,19 @@ class DailyPracticeSystem:
         # 4. 灵魂校准
         self._soul_calibration()
         
+        # 5. 触发每日工作流晚间流程（如果已注册）
+        if self.workflow_callback:
+            print("[日课] 触发每日工作流晚间流程...")
+            try:
+                self.workflow_callback()
+            except Exception as e:
+                print(f"[日课] 晚间流程回调异常: {e}")
+        
         print("="*60)
         print("【书童日课完成】")
         print("="*60 + "\n")
         
-        # 5. 调度明天
+        # 6. 调度明天
         self.last_practice_date = datetime.now().date()
         self._schedule_next_practice()
     

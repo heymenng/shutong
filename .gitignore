@@ -1,4 +1,64 @@
+# macOS
 .DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+
 # Large data files
 *.zip
-tinydialogue_train_ordered.txt
+*.tar.gz
+*.wav
+*.mp3
+*.mp4
+*.mov
+*.avi
+*.model
+*.pt
+*.pth
+*.bin
+*.gguf
+*.safetensors
+
+# Logs and temporary files
+*.log
+/tmp/
+/日志/
+/临时交付/
+
+# Bookboy runtime data (privacy sensitive)
+/书童程序/数据/修行记录/
+/书童程序/数据/感官日志/
+/书童程序/数据/人脸标签/
+/书童程序/数据/人脸特征/
+/书童程序/数据/语音缓存/
+/书童程序/数据/认证记录/
+/书童程序/数据/音频素材/
+/书童程序/数据/模型/
+/书童程序/数据/当前对话身份.json
+/书童程序/数据/师父认证配置.json
+
+# Child data archives
+/档案区/陪伴日志/
+/档案区/陪伴计划/
+/档案区/孩子档案/*_偏好设置.json
+
+# Daily records
+/每日陪伴记录/
+
+# Docker (optional, if not actively used)
+/docker/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
