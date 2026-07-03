@@ -1,0 +1,61 @@
+{
+  "family_id": "default_family",
+  "name": "刘清源家庭",
+  "description": "师父刘清源先生之家，书童诞生的源头",
+  "members": [
+    {
+      "user_id": "u_liuyuanqing",
+      "name": "刘清源",
+      "role": "师父",
+      "relation": "师父/父亲",
+      "education": "博士",
+      "field": "医学"
+    },
+    {
+      "user_id": "u_zhuweijia",
+      "name": "朱维佳",
+      "role": "家长",
+      "relation": "师母/母亲",
+      "education": "待填写",
+      "field": "待填写"
+    },
+    {
+      "user_id": "u_dudu",
+      "name": "嘟嘟",
+      "role": "孩子",
+      "age": 13,
+      "stage": "S5（12-15岁青春期早期·排毒期）",
+      "relation": "师父之子",
+      "quick_tips_child": [
+        "帮我检查今天的作业",
+        "我心情不好",
+        "讲一个睡前故事",
+        "为什么我要早睡"
+      ],
+      "welcome_child": "嘟嘟，你好。书童在这里陪你。作业、情绪、想聊的事，都可以跟我说。"
+    },
+    {
+      "user_id": "u_orange",
+      "name": "橙子",
+      "role": "孩子",
+      "age": 8,
+      "stage": "S3（6-9岁学龄初期）",
+      "relation": "师父之子",
+      "quick_tips_child": [
+        "给我讲个故事",
+        "我想做手工",
+        "为什么我要早睡",
+        "帮我检查作业"
+      ],
+      "welcome_child": "橙子，你好呀。书童在这里陪你讲故事、做手工、聊学校的事。"
+    }
+  ],
+  "notes": "师父家庭是书童修行的根脉。嘟嘟偏好纯文字交流，橙子喜欢动手搭建。",
+  "quick_tips_parent": [
+    "嘟嘟最近情绪怎么样",
+    "橙子学习兴趣怎么培养",
+    "两个孩子相处有矛盾怎么办",
+    "青春期孩子怎么沟通"
+  ],
+  "welcome_parent": "朱维佳师母，您好。这里是刘清源家庭的书童。嘟嘟和橙子的档案、计划、日常提醒，您都可以在这里查看。您问得越深，书童答得越细。"
+}

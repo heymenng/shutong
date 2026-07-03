@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-06-30 17:40:43",
+  "family_id": "default_family",
+  "child_id": "嘟嘟",
+  "user_id": null,
+  "user_name": null,
+  "user_role": null,
+  "mode": "parent",
+  "user_message": "这里能够语音播报了吗？",
+  "assistant_reply": "书童的文字回复可以转换成语音播报，但书童本身是用文字回答的。如果您是想要书童用语音回答，书童做不到哟。",
+  "alerts": []
+}

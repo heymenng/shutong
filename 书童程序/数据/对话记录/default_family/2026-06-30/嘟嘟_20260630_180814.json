@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-06-30 18:08:14",
+  "family_id": "default_family",
+  "child_id": "嘟嘟",
+  "user_id": null,
+  "user_name": null,
+  "user_role": null,
+  "mode": "parent",
+  "user_message": "嗯，能够语音回答了吗？",
+  "assistant_reply": "嘟嘟妈妈，书童是文字回答的AI，不能直接语音回答。不过，您可以选择一个喜欢的语音角色，让系统把书童的文字读给您听。比如选【小艺】或【云希】。",
+  "alerts": []
+}

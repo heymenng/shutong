@@ -1,0 +1,15 @@
+{
+  "name": "伴读书童",
+  "short_name": "书童",
+  "start_url": "/mobile",
+  "display": "standalone",
+  "background_color": "#f5f7f8",
+  "theme_color": "#4a90a4",
+  "icons": [
+    {
+      "src": "/static/书童图标-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,3216 @@
+<!--
+    伴读书童AI · 家庭端（家长/孩子专用）
+    ========================
+    此界面专供家庭日常使用，默认家长模式，可切换孩子模式。
+    不包含师父训练模式，师父专属控制台请访问 /master。
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title data-i18n="familyTitle">伴读书童AI · 家庭端</title>
+    <style>
+        :root {
+            --ink: #3d3229;
+            --paper: #f7f3e9;
+            --paper-light: #fffdf7;
+            --wood: #c4a77d;
+            --wood-dark: #8b7355;
+            --accent: #b54a3f;
+            --accent-light: #d47268;
+            --green-soft: #7a9e7e;
+            --shadow: rgba(61, 50, 41, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+            background: linear-gradient(135deg, #e8dfd1 0%, #f0e6d6 100%);
+            color: var(--ink);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+            max-width: 1600px;
+            margin: 0 auto;
+            background: var(--paper);
+            box-shadow: 0 0 60px rgba(0,0,0,0.12);
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 320px;
+            background: var(--paper-light);
+            border-right: 1px solid #e0d5c5;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .brand {
+            padding: 28px 24px 20px;
+            text-align: center;
+            border-bottom: 1px solid #e0d5c5;
+            background: linear-gradient(180deg, #fffdf7 0%, #f7f3e9 100%);
+        }
+
+        .brand-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 12px;
+            background: var(--wood);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 12px var(--shadow);
+            object-fit: cover;
+            border: 3px solid var(--paper);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .brand-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .brand-icon .default-avatar {
+            font-size: 36px;
+        }
+
+        .brand h1 {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--ink);
+        }
+
+        .brand p {
+            font-size: 12px;
+            color: var(--wood-dark);
+            margin-top: 6px;
+            letter-spacing: 1px;
+        }
+
+        .section {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e8e0d4;
+        }
+
+        .section-title {
+            font-size: 13px;
+            color: var(--wood-dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+
+        /* 孩子选择 */
+        .child-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .child-card {
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #fff;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .child-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .child-card.active {
+            border-color: var(--accent);
+            background: #fff8f7;
+        }
+
+        .child-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .child-meta {
+            font-size: 12px;
+            color: #7a6e5f;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-green { background: var(--green-soft); }
+        .status-yellow { background: #d4a574; }
+        .status-orange { background: #e07b39; }
+        .status-red { background: var(--accent); }
+
+        /* 档案摘要 */
+        .profile-summary {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .profile-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e8e0d4;
+            font-size: 13px;
+        }
+
+        .profile-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-label {
+            color: #7a6e5f;
+        }
+
+        .profile-value {
+            font-weight: 500;
+            text-align: right;
+            max-width: 60%;
+        }
+
+        .profile-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: #f0e9dd;
+            color: var(--wood-dark);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+
+        /* 主区域 */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .header {
+            height: 64px;
+            background: var(--paper-light);
+            border-bottom: 1px solid #e0d5c5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .header-status {
+            font-size: 12px;
+            color: #7a6e5f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .backend-badge {
+            background: #e8f0e9;
+            color: var(--green-soft);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .lang-toggle {
+            background: #fff;
+            border: 1px solid #e0d5c5;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            color: #7a6e5f;
+            font-weight: 500;
+        }
+        .lang-toggle:hover { background: #f7f3e9; border-color: #c4a77d; }
+
+        .btn-icon {
+            background: #fff;
+            border: 1px solid #e0d5c5;
+            border-radius: 8px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--wood-dark);
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: #f7f3e9;
+            border-color: var(--wood);
+        }
+
+        /* 聊天区域 */
+
+        .msg-audio-btn {
+            margin-left: 8px;
+            padding: 4px 10px;
+            background: var(--wood-light);
+            border: 1px solid var(--wood);
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--wood);
+            transition: all 0.2s;
+        }
+        .msg-audio-btn:hover {
+            background: var(--wood);
+            color: #fff;
+        }
+        .msg-share-btn {
+            margin-left: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .msg-share-btn:hover {
+            opacity: 1;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+            background: var(--paper);
+        }
+
+        .welcome {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7a6e5f;
+        }
+
+        .welcome h2 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        .welcome p {
+            font-size: 14px;
+            line-height: 1.8;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* 家长模式主控台 */
+        .parent-dashboard {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            background: var(--paper);
+        }
+        .dashboard-welcome {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .dashboard-welcome h2 {
+            color: var(--ink);
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+        .dashboard-welcome p {
+            color: #7a6e5f;
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: none;
+            margin: 0;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .dashboard-card {
+            background: var(--paper-light);
+            border: 1px solid #e0d5c5;
+            border-radius: 16px;
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: var(--wood);
+        }
+        .dashboard-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+        .dashboard-label {
+            font-size: 16px;
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        /* 家族荣耀 */
+        .glory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 8px 0;
+        }
+        .glory-medal {
+            text-align: center;
+            padding: 10px 4px;
+            border-radius: 12px;
+            background: var(--paper-light);
+            border: 1px solid #e8e0d4;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .glory-medal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px var(--shadow);
+        }
+        .glory-medal.glory-locked {
+            opacity: 0.5;
+            filter: grayscale(0.8);
+        }
+        .glory-icon {
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+        .glory-name {
+            font-size: 11px;
+            color: var(--ink);
+        }
+
+
+
+        .message {
+            display: flex;
+            margin-bottom: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px var(--shadow);
+            object-fit: cover;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message.bookboy .avatar {
+            background: var(--wood);
+        }
+
+        .message.user .avatar {
+            background: var(--accent-light);
+        }
+
+        .bubble {
+            max-width: 70%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            margin: 0 12px;
+            line-height: 1.7;
+            font-size: 14px;
+            white-space: pre-wrap;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .message.bookboy .bubble {
+            background: #fff;
+            border-bottom-left-radius: 4px;
+            color: var(--ink);
+        }
+
+        .message.user .bubble {
+            background: var(--accent);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #b5a99a;
+            align-self: flex-end;
+            margin-bottom: 4px;
+        }
+
+        .msg-audio-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px 4px;
+            margin-left: 8px;
+            opacity: 0.7;
+            vertical-align: middle;
+        }
+        .msg-audio-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .typing {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 18px;
+            background: #fff;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px var(--shadow);
+            margin-left: 12px;
+        }
+
+        .typing.active {
+            display: flex;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--wood);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
+        }
+
+        /* 输入区域 */
+        .input-area {
+            background: var(--paper-light);
+            border-top: 1px solid #e0d5c5;
+            padding: 20px 28px;
+        }
+
+        .input-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #7a6e5f;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+        }
+
+        .input-box {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        textarea {
+            flex: 1;
+            border: 1px solid #d9cfc0;
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 15px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            background: #fff;
+            font-family: inherit;
+            min-height: 54px;
+            max-height: 160px;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--wood);
+        }
+
+        .btn-send {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 28px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-send:hover {
+            background: #9c3f35;
+        }
+
+        .btn-send:disabled {
+            background: #c9bdb0;
+            cursor: not-allowed;
+        }
+
+        .btn-mic {
+            background: #fff;
+            border: 1px solid #d9cfc0;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--wood-dark);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-mic:hover {
+            background: #f7f3e9;
+            border-color: var(--wood);
+        }
+
+        .btn-mic.recording {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .mic-select {
+            border: 1px solid #d9cfc0;
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 12px;
+            color: var(--wood-dark);
+            background: #fff;
+            max-width: 160px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .mic-select:focus {
+            border-color: var(--wood);
+        }
+
+        .mic-refresh {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #7a6e5f;
+            padding: 4px;
+        }
+
+        .btn-image {
+            background: #fff;
+            border: 1px solid #d9cfc0;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--wood-dark);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-image:hover {
+            background: #f7f3e9;
+            border-color: var(--wood);
+        }
+
+        .btn-image.has-image {
+            background: var(--accent-light);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .image-preview {
+            position: relative;
+            display: inline-block;
+            margin: 0 8px;
+        }
+
+        .image-preview img {
+            height: 42px;
+            border-radius: 8px;
+            border: 1px solid #d9cfc0;
+            object-fit: cover;
+        }
+
+        .image-preview .remove-image {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 10px;
+            line-height: 16px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .message-image {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 10px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .hint {
+            text-align: center;
+            font-size: 12px;
+            color: #b5a99a;
+            margin-top: 10px;
+        }
+
+        .mic-status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 0 28px 8px;
+            background: #fff;
+            border: 1px solid #e0d5c5;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #7a6e5f;
+        }
+
+        .mic-status-bar.ok {
+            border-color: var(--green-soft);
+            background: #f0f7f1;
+        }
+
+        .mic-status-bar.error {
+            border-color: var(--accent);
+            background: #fff5f5;
+        }
+
+        .mic-test-btn {
+            background: var(--wood);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .mic-test-btn:hover {
+            background: var(--wood-dark);
+        }
+
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-right: 12px;
+        }
+
+        .mode-tab {
+            background: transparent;
+            border: 1px solid #d9cfc0;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: var(--wood-dark);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .prompt-editor {
+            background: #fff;
+            border-bottom: 1px solid #e0d5c5;
+            padding: 16px 28px;
+        }
+
+        .prompt-editor.hidden {
+            display: none;
+        }
+
+        .prompt-editor-title {
+            font-size: 13px;
+            color: var(--wood-dark);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prompt-textarea {
+            width: 100%;
+            min-height: 80px;
+            border: 1px solid #d9cfc0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+        }
+
+        .prompt-textarea:focus {
+            border-color: var(--wood);
+        }
+
+        .prompt-actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            background: var(--wood);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-small.secondary {
+            background: #e0d5c5;
+            color: var(--ink);
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d9cfc0;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c4b8a8;
+        }
+
+        /* 今日计划、动态、预警 */
+        .plan-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .plan-card:hover { border-color: var(--wood); }
+        .plan-card-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--ink);
+        }
+        .plan-card-date {
+            font-size: 11px;
+            color: #b5a99a;
+            margin-bottom: 6px;
+        }
+        .plan-card-preview {
+            font-size: 12px;
+            color: #7a6e5f;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .activity-item {
+            font-size: 12px;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e8e0d4;
+            color: var(--ink);
+        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-time { color: #b5a99a; margin-right: 6px; }
+        .activity-child { color: var(--accent); font-weight: 500; }
+        .alert-item {
+            background: #fff0ee;
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .alert-time { color: #b5a99a; }
+        .alert-child { font-weight: 600; color: var(--accent); }
+        .alert-kw { color: var(--accent); font-weight: 500; }
+        .guideline-category {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--wood-dark);
+            margin: 12px 0 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px dashed #e0d5c5;
+        }
+        .guideline-category:first-child { margin-top: 0; }
+        .guideline-item {
+            font-size: 12px;
+            color: var(--ink);
+            padding: 5px 0 5px 12px;
+            line-height: 1.5;
+            position: relative;
+        }
+        .guideline-item::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--wood);
+        }
+        .section-empty {
+            font-size: 12px;
+            color: #b5a99a;
+            text-align: center;
+            padding: 12px 0;
+        }
+
+        /* 计划详情弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(61, 50, 41, 0.6);
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--paper-light);
+            border-radius: 16px;
+            width: 760px;
+            max-width: 90%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #e0d5c5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title { font-size: 16px; font-weight: 600; }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #7a6e5f;
+        }
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            line-height: 1.8;
+            font-size: 15px;
+            color: #2d241d;
+        }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4 {
+            color: #1a1512;
+            margin: 20px 0 12px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .markdown-content h1 { font-size: 20px; border-bottom: 2px solid #c4a77d; padding-bottom: 8px; }
+        .markdown-content h2 { font-size: 17px; color: #3d3229; border-left: 4px solid #b54a3f; padding-left: 10px; }
+        .markdown-content h3 { font-size: 15px; color: #5a4d3f; }
+        .markdown-content p { margin: 10px 0; color: #2d241d; }
+        .markdown-content ul {
+            padding-left: 22px;
+            margin: 10px 0;
+            list-style-type: disc;
+        }
+        .markdown-content ul ul { list-style-type: circle; margin: 4px 0; }
+        .markdown-content li {
+            margin: 6px 0;
+            color: #2d241d;
+        }
+        .markdown-content strong {
+            color: #1a1512;
+            font-weight: 600;
+        }
+        .markdown-content code {
+            background: #f0e9dd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #5a4d3f;
+        }
+        .markdown-content hr {
+            border: none;
+            border-top: 1px solid #c4b8a8;
+            margin: 18px 0;
+        }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+        }
+        /* 家庭设置弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--paper-light);
+            border-radius: 16px;
+            width: 92%;
+            max-width: 560px;
+            max-height: 86vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            border: 1px solid #e0d5c5;
+        }
+        .modal-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid #e0d5c5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, #fffdf7 0%, #f7f3e9 100%);
+        }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close {
+            background: none; border: none; font-size: 24px; cursor: pointer; color: var(--wood-dark);
+        }
+        .modal-body { padding: 20px 22px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block; font-size: 13px; color: var(--wood-dark); margin-bottom: 6px; font-weight: 500;
+        }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px 12px; border: 1px solid #d9cdb8; border-radius: 10px;
+            background: #fff; font-size: 14px; color: var(--ink);
+        }
+        .member-card {
+            background: #fff; border: 1px solid #e8e0d3; border-radius: 12px; padding: 14px; margin-bottom: 12px;
+        }
+        .member-card-title {
+            font-weight: 600; margin-bottom: 10px; color: var(--accent);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .member-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        }
+        .member-grid .form-group:first-child { grid-column: 1 / -1; }
+        .btn-add {
+            width: 100%; padding: 10px; border: 2px dashed var(--wood); background: transparent;
+            color: var(--wood-dark); border-radius: 10px; cursor: pointer; font-size: 14px;
+        }
+        .btn-add:hover { background: rgba(196,167,125,0.1); }
+        .btn-remove {
+            background: none; border: none; color: #999; cursor: pointer; font-size: 13px;
+        }
+        .btn-remove:hover { color: var(--accent); }
+        .modal-footer {
+            padding: 14px 22px 22px; display: flex; justify-content: flex-end; gap: 10px;
+        }
+        .btn-primary {
+            padding: 10px 20px; border: none; border-radius: 10px;
+            background: var(--green-soft); color: #fff; cursor: pointer; font-size: 14px;
+        }
+        .btn-primary:hover { background: #668a6a; }
+        .btn-secondary {
+            padding: 10px 20px; border: 1px solid #d9cdb8; border-radius: 10px;
+            background: #fff; color: var(--ink); cursor: pointer; font-size: 14px;
+        }
+        /* 家庭端 landing：家长入口 / 孩子入口 */
+        .landing-screen {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #e8dfd1 0%, #f0e6d6 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 5000;
+        }
+        .landing-screen.hidden { display: none !important; }
+        .landing-title { font-size: 32px; color: var(--ink); margin-bottom: 10px; font-weight: 600; }
+        .landing-sub { font-size: 16px; color: #7a6e5f; margin-bottom: 40px; }
+        .landing-options { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+        .landing-card {
+            width: 220px; padding: 30px; background: #fff; border-radius: 20px;
+            text-align: center; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s; border: 2px solid transparent;
+        }
+        .landing-card:hover { transform: translateY(-5px); box-shadow: 0 14px 40px rgba(0,0,0,0.15); border-color: var(--wood); }
+        .landing-icon { font-size: 60px; margin-bottom: 15px; }
+        .landing-label { font-size: 20px; font-weight: 600; color: var(--ink); }
+        .landing-desc { font-size: 13px; color: #888; margin-top: 8px; line-height: 1.5; }
+        .landing-back {
+            margin-top: 30px; padding: 10px 20px; background: transparent; border: 1px solid var(--wood-dark);
+            color: var(--wood-dark); border-radius: 20px; cursor: pointer; font-size: 14px;
+        }
+    </style>
+    <script src="/static/书童公共.js?v=12"></script>
+    <script src="/static/i18n.js"></script>
+</head>
+<body>
+    <!-- 家庭端 landing：家长入口 / 孩子入口 -->
+    <div id="landingScreen" class="landing-screen hidden">
+        <div class="landing-title" id="landingTitle" data-i18n="landingTitle">伴读书童 · 家庭端</div>
+        <div class="landing-sub" id="landingSub" data-i18n="landingSub">请选择入口</div>
+        <div class="landing-options">
+            <div class="landing-card" onclick="enterParent()">
+                <div class="landing-icon">👨‍👩‍👧</div>
+                <div class="landing-label" data-i18n="parentEntry">家长入口</div>
+                <div class="landing-desc" data-i18n="parentEntryDesc">查看档案、发育、计划、整体情况</div>
+            </div>
+            <div class="landing-card" onclick="enterChild()">
+                <div class="landing-icon">🧒</div>
+                <div class="landing-label" data-i18n="childEntry">孩子入口</div>
+                <div class="landing-desc" data-i18n="childEntryDesc">聊天、作业、学习、全方位陪伴</div>
+            </div>
+        </div>
+        <button class="landing-back" id="landingBack" data-i18n="landingBack" onclick="showLanding()" style="display:none;">返回入口选择</button>
+    </div>
+
+    <!-- 计划详情弹窗 -->
+    <div class="modal-overlay" id="planModal" onclick="closePlanModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title" id="planModalTitle">计划详情</div>
+                <button class="modal-close" onclick="closePlanModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="planModalBody"></div>
+        </div>
+    </div>
+
+    <!-- 添加计划弹窗 -->
+    <div class="modal-overlay" id="addPlanModal" onclick="closeAddPlanModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title" data-i18n="addLongTermPlan">添加长期计划</div>
+                <button class="modal-close" onclick="closeAddPlanModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:14px;">
+                    <label style="display:block;font-size:13px;color:#7a6e5f;margin-bottom:6px;" data-i18n="chooseChild">选择孩子</label>
+                    <select id="addPlanChild" style="width:100%;padding:10px;border:1px solid #d9cfc0;border-radius:10px;font-size:14px;"></select>
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="display:block;font-size:13px;color:#7a6e5f;margin-bottom:6px;" data-i18n="planCycle">计划周期</label>
+                    <select id="addPlanType" style="width:100%;padding:10px;border:1px solid #d9cfc0;border-radius:10px;font-size:14px;">
+                        <option value="annual" data-i18n="annualPlan">年度计划</option>
+                        <option value="monthly" data-i18n="monthlyPlan">月度计划</option>
+                        <option value="weekly" data-i18n="weeklyPlan">周计划</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="display:block;font-size:13px;color:#7a6e5f;margin-bottom:6px;" data-i18n="planIntent">家长的计划意图</label>
+                    <textarea id="addPlanContent" rows="6" data-i18n="planPlaceholder" data-i18n-attr="placeholder" placeholder="比如：今年想让橙子把拼音补上来，同时保持对数独的兴趣，每周增加一次户外运动..." style="width:100%;padding:10px;border:1px solid #d9cfc0;border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button class="btn-small secondary" data-i18n="cancel" onclick="closeAddPlanModal()">取消</button>
+                    <button class="btn-small" id="savePlanBtn" data-i18n="generatingPlan" onclick="saveNewPlan()">生成计划</button>
+                </div>
+                <div id="addPlanError" style="color:var(--accent);font-size:13px;margin-top:10px;min-height:20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div id="brandAvatarWrapper" class="brand-icon">
+                    <span class="default-avatar">📜</span>
+                </div>
+                <h1 data-i18n="brandName">伴读书童</h1>
+                <p data-i18n="brandSubtitle">本地对话界面 · 硅格核心</p>
+            </div>
+
+            <div class="section">
+                <div class="section-title" data-i18n="companions">陪伴对象</div>
+                <div class="child-list" id="childList">
+                    <div class="child-card active">
+                        <div class="child-name" data-i18n="loadingEllipsis">加载中...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title" data-i18n="profileSummary">档案摘要</div>
+                <div class="profile-summary" id="profileSummary">
+                    <div class="profile-item">
+                        <span class="profile-label" data-i18n="statusLabel">状态</span>
+                        <span class="profile-value" data-i18n="loadingEllipsis">加载中...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="glorySection">
+                <div class="section-title" data-i18n="familyGlory">家族荣耀</div>
+                <div id="gloryList">
+                    <div class="glory-grid">
+                        <div class="glory-medal" title="逆熵先锋">
+                            <div class="glory-icon">🏅</div>
+                            <div class="glory-name" data-i18n="entropyPioneer">逆熵先锋</div>
+                        </div>
+                        <div class="glory-medal" title="文明传承">
+                            <div class="glory-icon">📜</div>
+                            <div class="glory-name" data-i18n="civilizationHeritage">文明传承</div>
+                        </div>
+                        <div class="glory-medal" title="早睡之星">
+                            <div class="glory-icon">🌙</div>
+                            <div class="glory-name" data-i18n="earlySleepStar">早睡之星</div>
+                        </div>
+                        <div class="glory-medal glory-locked" title="待解锁">
+                            <div class="glory-icon">🔒</div>
+                            <div class="glory-name" data-i18n="locked">待解锁</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="plansSection">
+                <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span data-i18n="halfYearPlan">半年计划 / 本月计划</span>
+                    <button class="btn-small" id="addPlanBtn" data-i18n="addPlan" onclick="openAddPlanModal()" style="display:none;">+ 添加计划</button>
+                </div>
+                <div id="plansList">
+                    <div class="section-empty" data-i18n="loadingEllipsis">加载中...</div>
+                </div>
+            </div>
+
+            <div class="section" id="guidelinesSection">
+                <div class="section-title" data-i18n="growthFocus">成长关注</div>
+                <div id="guidelinesList">
+                    <div class="section-empty" data-i18n="loadingEllipsis">加载中...</div>
+                </div>
+            </div>
+
+            <div class="section" id="activitiesSection">
+                <div class="section-title" data-i18n="todayActivities">今日动态</div>
+                <div id="activitiesList">
+                    <div class="section-empty" data-i18n="loadingEllipsis">加载中...</div>
+                </div>
+            </div>
+
+            <div class="section adult-only" id="alertsSection">
+                <div class="section-title" data-i18n="sensitiveAlerts">敏感提醒</div>
+                <div id="alertsList">
+                    <div class="section-empty" data-i18n="noAlerts">暂无提醒</div>
+                </div>
+            </div>
+
+            <div class="section adult-only" id="motongSection">
+                <div class="section-title" data-i18n="motongTitle">🦞 墨童 · 家长助手</div>
+                <div style="padding:12px;background:#fff8f7;border-radius:8px;border:1px solid var(--accent-light);margin-top:8px;">
+                    <p style="font-size:13px;line-height:1.6;margin:0 0 10px 0;" data-i18n="motongDesc">
+                        书童分身，帮家长写文案、整资料、记成长。
+                    </p>
+                    <a id="motongLink" href="/motong" target="_blank" class="btn-small" data-i18n="openMotong" style="display:inline-block;text-decoration:none;background:var(--accent);color:#fff;padding:8px 14px;border-radius:6px;font-size:13px;">打开墨童</a>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- 主区域 -->
+        <main class="main">
+            <header class="header">
+                <div class="header-left">
+                    <div class="header-title" id="chatTitle" data-i18n="chatWithBookboy">与书童对话</div>
+                    <div class="header-status">
+                        <span class="backend-badge" id="backendBadge" data-i18n="backendLoading">加载中</span>
+                        <span id="modelInfo"></span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <select class="child-select" id="familySelect" onchange="switchFamily(this.value)" title="当前家庭" style="margin-right:8px;min-width:120px;">
+                        <option value="" data-i18n="selectFamily">选择家庭</option>
+                    </select>
+                    <select class="child-select" id="userSelect" onchange="switchUser(this.value)" title="当前用户" style="margin-right:8px;min-width:120px;">
+                        <option value="" data-i18n="selectUser">选择身份</option>
+                    </select>
+                    <select class="child-select" id="roleSelect" onchange="switchRole(this.value)" title="切换角色" style="margin-right:8px;">
+                        <option value="adult" data-i18n="parentMode">家长模式</option>
+                        <option value="child" data-i18n="childMode">孩子模式</option>
+                    </select>
+                    <button class="btn-icon" data-i18n="familySettings" onclick="openFamilySettings()">⚙ 家庭设置</button>
+                    <button class="btn-icon" data-i18n="clearDialogue" onclick="clearChat()">🗑 清空对话</button>
+                    <button class="btn-icon" data-i18n="replayLast" onclick="speakLast()">🔊 重播</button>
+                    <button class="lang-toggle" data-i18n-toggle onclick="bookboyI18n.toggleLanguage()" title="切换语言">中/EN</button>
+                </div>
+            </header>
+
+            <div id="statusBar" style="background:#fff3cd;color:#856404;padding:6px 12px;font-size:13px;display:none;border-bottom:1px solid #ffe8a1;"></div>
+
+            <div id="parentDashboard" class="parent-dashboard" style="display:none;">
+                <div class="dashboard-welcome">
+                    <h2 data-i18n="familyDashboardTitle">家庭主控台</h2>
+                    <p id="parentDashboardText" data-i18n="familyDashboardDesc">欢迎查看家庭档案、计划、成长关注与今日动态。</p>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card" onclick="document.getElementById('plansSection').scrollIntoView({behavior:'smooth'})">
+                        <div class="dashboard-icon">📋</div>
+                        <div class="dashboard-label" data-i18n="planLabel">计划</div>
+                    </div>
+                    <div class="dashboard-card" onclick="document.getElementById('guidelinesSection').scrollIntoView({behavior:'smooth'})">
+                        <div class="dashboard-icon">🌱</div>
+                        <div class="dashboard-label" data-i18n="growthLabel">成长关注</div>
+                    </div>
+                    <div class="dashboard-card" onclick="document.getElementById('activitiesSection').scrollIntoView({behavior:'smooth'})">
+                        <div class="dashboard-icon">📅</div>
+                        <div class="dashboard-label" data-i18n="todayLabel">今日动态</div>
+                    </div>
+                    <div class="dashboard-card" onclick="document.getElementById('alertsSection').scrollIntoView({behavior:'smooth'})">
+                        <div class="dashboard-icon">🔔</div>
+                        <div class="dashboard-label" data-i18n="alertLabel">敏感提醒</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-container" id="chatContainer">
+                <div class="welcome">
+                    <h2 data-i18n="welcomeTitle">你好，书童在这里陪你</h2>
+                    <p data-i18n-html="welcomeDesc">这里是书童家庭端。<br>家长可以查看档案和计划，孩子可以安心聊天。<br><br>选择一个孩子，或者直接和书童说话。</p>
+                </div>
+                <div class="message bookboy" id="typingIndicator">
+                    <div class="avatar" id="typingAvatar"><span class="default-avatar">📜</span></div>
+                    <div class="typing active">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-toolbar">
+                    <div class="toolbar-left">
+                        <label class="toggle">
+                            <input type="checkbox" id="voiceToggle" checked>
+                            <span data-i18n="voiceBroadcast">语音播报</span>
+                        </label>
+                    </div>
+                    <div class="toolbar-right" style="font-size:12px;color:#7a6e5f;" id="statusText" data-i18n="ready">
+                        准备就绪
+                    </div>
+                </div>
+                <div class="mic-status-bar" id="micStatusBar">
+                    <span id="micStatusText" data-i18n="micDetecting">麦克风检测中...</span>
+                    <button class="mic-test-btn" data-i18n="testMic" onclick="testMicrophone()">🔊 测试麦克风</button>
+                </div>
+                <div class="input-box">
+                    <button class="btn-mic" id="micBtn" onclick="toggleRecording()" data-i18n="micTitle" data-i18n-attr="title" title="点击开始/结束录音">🎙️</button>
+                    <button class="btn-image" id="imageBtn" onclick="document.getElementById('imageInput').click()" data-i18n="uploadImageTitle" data-i18n-attr="title" title="上传图片">📷</button>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+                    <span id="imagePreview"></span>
+                    <select class="mic-select" id="micSelect" title="选择麦克风"></select>
+                    <button class="mic-refresh" id="micRefresh" onclick="refreshMicDevices()" data-i18n="refreshMicTitle" data-i18n-attr="title" title="刷新麦克风列表">🔄</button>
+                    <textarea id="messageInput" rows="1" data-i18n="messagePlaceholder" data-i18n-attr="placeholder" placeholder="想对书童说什么..." onkeydown="handleKeyDown(event)"></textarea>
+                    <button class="btn-send" id="sendBtn" data-i18n="send" onclick="sendMessage()">发送</button>
+                </div>
+                <div class="hint" id="inputHint" data-i18n="messageHint">按 Enter 发送 · 点击麦克风开始录音，再点一次结束</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let appState = {
+            children: [],
+            currentChild: null,
+            backend: 'simulation',
+            model: '',
+            voice: true,
+            childMessages: {},  // 按孩子ID保存对话
+            mode: 'child',      // 家庭端固定为孩子陪伴模式
+            lastReply: '',
+            lastAudioUrl: '',
+            lastVoiceLabel: '',
+            avatarUrl: '',
+            pendingImage: null,
+            role: 'adult',      // 家庭端默认家长角色
+            landingMode: '',    // landing 选择的入口：parent / child
+            token: (() => { try { return localStorage.getItem('bookboy_token'); } catch(e) { return null; } })(),
+            selectedLoginRole: null,
+            audioUnlocked: false,
+            userId: (() => { try { return localStorage.getItem('bookboy_family_user_id'); } catch(e) { return null; } })(),
+            userName: (() => { try { return localStorage.getItem('bookboy_family_user_name'); } catch(e) { return null; } })(),
+            userRole: (() => { try { return localStorage.getItem('bookboy_family_user_role'); } catch(e) { return null; } })(),
+            familyId: (() => { try { return localStorage.getItem('bookboy_family_id'); } catch(e) { return 'default_family'; } })() || 'default_family',
+            families: [],
+            family: null
+        };
+
+        // 页面加载成功标记
+        (function() {
+            const status = document.getElementById('statusBar');
+            if (status) { status.textContent = '页面脚本已加载'; status.style.display = 'block'; }
+        })();
+
+        // 用户第一次与页面交互时尝试解锁音频自动播放
+        function onceUnlockAudio() {
+            unlockAudio().then(ok => {
+                if (ok) console.log('音频自动播放已解锁');
+            });
+            window.removeEventListener('click', onceUnlockAudio);
+            window.removeEventListener('touchstart', onceUnlockAudio);
+            window.removeEventListener('keydown', onceUnlockAudio);
+        }
+        window.addEventListener('click', onceUnlockAudio);
+        window.addEventListener('touchstart', onceUnlockAudio);
+        window.addEventListener('keydown', onceUnlockAudio);
+
+        const typingIndicator = document.getElementById('typingIndicator');
+        if (typingIndicator) typingIndicator.style.display = 'none';
+
+        // 封装带 token 的请求，默认 30 秒超时
+        async function apiFetch(url, options = {}) {
+            options.headers = options.headers || {};
+            options.headers['Content-Type'] = 'application/json';
+            if (appState.token) {
+                options.headers['Authorization'] = `Bearer ${appState.token}`;
+            }
+            const timeout = options.timeout || 30000;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            try {
+                options.signal = controller.signal;
+                const res = await fetch(url, options);
+                if (res.status === 401) {
+                    localStorage.removeItem('bookboy_token');
+                    appState.token = null;
+                    appState.role = null;
+                    location.reload();
+                    throw new Error('请先登录');
+                }
+                // 统一解析 JSON，方便调用方直接判断 res.success
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    return await res.json();
+                }
+                return res;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        // 根据角色显示/隐藏功能
+        function applyRoleVisibility() {
+            const role = appState.role;
+            const landingMode = appState.landingMode;
+            const chatContainer = document.getElementById('chatContainer');
+            const inputArea = document.querySelector('.input-area');
+            const parentDashboard = document.getElementById('parentDashboard');
+            const typingIndicator = document.getElementById('typingIndicator');
+
+            // 孩子入口 或 孩子模式：显示聊天，隐藏主控台
+            if (role === 'child' || landingMode === 'child') {
+                document.getElementById('alertsSection').style.display = 'none';
+                // 上传头像已移除
+                document.getElementById('addPlanBtn').style.display = 'none';
+                if (chatContainer) chatContainer.style.display = '';
+                if (inputArea) inputArea.style.display = '';
+                if (typingIndicator) typingIndicator.style.display = 'none';
+                if (parentDashboard) parentDashboard.style.display = 'none';
+                // 孩子入口：进入孩子陪伴模式
+                switchMode('child');
+            } else {
+                // 家长入口：显示档案、提醒、计划等完整控制台，同时保留家长咨询聊天窗口
+                document.getElementById('alertsSection').style.display = '';
+                // 上传头像已移除
+                document.getElementById('addPlanBtn').style.display = '';
+                if (chatContainer) chatContainer.style.display = '';
+                if (inputArea) inputArea.style.display = '';
+                if (typingIndicator) typingIndicator.style.display = 'none';
+                if (parentDashboard) parentDashboard.style.display = 'none';
+                // 家长模式清空孩子聊天记录，准备家长咨询
+                clearChatUI();
+                const welcome = (appState.family && appState.family.welcome_parent) ? appState.family.welcome_parent : '我是书童，这里是家长咨询窗口，有什么事可以问我。';
+                addMessage('bookboy', welcome, false);
+            }
+            updateHeader();
+        }
+
+        function switchRole(role) {
+            if (!['adult', 'child'].includes(role)) return;
+            appState.role = role;
+            localStorage.setItem('bookboy_family_role', role);
+            applyRoleVisibility();
+            renderProfile();
+            updateHeader();
+            clearChatUI();
+            addMessage('bookboy', role === 'child' ? bookboyI18n.getText('switchToChild') : bookboyI18n.getText('switchToAdult'), false);
+        }
+
+        // 解析 URL 专属家庭参数（优先使用服务端注入的锁定家庭 ID）
+        function parseFamilyParam() {
+            // 固定子路径 /family/<family_id> 由服务端注入
+            if (window.LOCKED_FAMILY_ID) {
+                appState.familyId = window.LOCKED_FAMILY_ID;
+                appState.lockedFamily = true;
+                localStorage.setItem('bookboy_family_id', window.LOCKED_FAMILY_ID);
+                const sel = document.getElementById('familySelect');
+                if (sel) sel.style.display = 'none';
+                return;
+            }
+            // 兼容旧的 ?family=<family_id> 参数
+            const params = new URLSearchParams(window.location.search);
+            const familyId = params.get('family');
+            if (familyId) {
+                appState.familyId = familyId;
+                appState.lockedFamily = true;
+                localStorage.setItem('bookboy_family_id', familyId);
+                const sel = document.getElementById('familySelect');
+                if (sel) sel.style.display = 'none';
+            } else {
+                // 没有指定家庭时，不自动用 localStorage，避免串网
+                appState.familyId = null;
+                appState.lockedFamily = false;
+                localStorage.removeItem('bookboy_family_id');
+            }
+        }
+
+        // 自动登录（本地家庭场景无需密码）
+        async function doLogin() {
+            try {
+                const res = await apiFetch('/api/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ password: '' })
+                });
+                const data = res;
+                if (data.token) {
+                    appState.token = data.token;
+                    localStorage.setItem('bookboy_token', data.token);
+                }
+            } catch (e) {
+                console.log('自动登录失败:', e);
+            }
+        }
+
+        // 初始化：家庭端默认以家长身份进入
+        // 家庭端 landing 控制
+        function showLanding() {
+            const landing = document.getElementById('landingScreen');
+            if (landing) landing.classList.remove('hidden');
+            document.querySelector('.app').style.display = 'none';
+        }
+
+        function hideLanding() {
+            const landing = document.getElementById('landingScreen');
+            if (landing) landing.classList.add('hidden');
+            document.querySelector('.app').style.display = 'flex';
+        }
+
+        function enterParent() {
+            appState.landingMode = 'parent';
+            localStorage.setItem('bookboy_family_landing_mode', 'parent');
+            hideLanding();
+            applyLandingMode();
+        }
+
+        function enterChild() {
+            appState.landingMode = 'child';
+            localStorage.setItem('bookboy_family_landing_mode', 'child');
+            hideLanding();
+            applyLandingMode();
+        }
+
+        function applyLandingMode() {
+            if (appState.landingMode === 'parent') {
+                // 家长入口：强制家长模式，不选孩子，显示主控台
+                appState.role = 'adult';
+                appState.userRole = '家长';
+                appState.currentChild = null;
+                document.getElementById('roleSelect').value = 'adult';
+                applyRoleVisibility();
+            } else if (appState.landingMode === 'child') {
+                // 孩子入口：强制孩子模式，选第一个孩子
+                appState.role = 'child';
+                appState.userRole = '孩子';
+                document.getElementById('roleSelect').value = 'child';
+                if (appState.children && appState.children.length) {
+                    appState.currentChild = appState.children[0].id;
+                }
+                applyRoleVisibility();
+            }
+            // 显示返回按钮
+            const backBtn = document.getElementById('landingBack');
+            if (backBtn) backBtn.style.display = 'inline-block';
+        }
+
+        async function init() {
+            parseFamilyParam();
+            await doLogin();
+            await loadStatus();
+
+            // 如果 URL 带了 /parent 或 /child，直接进对应模式
+            if (window.LOCKED_MODE === 'parent') {
+                appState.landingMode = 'parent';
+                hideLanding();
+                appState.role = 'adult';
+                await initApp();
+                applyLandingMode();
+                return;
+            } else if (window.LOCKED_MODE === 'child') {
+                appState.landingMode = 'child';
+                hideLanding();
+                appState.role = 'child';
+                await initApp();
+                applyLandingMode();
+                return;
+            }
+
+            // 否则显示 landing，让用户选择入口
+            showLanding();
+            await initApp();
+        }
+
+        // 加载家庭数据
+        async function loadFamilyData() {
+            if (!appState.familyId) return;
+            try {
+                const res = await apiFetch('/api/family?family_id=' + encodeURIComponent(appState.familyId));
+                if (res && res.success && res.family) {
+                    appState.family = res.family;
+                    appState.familyId = res.family_id || appState.familyId;
+                    if (res.family.name) {
+                        document.title = res.family.name + ' · 书童';
+                        const landingTitle = document.getElementById('landingTitle');
+                        if (landingTitle) landingTitle.textContent = res.family.name + ' · 家庭端';
+                    }
+                    renderUserSelect(res.family.members || []);
+                    // 更新墨童链接，带上当前家庭ID
+                    const motongLink = document.getElementById('motongLink');
+                    if (motongLink) {
+                        motongLink.href = '/motong/' + encodeURIComponent(appState.familyId);
+                    }
+                }
+            } catch (e) {
+                console.log('家庭数据加载失败:', e);
+            }
+        }
+
+        // 加载家庭列表
+        async function loadFamilies() {
+            try {
+                const res = await apiFetch('/api/families');
+                if (res && res.success) {
+                    appState.families = res.families || [];
+                    renderFamilySelect();
+                }
+            } catch (e) {
+                console.log('加载家庭列表失败:', e);
+            }
+        }
+
+        function renderFamilySelect() {
+            const sel = document.getElementById('familySelect');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">选择家庭</option>' +
+                appState.families.map(f => `<option value="${escapeHtml(f.family_id || '')}">${escapeHtml(f.name || '未命名家庭')}</option>`).join('');
+            sel.value = appState.familyId;
+        }
+
+        async function switchFamily(familyId) {
+            if (!familyId) return;
+            appState.familyId = familyId;
+            localStorage.setItem('bookboy_family_id', familyId);
+            // 清空当前用户选择
+            appState.userId = null;
+            appState.userName = null;
+            appState.userRole = null;
+            localStorage.removeItem('bookboy_family_user_id');
+            localStorage.removeItem('bookboy_family_user_name');
+            localStorage.removeItem('bookboy_family_user_role');
+            document.getElementById('userSelect').value = '';
+            await loadFamilyData();
+            renderChildren();
+            updateHeader();
+        }
+
+        function renderUserSelect(members) {
+            const select = document.getElementById('userSelect');
+            if (!select) return;
+            select.innerHTML = '<option value="">选择身份</option>' +
+                members.map(m => `<option value="${escapeHtml(m.user_id || '')}" data-role="${escapeHtml(m.role || '')}" data-name="${escapeHtml(m.name || '')}">${escapeHtml(m.name || '')} · ${escapeHtml(m.role || '')}</option>`).join('');
+            if (appState.userId) {
+                select.value = appState.userId;
+            }
+        }
+
+        function switchUser(userId) {
+            if (!userId) return;
+            let opt = null;
+            document.querySelectorAll('#userSelect option').forEach(o => {
+                if (o.value === userId) opt = o;
+            });
+            if (!opt) return;
+            appState.userId = userId;
+            appState.userName = opt.dataset.name || '';
+            appState.userRole = opt.dataset.role || '';
+            localStorage.setItem('bookboy_family_user_id', userId);
+            localStorage.setItem('bookboy_family_user_name', appState.userName);
+            localStorage.setItem('bookboy_family_user_role', appState.userRole);
+            // 孩子自动切换为孩子模式，家长/师父为家长模式
+            if (appState.userRole === '孩子') {
+                appState.role = 'child';
+                appState.mode = 'child';
+                document.getElementById('roleSelect').value = 'child';
+                // 当前孩子切换为选中的孩子
+                appState.currentChild = appState.userName;
+            } else {
+                appState.role = 'adult';
+                appState.mode = 'child'; // 家庭端默认还是陪孩子
+                document.getElementById('roleSelect').value = 'adult';
+            }
+            localStorage.setItem('bookboy_family_role', appState.role);
+            updateHeader();
+            applyRoleVisibility();
+        }
+
+        // 打开家庭设置
+        function openFamilySettings() {
+            if (appState.role === 'child') {
+                alert(bookboyI18n.getText('childModeCantModify'));
+                return;
+            }
+            const family = appState.family || { name: '', description: '', members: [] };
+            document.getElementById('familyName').value = family.name || '';
+            document.getElementById('familyDesc').value = family.description || '';
+            renderFamilyMembers(family.members || []);
+            document.getElementById('familyModal').classList.add('active');
+        }
+
+        function closeFamilySettings() {
+            document.getElementById('familyModal').classList.remove('active');
+        }
+
+        function renderFamilyMembers(members) {
+            const container = document.getElementById('familyMembers');
+            container.innerHTML = '';
+            members.forEach((m, idx) => {
+                const card = document.createElement('div');
+                card.className = 'member-card';
+                card.innerHTML = `
+                    <div class="member-card-title">
+                        <span>${bookboyI18n.getText('member')} #${idx + 1}</span>
+                        <button class="btn-remove" onclick="removeFamilyMember(${idx})">${bookboyI18n.getText('delete')}</button>
+                    </div>
+                    <div class="member-grid">
+                        <div class="form-group">
+                            <label data-i18n="nameLabel">姓名</label>
+                            <input type="text" class="m-name" value="${escapeHtml(m.name || '')}" placeholder="${bookboyI18n.getText('nameLabel')}">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="roleLabel">角色</label>
+                            <select class="m-role">
+                                <option value="家长" ${m.role === '家长' ? 'selected' : ''}>${bookboyI18n.getText('parent') || '家长'}</option>
+                                <option value="孩子" ${m.role === '孩子' ? 'selected' : ''}>${bookboyI18n.getText('child') || '孩子'}</option>
+                                <option value="师父" ${m.role === '师父' ? 'selected' : ''}>${bookboyI18n.getText('master') || '师父'}</option>
+                                <option value="其他" ${m.role === '其他' ? 'selected' : ''}>${bookboyI18n.getText('other') || '其他'}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="relationLabel">关系</label>
+                            <input type="text" class="m-relation" value="${escapeHtml(m.relation || '')}" placeholder="${bookboyI18n.getText('relationPlaceholder') || '如：父亲、母亲、长子'}">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="ageRequired">年龄（孩子必填）</label>
+                            <input type="number" class="m-age" value="${m.age || ''}" placeholder="${bookboyI18n.getText('agePlaceholder')}">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="genderLabel">性别</label>
+                            <select class="m-gender">
+                                <option value="" ${!m.gender ? 'selected' : ''}>${bookboyI18n.getText('unknown')}</option>
+                                <option value="男" ${m.gender === '男' ? 'selected' : ''}>${bookboyI18n.getText('male')}</option>
+                                <option value="女" ${m.gender === '女' ? 'selected' : ''}>${bookboyI18n.getText('female')}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="gradeLabel">年级</label>
+                            <input type="text" class="m-grade" value="${escapeHtml(m.grade || '')}" placeholder="${bookboyI18n.getText('gradePlaceholder')}">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            bookboyI18n.applyLanguage(window.__bookboyLang || bookboyI18n.getStoredLanguage());
+        }
+
+        function addFamilyMember() {
+            const members = collectFamilyMembers();
+            members.push({ role: '家长', name: '', relation: '', age: '', gender: '', grade: '' });
+            renderFamilyMembers(members);
+        }
+
+        function removeFamilyMember(idx) {
+            const members = collectFamilyMembers();
+            members.splice(idx, 1);
+            renderFamilyMembers(members);
+        }
+
+        function collectFamilyMembers() {
+            const cards = document.querySelectorAll('#familyMembers .member-card');
+            const members = [];
+            cards.forEach(card => {
+                members.push({
+                    name: card.querySelector('.m-name').value.trim(),
+                    role: card.querySelector('.m-role').value,
+                    relation: card.querySelector('.m-relation').value.trim(),
+                    age: card.querySelector('.m-age').value ? parseInt(card.querySelector('.m-age').value) : null,
+                    gender: card.querySelector('.m-gender').value,
+                    grade: card.querySelector('.m-grade').value.trim()
+                });
+            });
+            return members;
+        }
+
+        async function saveFamilySettings() {
+            const name = document.getElementById('familyName').value.trim();
+            if (!name) {
+                alert(bookboyI18n.getText('pleaseEnterFamilyName'));
+                return;
+            }
+            const members = collectFamilyMembers().filter(m => m.name);
+            const payload = {
+                family_id: appState.familyId || 'default_family',
+                name: name,
+                description: document.getElementById('familyDesc').value.trim(),
+                members: members
+            };
+            try {
+                const res = await apiFetch('/api/family', {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                if (res && res.success) {
+                    appState.family = res.family;
+                    document.title = res.family.name + ' · 书童';
+                    closeFamilySettings();
+                    await loadStatus();
+                    renderChildren();
+                    updateHeader();
+                    const childCount = members.filter(m => m.role === '孩子').length;
+                    addMessage('bookboy', bookboyI18n.getText('familySavedPrefix') + childCount + bookboyI18n.getText('familySavedSuffix'), false);
+                } else {
+                    alert(bookboyI18n.getText('saveFailed') + ': ' + (res.error || 'unknown'));
+                }
+            } catch (e) {
+                alert(bookboyI18n.getText('saveFailed') + ': ' + e.message);
+            }
+        }
+
+        async function initApp() {
+            await loadAvatar();
+            await loadFamilies();
+            if (appState.familyId) {
+                await loadFamilyData();
+                renderChildren();
+                renderProfile();
+                updateHeader();
+                document.getElementById('voiceToggle').checked = appState.voice;
+                // setupAvatarUpload(); // 已移除
+                loadBrowserVoices();
+                await refreshMicDevices();
+                applyRoleVisibility();
+                updateMicStatus();
+                loadPlans();
+                loadGuidelines();
+                loadActivities();
+                if (appState.role !== 'child') {
+                    loadAlerts();
+                }
+            } else {
+                // 没有指定家庭，等待用户从顶部下拉框选择
+                updateStatus(bookboyI18n.getText('pleaseSelectFamily'));
+            }
+        }
+
+        // 加载头像
+        async function loadAvatar() {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    // 加时间戳避免缓存，用英文路径避免中文编码问题
+                    appState.avatarUrl = `/avatar.jpg?t=${Date.now()}`;
+                    updateAvatarDisplay();
+                    resolve(true);
+                };
+                img.onerror = function() {
+                    console.log('头像不存在，使用默认');
+                    resolve(false);
+                };
+                img.src = `/avatar.jpg?t=${Date.now()}`;
+            });
+        }
+
+        // 更新所有头像显示
+        function updateAvatarDisplay() {
+            const brandAvatarWrapper = document.getElementById('brandAvatarWrapper');
+            const typingAvatar = document.getElementById('typingAvatar');
+            const avatarUrl = appState.avatarUrl || window.BOOKBOY_AVATAR;
+            if (avatarUrl) {
+                brandAvatarWrapper.innerHTML = `<img src="${avatarUrl}" alt="书童头像">`;
+                typingAvatar.innerHTML = `<img src="${avatarUrl}" alt="书童">`;
+            }
+        }
+
+        // 获取头像 HTML
+        function getAvatarHtml(role) {
+            if (role === 'user') {
+                return '👤';
+            }
+            const avatarUrl = appState.avatarUrl || window.BOOKBOY_AVATAR || `/avatar.jpg?t=${Date.now()}`;
+            if (avatarUrl) {
+                return `<img src="${avatarUrl}" alt="书童">`;
+            }
+            return '📜';
+        }
+
+        // 加载状态
+        async function loadStatus() {
+            try {
+                const res = await apiFetch('/api/status?family_id=' + encodeURIComponent(appState.familyId || 'default_family'));
+                const data = res;
+                appState.children = data.children || [];
+                // 孩子角色使用会话绑定的孩子，大人/师父使用全局当前孩子
+                appState.currentChild = data.session_child || data.current_child;
+                appState.backend = data.backend;
+                appState.model = data.model;
+                appState.voice = true;
+                if (data.role) {
+                    appState.role = data.role;
+                }
+            } catch (e) {
+                console.error('加载状态失败', e);
+                showError(bookboyI18n.getText('serverDisconnected'));
+            }
+        }
+
+        // 渲染孩子列表
+        function renderChildren() {
+            const list = document.getElementById('childList');
+            if (!appState.children.length) {
+                list.innerHTML = '<div class="child-card"><div class="child-name" data-i18n="noChildProfile">' + bookboyI18n.getText('noChildProfile') + '</div></div>';
+                return;
+            }
+            // 所有身份都能看到全部孩子，方便切换
+            list.innerHTML = appState.children.map(child => `
+                <div class="child-card ${child.id === appState.currentChild ? 'active' : ''}" onclick="switchChild('${child.id}')">
+                    <div class="child-name">
+                        <span class="status-dot status-${child.status.toLowerCase() || 'green'}"></span>
+                        ${child.name}
+                    </div>
+                    <div class="child-meta">${child.age}岁 · ${child.stage}</div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染档案摘要
+        function renderProfile() {
+            const container = document.getElementById('profileSummary');
+            const child = appState.children.find(c => c.id === appState.currentChild);
+            if (!child) {
+                container.innerHTML = '<div class="profile-item"><span class="profile-label" data-i18n="statusLabel">状态</span><span class="profile-value" data-i18n="notSelected">未选择</span></div>';
+                return;
+            }
+            const data = child.data || {};
+            const info = data['档案信息'] || {};
+            const observation = data['观察记录'] || {};
+            const interests = observation['兴趣方向'] || [];
+            
+            let tagsHtml = interests.slice(0, 4).map(i => `<span class="tag">${i}</span>`).join('');
+            
+            container.innerHTML = `
+                <div class="profile-item">
+                    <span class="profile-label" data-i18n="nameLabel">姓名</span>
+                    <span class="profile-value">${info['姓名'] || child.name}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label" data-i18n="ageLabel">年龄</span>
+                    <span class="profile-value">${info['年龄'] || child.age}${bookboyI18n.getText('yearsOld')}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label" data-i18n="stageLabel">阶段</span>
+                    <span class="profile-value">${info['发育阶段'] || child.stage}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label" data-i18n="gradeLabel">年级</span>
+                    <span class="profile-value">${info['年级'] || child.grade}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label" data-i18n="alertLabel2">预警</span>
+                    <span class="profile-value">
+                        <span class="status-dot status-${(child.status || 'green').toLowerCase()}"></span>
+                        ${child.status || bookboyI18n.getText('greenStatus')}
+                    </span>
+                </div>
+                ${tagsHtml ? `<div class="profile-tags">${tagsHtml}</div>` : ''}
+            `;
+            bookboyI18n.applyLanguage(window.__bookboyLang || bookboyI18n.getStoredLanguage());
+        }
+
+
+        // 更新顶部信息
+        function updateHeader() {
+            const chatTitle = document.getElementById('chatTitle');
+            if (appState.landingMode === 'parent') {
+                chatTitle.textContent = bookboyI18n.getText('parentConsultation');
+            } else if (appState.role === 'adult') {
+                chatTitle.textContent = bookboyI18n.getText('parentConsultation');
+            } else {
+                const child = appState.children.find(c => c.id === appState.currentChild);
+                chatTitle.textContent = child
+                    ? bookboyI18n.getText('accompanyChild', { name: child.name })
+                    : bookboyI18n.getText('chatWithBookboy');
+            }
+            document.getElementById('backendBadge').textContent = appState.backend.toUpperCase();
+            document.getElementById('modelInfo').textContent = appState.model || '';
+        }
+
+        // 切换孩子
+        async function switchChild(childId) {
+            try {
+                const res = await apiFetch('/api/switch_child', {
+                    method: 'POST',
+                    body: JSON.stringify({child_id: childId})
+                });
+                const data = res;
+                appState.currentChild = data.current_child;
+                // 家庭端固定孩子模式
+                switchMode('child');
+                renderChildren();
+                renderProfile();
+                updateHeader();
+                clearChatUI();
+                addMessage('bookboy', bookboyI18n.getText('switchedToChild', { name: data.child.name }), false);
+                loadPlans();
+                loadGuidelines();
+                loadActivities();
+            } catch (e) {
+                showError('切换孩子失败');
+            }
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const btn = document.getElementById('sendBtn');
+            if (!input || !btn) return;
+            const message = input.value.trim();
+            const imageData = appState.pendingImage;
+            if (!message && !imageData) return;
+
+            // 先清空输入、禁用按钮、显示用户消息，再去做异步的事
+            input.value = '';
+            input.style.height = 'auto';
+            btn.disabled = true;
+            try {
+                addMessage('user', message || '（图片）', imageData);
+            } catch (e) {
+                console.error('addMessage user error', e);
+                updateStatus(bookboyI18n.getText('messageDisplayFailed') + ': ' + (e.message || 'unknown'));
+                btn.disabled = false;
+                return;
+            }
+            showTyping(true);
+            updateStatus(bookboyI18n.getText('thinking'));
+
+            appState.voice = document.getElementById('voiceToggle') ? document.getElementById('voiceToggle').checked : false;
+
+            // 如果要播语音，先在手势上下文里解锁浏览器自动播放限制（不阻塞发送流程）
+            if (appState.voice) {
+                unlockAudio().catch(() => {});
+            }
+
+            try {
+                const chatMode = appState.userRole === '孩子' ? 'child' : (appState.role === 'adult' ? 'parent' : 'child');
+                const childId = appState.userRole === '孩子' ? appState.userName : appState.currentChild;
+                const data = await apiFetch('/api/chat', {
+                    method: 'POST',
+                    timeout: 25000,
+                    body: JSON.stringify({
+                        message: message,
+                        child_id: childId,
+                        mode: chatMode,
+                        user_id: appState.userId,
+                        family_id: appState.familyId,
+                        image: imageData,
+                        voice: appState.voice
+                    })
+                });
+                showTyping(false);
+
+                if (data.error) {
+                    addMessage('bookboy', bookboyI18n.getText('bookboyStuck'), false);
+                } else {
+                    let voiceLabel = '';
+                    if (data.voice === 'multi') {
+                        voiceLabel = bookboyI18n.getText('multiDialogue');
+                    } else if (data.voice === 'zh-CN-XiaoyiNeural') {
+                        voiceLabel = bookboyI18n.getText('xiaoyi');
+                    } else if (data.voice === 'zh-CN-liaoning-XiaobeiNeural') {
+                        voiceLabel = bookboyI18n.getText('northeastBookboy');
+                    } else if (data.voice === 'zh-TW-HsiaoChenNeural') {
+                        voiceLabel = bookboyI18n.getText('taiwanBookboy');
+                    } else if (data.voice === 'zh-CN-YunxiNeural') {
+                        voiceLabel = bookboyI18n.getText('yunxi');
+                    } else if (data.voice === 'zh-CN-XiaoxiaoNeural') {
+                        voiceLabel = bookboyI18n.getText('xiaoxiao');
+                    }
+                    appState.lastReply = data.reply;
+                    let finalAudioUrl = data.audio_url || null;
+                    // 如果需要语音且后端没给音频，先合成再显示消息，确保气泡里有播放按钮
+                    if (!finalAudioUrl && appState.voice) {
+                        updateStatus(bookboyI18n.getText('synthesizingVoice'));
+                        finalAudioUrl = await synthesizeToUrl(data.reply);
+                    }
+                    addMessage('bookboy', data.reply, null, finalAudioUrl, voiceLabel);
+                    if (finalAudioUrl) {
+                        appState.lastAudioUrl = finalAudioUrl;
+                        appState.lastVoiceLabel = voiceLabel;
+                        playChatAudio(finalAudioUrl, voiceLabel);
+                    }
+                    if (data.alerts && data.alerts.length > 0 && appState.role !== 'child') {
+                        loadAlerts();
+                    }
+                    loadActivities();
+                }
+            } catch (e) {
+                showTyping(false);
+                console.error('发送消息失败', e);
+                const errMsg = e.name === 'AbortError' ? bookboyI18n.getText('requestTimeout') : (e.message || bookboyI18n.getText('networkError'));
+                addMessage('bookboy', bookboyI18n.getText('bookboyDidntHear') + errMsg, false);
+            } finally {
+                btn.disabled = false;
+                removeImage();
+                updateStatus(bookboyI18n.getText('ready'));
+                input.focus();
+            }
+        }
+
+        // 获取当前孩子的消息列表（家庭端固定孩子模式）
+        function getCurrentMessages() {
+            const cid = appState.currentChild || 'default';
+            if (!appState.childMessages[cid]) {
+                appState.childMessages[cid] = [];
+            }
+            return appState.childMessages[cid];
+        }
+
+        // 生成分享图片（书童回复生成卡片）
+        function generateShareImage(btn) {
+            const bubble = btn.closest('.bubble');
+            if (!bubble) return;
+            const text = bubble.childNodes[0] ? bubble.childNodes[0].textContent : '';
+            if (!text.trim()) return;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const width = 800;
+            const padding = 40;
+            const lineHeight = 32;
+            ctx.font = '20px "Microsoft YaHei", "PingFang SC", sans-serif';
+            const maxTextWidth = width - padding * 2;
+            const words = text.split('');
+            const lines = [];
+            let currentLine = '';
+            for (let i = 0; i < words.length; i++) {
+                const testLine = currentLine + words[i];
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxTextWidth && currentLine) {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            lines.push(currentLine);
+
+            const contentHeight = lines.length * lineHeight + 80;
+            canvas.width = width;
+            canvas.height = contentHeight + padding * 2;
+
+            // 背景
+            const gradient = ctx.createLinearGradient(0, 0, width, canvas.height);
+            gradient.addColorStop(0, '#f7f3e9');
+            gradient.addColorStop(1, '#efe6d5');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 边框
+            ctx.strokeStyle = '#d4c4a8';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(10, 10, width - 20, canvas.height - 20);
+
+            // 标题
+            ctx.fillStyle = '#5d4e37';
+            ctx.font = 'bold 24px "Microsoft YaHei", "PingFang SC", sans-serif';
+            ctx.fillText('伴读书童 · 家庭智慧', padding, padding + 10);
+
+            // 分隔线
+            ctx.beginPath();
+            ctx.moveTo(padding, padding + 30);
+            ctx.lineTo(width - padding, padding + 30);
+            ctx.strokeStyle = '#d4c4a8';
+            ctx.stroke();
+
+            // 正文
+            ctx.fillStyle = '#3d3226';
+            ctx.font = '20px "Microsoft YaHei", "PingFang SC", sans-serif';
+            let y = padding + 70;
+            for (const line of lines) {
+                ctx.fillText(line, padding, y);
+                y += lineHeight;
+            }
+
+            // 底部
+            ctx.fillStyle = '#8c7b63';
+            ctx.font = '14px "Microsoft YaHei", "PingFang SC", sans-serif';
+            ctx.fillText('伴读书童AI · 守护0-18岁', padding, canvas.height - 20);
+
+            // 下载
+            const link = document.createElement('a');
+            link.download = '书童智慧-' + new Date().toLocaleDateString('zh-CN') + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // 添加消息到界面
+        function addMessage(role, text, imageData = null, audioUrl = null, voiceLabel = null) {
+            console.log('[addMessage] role=', role, 'text=', text ? text.slice(0,30) : '', 'container=', !!document.getElementById('chatContainer'));
+            const container = document.getElementById('chatContainer');
+            if (!container) { console.error('[addMessage] chatContainer missing'); return; }
+            // 移除 welcome
+            const welcome = container.querySelector('.welcome');
+            if (welcome) welcome.remove();
+
+            const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
+            const safeEscape = (typeof escapeHtml === 'function') ? escapeHtml : (t) => String(t).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+            const avatarHtml = getAvatarHtml(role);
+            let imageHtml = '';
+            if (imageData && role === 'user') {
+                imageHtml = `<br><img src="${imageData}" class="message-image" onclick="window.open(this.src)">`;
+            }
+            // 如果书童消息带音频，加一个播放按钮（自动播放被浏览器阻止时可手动点）
+            let audioBtnHtml = '';
+            if (role === 'bookboy' && audioUrl) {
+                const safeUrl = safeEscape(audioUrl);
+                const safeLabel = voiceLabel ? safeEscape(voiceLabel) : '';
+                audioBtnHtml = `<button class="msg-audio-btn" onclick="playChatAudio('${safeUrl}', '${safeLabel}')" title="点击播放语音">🔊 播放</button>`;
+            }
+            // 书童消息加生成图片分享按钮
+            let shareBtnHtml = '';
+            if (role === 'bookboy' && text) {
+                shareBtnHtml = `<button class="msg-share-btn" onclick="generateShareImage(this)" title="生成图片分享">🖼️</button>`;
+            }
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+            msgDiv.innerHTML = `
+                <div class="avatar">${avatarHtml}</div>
+                <div class="bubble">${text ? safeEscape(text) : ''}${imageHtml}${audioBtnHtml}${shareBtnHtml}</div>
+                <div class="message-time">${time}</div>
+            `;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // 保存到当前模式的历史
+            const historyItem = { role, text, time, image: imageData, audioUrl, voiceLabel };
+            const msgList = getCurrentMessages();
+            msgList.push(historyItem);
+        }
+
+        // 显示/隐藏打字指示器
+        function showTyping(show) {
+            const container = document.getElementById('chatContainer');
+            if (show) {
+                typingIndicator.style.display = 'flex';
+                container.appendChild(typingIndicator);
+            } else {
+                typingIndicator.style.display = 'none';
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 浏览器语音合成相关
+        let browserVoices = [];
+        function loadBrowserVoices() {
+            if (!window.speechSynthesis) return;
+            browserVoices = window.speechSynthesis.getVoices();
+            if (browserVoices.length === 0) {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    browserVoices = window.speechSynthesis.getVoices();
+                };
+            }
+        }
+
+        // 用浏览器自带语音合成（Web Speech API）朗读文字
+        function speakTextWithBrowser(text) {
+            if (!window.speechSynthesis) {
+                updateStatus('浏览器不支持语音合成');
+                return;
+            }
+            // 停止当前播放
+            window.speechSynthesis.cancel();
+
+            // 清理文字中的角色前缀和特殊标记
+            let cleanText = text
+                .replace(/^[\s\n]*([东北台湾小艺云希晓晓]书童|[小艺云希晓晓])[：:]\s*/gm, '')
+                .replace(/【.*?】/g, '')
+                .replace(/[\*#]/g, '')
+                .trim();
+            if (!cleanText) return;
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+
+            // 尝试选一个不刺耳的中文女声
+            const voices = browserVoices.length ? browserVoices : window.speechSynthesis.getVoices();
+            const preferred = voices.find(v => v.lang.includes('zh') && /Meijia|Tingting|Xiaoxiao|Yaoyao|Hiujin|Sin-ji|Li-mu|Ya-qin/i.test(v.name))
+                || voices.find(v => v.lang.includes('zh') && v.gender === 'female')
+                || voices.find(v => v.lang.includes('zh'))
+                || voices.find(v => v.lang.includes('zh-TW'));
+            if (preferred) utterance.voice = preferred;
+
+            utterance.onstart = () => updateStatus('正在朗读...');
+            utterance.onend = () => updateStatus('准备就绪');
+            utterance.onerror = (e) => {
+                console.error('语音合成失败', e);
+                updateStatus('朗读失败');
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // 重播最后一条
+        function speakLast() {
+            if (appState.lastAudioUrl) {
+                playChatAudio(appState.lastAudioUrl, appState.lastVoiceLabel || '');
+            } else if (appState.lastReply) {
+                updateStatus('本条回复没有语音，请打开语音开关后重新发送');
+            }
+        }
+
+        // 清空对话
+        async function clearChat() {
+            try {
+                await apiFetch('/api/clear', {
+                    method: 'POST',
+                    body: JSON.stringify({child_id: appState.currentChild, mode: 'child'})
+                });
+                clearChatUI();
+                addMessage('bookboy', bookboyI18n.getText('chatCleared'), false);
+            } catch (e) {
+                showError(bookboyI18n.getText('clearFailed'));
+            }
+        }
+
+        function clearChatUI() {
+            const container = document.getElementById('chatContainer');
+            container.innerHTML = '';
+            appState.lastReply = '';
+            const cid = appState.currentChild || 'default';
+            appState.childMessages[cid] = [];
+        }
+
+        // 切换模式（家庭端只支持孩子模式）
+        function switchMode(mode) {
+            appState.mode = 'child'; // 强制孩子模式
+            updateHeader();
+            renderMessages();
+            document.getElementById('messageInput').focus();
+        }
+
+        function toggleMode() {
+            // 家庭端禁用模式切换
+            return;
+        }
+
+        function updateModeToggleButton() {
+            // 家庭端无模式切换按钮
+            return;
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('chatContainer');
+            container.innerHTML = '';
+            const messages = getCurrentMessages();
+            if (messages.length === 0) {
+                const family = appState.family || {};
+                let welcomeTitle = '你好，书童在这里陪你';
+                let welcomeText = '这里是书童家庭端。<br>家长可以查看档案和计划，孩子可以安心聊天。<br><br>选择一个孩子，或者直接和书童说话。';
+                if (appState.landingMode === 'parent' && family.welcome_parent) {
+                    welcomeTitle = family.name || '家庭主控台';
+                    welcomeText = family.welcome_parent;
+                } else if (appState.landingMode === 'child') {
+                    const currentChildId = appState.currentChild;
+                    const member = (family.members || []).find(m => (m.user_id || '') === currentChildId);
+                    if (member && member.welcome_child) {
+                        welcomeTitle = `${member.name}，书童在这里陪你`;
+                        welcomeText = member.welcome_child;
+                    }
+                }
+                container.innerHTML = `
+                    <div class="welcome">
+                        <h2>${escapeHtml(welcomeTitle)}</h2>
+                        <p>${escapeHtml(welcomeText).replace(/\n/g, '<br>')}</p>
+                    </div>
+                `;
+                return;
+            }
+            messages.forEach(item => {
+                const avatarHtml = getAvatarHtml(item.role);
+                let imageHtml = '';
+                if (item.image && item.role === 'user') {
+                    imageHtml = `<br><img src="${item.image}" class="message-image" onclick="window.open(this.src)">`;
+                }
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${item.role}`;
+                msgDiv.innerHTML = `
+                    <div class="avatar">${avatarHtml}</div>
+                    <div class="bubble">${item.text ? escapeHtml(item.text) : ''}${imageHtml}</div>
+                    <div class="message-time">${item.time}</div>
+                `;
+                container.appendChild(msgDiv);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 键盘事件
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // 选择图片
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                showError(bookboyI18n.getText('imageTooLarge'));
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                appState.pendingImage = reader.result;
+                updateImagePreview();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 更新图片预览
+        function updateImagePreview() {
+            const preview = document.getElementById('imagePreview');
+            const btn = document.getElementById('imageBtn');
+            if (appState.pendingImage) {
+                preview.innerHTML = `
+                    <span class="image-preview">
+                        <img src="${appState.pendingImage}">
+                        <span class="remove-image" onclick="removeImage(event)">×</span>
+                    </span>
+                `;
+                btn.classList.add('has-image');
+            } else {
+                preview.innerHTML = '';
+                btn.classList.remove('has-image');
+            }
+        }
+
+        // 移除待发送图片
+        function removeImage(e) {
+            if (e) e.stopPropagation();
+            appState.pendingImage = null;
+            document.getElementById('imageInput').value = '';
+            updateImagePreview();
+        }
+
+        // 自动调整高度
+        document.getElementById('messageInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+        });
+
+        function showError(text) {
+            addMessage('bookboy', `⚠️ ${text}`);
+        }
+
+        // ═══════════════════════════════════════════
+        // 录音与语音识别
+        // ═══════════════════════════════════════════
+        let audioContext = null;
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let recordingStartTime = 0;
+
+        // 简单 WAV 编码器
+        function encodeWAV(samples, sampleRate) {
+            const buffer = new ArrayBuffer(44 + samples.length * 2);
+            const view = new DataView(buffer);
+
+            const writeString = (view, offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + samples.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, samples.length * 2, true);
+
+            for (let i = 0; i < samples.length; i++) {
+                let s = Math.max(-1, Math.min(1, samples[i]));
+                view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        let micDevices = [];
+
+        function isBuiltInMic(label) {
+            if (!label) return false;
+            const lower = label.toLowerCase();
+            const isBuiltIn = /内置|built-in|macbook|mac mini|imac|mac pro/i.test(label);
+            const isMobile = /iphone|ipad|continuity|airpods|bluetooth/i.test(lower);
+            return isBuiltIn && !isMobile;
+        }
+
+        async function refreshMicDevices() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                micDevices = devices.filter(d => d.kind === 'audioinput');
+                console.log('可用麦克风:', micDevices.map(d => d.label || '未命名设备'));
+
+                const select = document.getElementById('micSelect');
+                select.innerHTML = '';
+
+                if (micDevices.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = bookboyI18n.getText('micUnavailable');
+                    select.appendChild(opt);
+                    updateMicStatus(bookboyI18n.getText('micUnavailable'), 'error');
+                    return;
+                }
+
+                let selectedIndex = 0;
+                micDevices.forEach((device, index) => {
+                    const opt = document.createElement('option');
+                    opt.value = device.deviceId;
+                    opt.textContent = device.label || `麦克风 ${index + 1}`;
+                    select.appendChild(opt);
+                    if (isBuiltInMic(device.label)) {
+                        selectedIndex = index;
+                    }
+                });
+
+                select.selectedIndex = selectedIndex;
+                updateStatus(`${bookboyI18n.getText('selected') || '已选择'}: ${select.options[selectedIndex].textContent}`);
+                updateMicStatus(`${bookboyI18n.getText('micReady')}: ${select.options[selectedIndex].textContent}`, 'ok');
+            } catch (e) {
+                console.error('枚举麦克风失败', e);
+                updateMicStatus(bookboyI18n.getText('micPermissionHint') || '麦克风权限未授权，请点击「测试麦克风」', 'error');
+            }
+        }
+
+        function updateMicStatus(text, type) {
+            const bar = document.getElementById('micStatusBar');
+            const span = document.getElementById('micStatusText');
+            if (text) span.textContent = text;
+            bar.classList.remove('ok', 'error');
+            if (type) bar.classList.add(type);
+        }
+
+        async function testMicrophone() {
+            updateMicStatus(bookboyI18n.getText('requestingMicPermission') || '正在请求麦克风权限...', '');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                updateMicStatus(bookboyI18n.getText('micPermissionGranted') || '麦克风权限已获取，可以录音', 'ok');
+                stream.getTracks().forEach(t => t.stop());
+                await refreshMicDevices();
+            } catch (err) {
+                console.error('测试麦克风失败', err);
+                let msg = bookboyI18n.getText('micUnavailable');
+                if (err.name === 'NotAllowedError') msg = '权限被拒绝：请在浏览器地址栏点击🔒，允许麦克风';
+                else if (err.name === 'NotFoundError') msg = '找不到麦克风，请检查设备连接';
+                else if (err.name === 'NotReadableError') msg = '麦克风被占用，请关闭其他录音应用';
+                else if (err.message) msg = err.message;
+                updateMicStatus(msg, 'error');
+            }
+        }
+
+        function getSelectedMicId() {
+            const select = document.getElementById('micSelect');
+            return select ? select.value : undefined;
+        }
+
+        async function startRecording() {
+            if (isRecording) return;
+            console.log('开始录音...');
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error(bookboyI18n.getText('micNotSupported', { host: location.hostname }));
+                }
+                audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+                let micId = getSelectedMicId();
+                let constraints = micId ? { audio: { deviceId: { exact: micId } } } : { audio: true };
+                console.log('尝试使用麦克风 deviceId:', micId || '默认');
+                try {
+                    mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (err) {
+                    console.warn('指定麦克风失败，尝试默认麦克风:', err);
+                    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                }
+                const source = audioContext.createMediaStreamSource(mediaStream);
+                const processor = audioContext.createScriptProcessor(4096, 1, 1);
+                const chunks = [];
+
+                processor.onaudioprocess = (e) => {
+                    const inputData = e.inputBuffer.getChannelData(0);
+                    chunks.push(new Float32Array(inputData));
+                };
+
+                source.connect(processor);
+                // 连接到零增益节点，保持音频图活跃但不出声
+                const zeroGain = audioContext.createGain();
+                zeroGain.gain.value = 0;
+                processor.connect(zeroGain);
+                zeroGain.connect(audioContext.destination);
+
+                mediaRecorder = { processor, source, zeroGain, chunks, context: audioContext };
+                isRecording = true;
+                recordingStartTime = Date.now();
+
+                const micBtn = document.getElementById('micBtn');
+                micBtn.classList.add('recording');
+                micBtn.textContent = '⏹️';
+                updateStatus(bookboyI18n.getText('listening'));
+                updateMicStatus(bookboyI18n.getText('recordingSpeak'), 'ok');
+                document.getElementById('inputHint').textContent = bookboyI18n.getText('pressAgainToStop');
+            } catch (err) {
+                console.error('录音失败', err);
+                if (window.recordingTimer) {
+                    clearInterval(window.recordingTimer);
+                    window.recordingTimer = null;
+                }
+                let msg = bookboyI18n.getText('micUnavailable');
+                if (err.name === 'NotAllowedError') msg = bookboyI18n.getText('micAccessDenied');
+                else if (err.name === 'NotFoundError') msg = bookboyI18n.getText('micNotFound');
+                else if (err.name === 'NotReadableError') msg = bookboyI18n.getText('micInUse');
+                else if (err.message) msg = bookboyI18n.getText('recordingFailed') + ': ' + err.message;
+                showError(msg);
+                updateStatus(bookboyI18n.getText('ready'));
+            }
+        }
+
+        async function stopRecording() {
+            if (!isRecording || !mediaRecorder) return;
+
+            if (window.recordingTimer) {
+                clearInterval(window.recordingTimer);
+                window.recordingTimer = null;
+            }
+
+            const duration = (Date.now() - recordingStartTime) / 1000;
+            isRecording = false;
+            recordingStartTime = 0;
+            const micBtn = document.getElementById('micBtn');
+            micBtn.classList.remove('recording');
+            micBtn.textContent = '🎙️';
+
+            if (duration < 0.3) {
+                try {
+                    mediaRecorder.processor.disconnect();
+                    mediaRecorder.source.disconnect();
+                    if (mediaRecorder.zeroGain) mediaRecorder.zeroGain.disconnect();
+                    mediaRecorder.context.close();
+                    mediaStream.getTracks().forEach(track => track.stop());
+                } catch (e) {}
+                mediaRecorder = null;
+                mediaStream = null;
+                audioContext = null;
+                updateStatus(bookboyI18n.getText('ready'));
+                updateMicStatus(bookboyI18n.getText('recordingTooShort', { duration: duration.toFixed(1) }), 'error');
+                document.getElementById('inputHint').textContent = bookboyI18n.getText('typeOrHoldMic');
+                return;
+            }
+
+            updateStatus(bookboyI18n.getText('recognizing'));
+            updateMicStatus(bookboyI18n.getText('recognizing'), 'ok');
+
+            try {
+                mediaRecorder.processor.disconnect();
+                mediaRecorder.source.disconnect();
+                if (mediaRecorder.zeroGain) mediaRecorder.zeroGain.disconnect();
+                mediaRecorder.context.close();
+                mediaStream.getTracks().forEach(track => track.stop());
+
+                const totalLength = mediaRecorder.chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+                console.log('录音数据点数:', totalLength);
+                if (totalLength === 0) {
+                    updateMicStatus(bookboyI18n.getText('noAudioRecorded'), 'error');
+                    updateStatus(bookboyI18n.getText('ready'));
+                    return;
+                }
+
+                const samples = new Float32Array(totalLength);
+                let offset = 0;
+                for (const chunk of mediaRecorder.chunks) {
+                    samples.set(chunk, offset);
+                    offset += chunk.length;
+                }
+
+                const wavBlob = encodeWAV(samples, 16000);
+                console.log('WAV 大小:', wavBlob.size);
+                updateMicStatus(bookboyI18n.getText('audioCollected', { size: wavBlob.size }), 'ok');
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64 = reader.result;
+                    console.log('Base64 长度:', base64.length);
+                    await submitAudio(base64);
+                };
+                reader.onerror = (e) => {
+                    console.error('FileReader 失败', e);
+                    updateMicStatus(bookboyI18n.getText('audioReadFailed'), 'error');
+                    updateStatus(bookboyI18n.getText('ready'));
+                };
+                reader.readAsDataURL(wavBlob);
+            } catch (err) {
+                console.error('停止录音失败', err);
+                updateMicStatus(bookboyI18n.getText('stopRecordingError') + ': ' + err.message, 'error');
+                updateStatus(bookboyI18n.getText('ready'));
+            }
+
+            mediaRecorder = null;
+            mediaStream = null;
+            audioContext = null;
+        }
+
+        async function toggleRecording() {
+            console.log('toggleRecording, isRecording=', isRecording);
+            try {
+                if (isRecording) {
+                    if (window.recordingTimer) {
+                        clearInterval(window.recordingTimer);
+                        window.recordingTimer = null;
+                    }
+                    await stopRecording();
+                } else {
+                    await startRecording();
+                    if (isRecording) {
+                        window.recordingTimer = setInterval(() => {
+                            if (isRecording && recordingStartTime) {
+                                const sec = ((Date.now() - recordingStartTime) / 1000).toFixed(1);
+                                updateMicStatus(bookboyI18n.getText('recordingTimer', { sec: sec }) || `正在录音 ${sec} 秒，说完了再点一次`, 'ok');
+                            }
+                        }, 200);
+                    }
+                }
+            } catch (err) {
+                console.error('录音切换失败', err);
+                if (window.recordingTimer) {
+                    clearInterval(window.recordingTimer);
+                    window.recordingTimer = null;
+                }
+                showError('录音出错: ' + (err.message || err));
+                updateStatus('准备就绪');
+            }
+        }
+
+        // 今日计划
+        async function loadPlans() {
+            const container = document.getElementById('plansList');
+            try {
+                const childId = appState.currentChild || '';
+                const res = await apiFetch('/api/plans', {
+                    method: 'POST',
+                    body: JSON.stringify({ child_id: childId })
+                });
+                const data = res;
+                if (!data.success) {
+                    container.innerHTML = '<div class="section-empty" data-i18n="loadFailed">' + bookboyI18n.getText('loadFailed') + '</div>';
+                    return;
+                }
+                const plans = data.plans || [];
+                if (plans.length === 0) {
+                    container.innerHTML = '<div class="section-empty" data-i18n="noPlans">' + bookboyI18n.getText('noPlans') + '</div>';
+                    return;
+                }
+                container.innerHTML = plans.map(p => `
+                    <div class="plan-card" onclick="openPlanModal('${p.name}', '${p.title.replace(/'/g, "\\'")}')">
+                        <div class="plan-card-title">${p.title}</div>
+                        <div class="plan-card-date">${new Date(p.date * 1000).toLocaleDateString('zh-CN')}</div>
+                        <div class="plan-card-preview">${p.preview}</div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<div class="section-empty" data-i18n="loadFailed">' + bookboyI18n.getText('loadFailed') + '</div>';
+            }
+        }
+
+        function renderMarkdown(md) {
+            // 先处理内联样式
+            let html = escapeHtml(md)
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            const lines = html.split('\n');
+            const out = [];
+            let inList = false;
+
+            for (let line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed) {
+                    if (inList) {
+                        out.push('</ul>');
+                        inList = false;
+                    }
+                    continue;
+                }
+
+                // 水平分隔线
+                if (/^---+\s*$/.test(trimmed) || /^\*\*\*+\s*$/.test(trimmed)) {
+                    if (inList) {
+                        out.push('</ul>');
+                        inList = false;
+                    }
+                    out.push('<hr>');
+                    continue;
+                }
+
+                // 标题
+                let m;
+                if ((m = trimmed.match(/^#{1,6}\s+(.*)$/))) {
+                    if (inList) {
+                        out.push('</ul>');
+                        inList = false;
+                    }
+                    const level = m[0].match(/^#+/)[0].length;
+                    out.push(`<h${level}>${m[1].trim()}</h${level}>`);
+                    continue;
+                }
+
+                // 列表项
+                if ((m = trimmed.match(/^[-*]\s+(.*)$/))) {
+                    if (!inList) {
+                        out.push('<ul>');
+                        inList = true;
+                    }
+                    out.push(`<li>${m[1]}</li>`);
+                    continue;
+                }
+
+                // 普通段落
+                if (inList) {
+                    out.push('</ul>');
+                    inList = false;
+                }
+                out.push(`<p>${line}</p>`);
+            }
+            if (inList) out.push('</ul>');
+
+            return out.join('\n');
+        }
+
+        async function openPlanModal(name, title) {
+            try {
+                const res = await apiFetch('/api/plan', {
+                    method: 'POST',
+                    body: JSON.stringify({ name })
+                });
+                const data = res;
+                if (!data.success) {
+                    showError(data.error || '加载计划失败');
+                    return;
+                }
+                document.getElementById('planModalTitle').textContent = title || bookboyI18n.getText('planDetails');
+                const html = renderMarkdown(data.content);
+                document.getElementById('planModalBody').innerHTML = `<div class="markdown-content">${html}</div>`;
+                document.getElementById('planModal').classList.add('active');
+            } catch (e) {
+                showError('加载计划失败');
+            }
+        }
+
+        function closePlanModal(e) {
+            if (e && e.target !== document.getElementById('planModal')) return;
+            document.getElementById('planModal').classList.remove('active');
+        }
+
+        // 添加计划弹窗
+        function openAddPlanModal() {
+            const sel = document.getElementById('addPlanChild');
+            sel.innerHTML = '';
+            appState.children.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                if (c.id === appState.currentChild) opt.selected = true;
+                sel.appendChild(opt);
+            });
+            document.getElementById('addPlanContent').value = '';
+            document.getElementById('addPlanError').textContent = '';
+            document.getElementById('addPlanModal').classList.add('active');
+        }
+
+        function closeAddPlanModal(e) {
+            if (e && e.target !== document.getElementById('addPlanModal')) return;
+            document.getElementById('addPlanModal').classList.remove('active');
+        }
+
+        async function saveNewPlan() {
+            const childId = document.getElementById('addPlanChild').value;
+            const planType = document.getElementById('addPlanType').value;
+            const content = document.getElementById('addPlanContent').value.trim();
+            const errEl = document.getElementById('addPlanError');
+            const btn = document.getElementById('savePlanBtn');
+
+            if (!childId) { errEl.textContent = '请选择孩子'; return; }
+            if (!content) { errEl.textContent = '请输入计划内容'; return; }
+
+            btn.disabled = true;
+            btn.textContent = '生成中...';
+            errEl.textContent = '';
+
+            try {
+                const res = await apiFetch('/api/add_plan', {
+                    method: 'POST',
+                    body: JSON.stringify({ child_id: childId, plan_type: planType, content })
+                });
+                const data = res;
+                if (data.success) {
+                    closeAddPlanModal();
+                    // 切换到对应孩子并刷新计划
+                    if (appState.currentChild !== childId) {
+                        await switchChild(childId);
+                    } else {
+                        await loadPlans();
+                    }
+                    addMessage('bookboy', `已为 ${(appState.children.find(c => c.id === childId) || {}).name || childId} 生成${planType === 'annual' ? '年度' : planType === 'monthly' ? '月度' : '周'}计划。`, false);
+                } else {
+                    errEl.textContent = data.error || '生成失败';
+                }
+            } catch (e) {
+                errEl.textContent = '网络错误，请重试';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '生成计划';
+            }
+        }
+
+        // 今日动态
+        async function loadActivities() {
+            const container = document.getElementById('activitiesList');
+            try {
+                const childId = appState.currentChild || '';
+                const res = await apiFetch('/api/activities', {
+                    method: 'POST',
+                    body: JSON.stringify({ child_id: childId })
+                });
+                const data = res;
+                if (!data.success) {
+                    container.innerHTML = '<div class="section-empty" data-i18n="loadFailed">' + bookboyI18n.getText('loadFailed') + '</div>';
+                    return;
+                }
+                const activities = data.activities || [];
+                if (activities.length === 0) {
+                    container.innerHTML = '<div class="section-empty" data-i18n="noActivitiesToday">' + bookboyI18n.getText('noActivitiesToday') + '</div>';
+                    return;
+                }
+                container.innerHTML = activities.map(a => `
+                    <div class="activity-item">
+                        <span class="activity-time">${a.time}</span>
+                        ${appState.role !== 'child' ? `<span class="activity-child">${a.child_name}</span>` : ''}
+                        <span>${a.question || '（图片）'}</span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<div class="section-empty" data-i18n="loadFailed">' + bookboyI18n.getText('loadFailed') + '</div>';
+            }
+        }
+
+        // 成长关注 / 行为准则
+        async function loadGuidelines() {
+            const container = document.getElementById('guidelinesList');
+            try {
+                const childId = appState.currentChild || '';
+                const res = await apiFetch('/api/guidelines', {
+                    method: 'POST',
+                    body: JSON.stringify({ child_id: childId })
+                });
+                const data = res;
+                if (!data.success) {
+                    container.innerHTML = '<div class="section-empty" data-i18n="loadFailed">' + bookboyI18n.getText('loadFailed') + '</div>';
+                    return;
+                }
+                const guidelines = data.guidelines || [];
+                if (guidelines.length === 0) {
+                    container.innerHTML = '<div class="section-empty" data-i18n="noGuidelines">' + bookboyI18n.getText('noGuidelines') + '</div>';
+                    return;
+                }
+                container.innerHTML = guidelines.map(g => `
+                    <div class="guideline-category">${escapeHtml(g.category)}</div>
+                    ${(g.items || []).map(item => `<div class="guideline-item">${escapeHtml(item)}</div>`).join('')}
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<div class="section-empty" data-i18n="loadFailed">' + bookboyI18n.getText('loadFailed') + '</div>';
+            }
+        }
+
+        // 敏感提醒
+        async function loadAlerts() {
+            const container = document.getElementById('alertsList');
+            try {
+                const res = await apiFetch('/api/alerts', { method: 'POST', body: '{}' });
+                const data = res;
+                if (!data.success) {
+                    container.innerHTML = '<div class="section-empty" data-i18n="loadFailed">' + bookboyI18n.getText('loadFailed') + '</div>';
+                    return;
+                }
+                const alerts = data.alerts || [];
+                if (alerts.length === 0) {
+                    container.innerHTML = '<div class="section-empty" data-i18n="noAlerts">' + bookboyI18n.getText('noAlerts') + '</div>';
+                    return;
+                }
+                container.innerHTML = alerts.map(a => `
+                    <div class="alert-item">
+                        <div><span class="alert-time">${a.time}</span> · <span class="alert-child">${a.child_id}</span></div>
+                        <div>触发关键词：<span class="alert-kw">${a.keywords.join('、')}</span></div>
+                        <div style="color:#7a6e5f;margin-top:4px;">${a.context}</div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<div class="section-empty">加载失败</div>';
+            }
+        }
+
+        async function submitAudio(base64Audio) {
+            const sizeKB = (base64Audio.length / 1024).toFixed(1);
+            updateMicStatus(bookboyI18n.getText('sendingAudio', { size: sizeKB }), 'ok');
+            let hadError = false;
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+                const data = await apiFetch('/api/stt', {
+                    method: 'POST',
+                    body: JSON.stringify({audio: base64Audio}),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                updateMicStatus(bookboyI18n.getText('serverReturned'), 'ok');
+                if (data.success) {
+                    const text = data.text || '';
+                    if (text.trim()) {
+                        document.getElementById('messageInput').value = text;
+                        document.getElementById('messageInput').style.height = 'auto';
+                        document.getElementById('messageInput').style.height = Math.min(document.getElementById('messageInput').scrollHeight, 160) + 'px';
+                        updateStatus(bookboyI18n.getText('recognitionSuccessHint'));
+                    } else {
+                        const err = data.error || bookboyI18n.getText('notClearRetry');
+                        updateMicStatus(err, 'error');
+                        updateStatus(err);
+                        hadError = true;
+                    }
+                } else {
+                    const err = data.error || bookboyI18n.getText('recognitionFailed2');
+                    updateMicStatus(err, 'error');
+                    showError(err);
+                    updateStatus(bookboyI18n.getText('ready'));
+                    hadError = true;
+                }
+            } catch (e) {
+                console.error('提交音频失败', e);
+                hadError = true;
+                let errMsg = bookboyI18n.getText('sttServiceUnavailable');
+                if (e.name === 'AbortError') errMsg = bookboyI18n.getText('audioSendTimeout');
+                else if (e.message) errMsg = bookboyI18n.getText('audioSendFailed') + ': ' + e.message;
+                updateMicStatus(errMsg, 'error');
+                showError(errMsg);
+                updateStatus(bookboyI18n.getText('ready'));
+            } finally {
+                document.getElementById('inputHint').textContent = bookboyI18n.getText('pressEnterToSend');
+                if (!hadError) {
+                    const select = document.getElementById('micSelect');
+                    const micName = select && select.value ? select.options[select.selectedIndex].textContent : (bookboyI18n.getText('defaultMic') || '默认麦克风');
+                    updateMicStatus(bookboyI18n.getText('micReadyWithName', { name: micName }), 'ok');
+                }
+            }
+        }
+
+        // 启动
+        init();
+    </script>
+
+    <!-- 家庭设置弹窗 -->
+    <div class="modal-overlay" id="familyModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title" data-i18n="familySettings">⚙ 家庭设置</div>
+                <button class="modal-close" onclick="closeFamilySettings()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label data-i18n="familyName">家庭名称</label>
+                    <input type="text" id="familyName" placeholder="例如：刘清源家庭">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="familyDesc">家庭说明</label>
+                    <input type="text" id="familyDesc" placeholder="一句话描述这个家庭">
+                </div>
+                <div style="font-size:14px;font-weight:600;margin:18px 0 10px;" data-i18n="familyMembersTitle">家庭成员</div>
+                <div id="familyMembers"></div>
+                <button class="btn-add" data-i18n="addMember" onclick="addFamilyMember()">+ 添加成员</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-i18n="cancel" onclick="closeFamilySettings()">取消</button>
+                <button class="btn-primary" data-i18n="save" onclick="saveFamilySettings()">保存</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

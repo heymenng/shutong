@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title data-i18n="cloudMasterTitle">伴读书童AI · 云端师父控制台</title>
+    <style>
+        :root {
+            --ink: #3d3229;
+            --paper: #f7f3e9;
+            --paper-light: #fffdf7;
+            --accent: #c45c48;
+            --accent-light: #e8a598;
+            --green: #6b8e5a;
+            --orange: #c98c4e;
+            --purple: #7a6fa3;
+            --border: #e0d5c5;
+            --shadow: 0 2px 8px rgba(61,50,41,0.08);
+            --radius: 12px;
+        }
+        * { box-sizing: border-box; }
+        html { height: 100%; height: -webkit-fill-available; }
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            overflow: hidden;
+        }
+
+        /* 登录弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(61,50,41,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: var(--paper-light);
+            padding: 28px;
+            border-radius: var(--radius);
+            width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            border: 1px solid var(--border);
+        }
+        .modal-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+        .modal-subtitle { font-size: 13px; color: #888; margin-bottom: 22px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            background: #fff;
+            color: var(--ink);
+        }
+        .form-textarea { min-height: 180px; resize: vertical; font-family: "SF Mono", Consolas, monospace; line-height: 1.5; }
+        .hidden { display: none !important; }
+
+        /* 顶部栏 */
+        .topbar {
+            height: 56px;
+            background: var(--paper-light);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            flex-shrink: 0;
+        }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; }
+        .brand-avatar {
+            width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
+            background: #e8e0d4; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .brand-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.25);
+            object-position: center 25%;
+        }
+        .topbar-actions { display: flex; align-items: center; gap: 12px; }
+        .status-badge {
+            padding: 4px 10px; border-radius: 20px; font-size: 12px;
+            background: #e8e0d4; color: var(--ink);
+        }
+        .status-badge.online { background: #d4e8d4; color: #3d6b3d; }
+        .status-badge.offline { background: #e8d4d4; color: #6b3d3d; }
+        .btn {
+            background: var(--accent); color: #fff; border: none;
+            border-radius: 10px; padding: 10px 18px; font-size: 15px; cursor: pointer;
+            transition: opacity .15s, transform .1s;
+            min-height: 40px;
+        }
+        .btn:hover { opacity: .9; transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn-secondary { background: #8c8c8c; }
+        .btn-green { background: var(--green); }
+        .btn-outline {
+            background: transparent; border: 1px solid var(--border); color: var(--ink);
+        }
+        .btn-sm { padding: 8px 14px; font-size: 14px; min-height: 36px; }
+        .lang-toggle {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--ink);
+            cursor: pointer;
+            font-size: 13px;
+            min-height: 36px;
+        }
+        .lang-toggle:hover { background: var(--paper-light); }
+
+        /* 主体布局 */
+        .app {
+            display: flex;
+            height: calc(100% - 56px);
+            min-height: 0;
+        }
+        .sidebar {
+            width: 180px;
+            min-width: 180px;
+            background: var(--paper-light);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 10px 8px;
+            gap: 4px;
+            flex-shrink: 0;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 8px;
+            cursor: pointer; font-size: 14px;
+            transition: background .15s; color: var(--ink);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .nav-item span[data-i18n] {
+            display: inline-block;
+        }
+        .nav-item:hover { background: #efe8dc; }
+        .nav-item.active { background: var(--accent); color: #fff; }
+        .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+        .main {
+            flex: 1; display: flex; flex-direction: column;
+            overflow: hidden; position: relative; min-height: 0;
+        }
+        .panel {
+            display: none; flex: 1; flex-direction: column;
+            overflow: hidden; min-height: 0;
+        }
+        .panel.active { display: flex; }
+        .panel-header {
+            padding: 14px 20px; border-bottom: 1px solid var(--border);
+            background: #fff; font-weight: 600; font-size: 15px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-body {
+            flex: 1; overflow: auto; padding: 16px 20px;
+        }
+
+        /* 聊天面板 */
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 16px 20px;
+            background: var(--paper);
+        }
+        .chat-message {
+            display: flex; gap: 12px; margin-bottom: 18px;
+            animation: fadeIn .3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: #e8e0d4; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            font-size: 20px;
+        }
+        .msg-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.18);
+            object-position: center 25%;
+        }
+        .msg-content { max-width: 75%; }
+        .msg-bubble {
+            padding: 12px 16px; border-radius: 14px;
+            background: #fff; border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            white-space: pre-wrap; line-height: 1.6; font-size: 14px;
+        }
+        .chat-message.user { flex-direction: row-reverse; }
+        .chat-message.user .msg-bubble { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .msg-meta { font-size: 12px; color: #999; margin-top: 4px; padding: 0 4px; }
+
+        .chat-input-bar {
+            border-top: 1px solid var(--border); background: #fff;
+            padding: 12px 20px; display: flex; gap: 12px; align-items: flex-end;
+        }
+        .chat-input {
+            flex: 1; border: 1px solid var(--border); border-radius: 10px;
+            padding: 10px 14px; font-size: 14px; resize: none; max-height: 120px;
+            font-family: inherit;
+        }
+
+        /* 卡片 */
+        .card {
+            background: #fff; border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            padding: 18px; margin-bottom: 16px;
+        }
+        .card-title { font-weight: 600; font-size: 15px; margin-bottom: 14px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .stat-item { background: var(--paper-light); padding: 14px; border-radius: 8px; }
+        .stat-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+        .stat-value { font-size: 18px; font-weight: 600; }
+
+        /* 表格 */
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-weight: 600; background: var(--paper-light); }
+
+        /* 日志 */
+        .log-list {
+            font-family: "SF Mono", Consolas, monospace; font-size: 12px;
+            max-height: 500px; overflow-y: auto; background: var(--paper-light);
+            padding: 10px; border-radius: 8px;
+        }
+        .log-item { padding: 6px; border-bottom: 1px solid var(--border); }
+        .log-time { color: #888; }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 16px; right: 16px;
+            padding: 12px 20px; border-radius: 8px; color: #fff;
+            z-index: 2000; animation: slideIn .3s ease;
+        }
+        .toast.success { background: var(--green); }
+        .toast.error { background: var(--accent); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* 工具栏 */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+
+        /* 文件浏览器 */
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background .15s;
+            border: 1px solid transparent;
+        }
+        .file-item:hover {
+            background: var(--paper-light);
+            border-color: var(--border);
+        }
+        .file-item-icon { font-size: 18px; width: 24px; text-align: center; }
+        .file-item-name { flex: 1; font-size: 14px; }
+        .file-item-size { font-size: 12px; color: #888; }
+        .file-viewer {
+            background: var(--paper-light);
+            padding: 16px;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow: auto;
+            font-family: "SF Mono", Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* 发送按钮：书童头像 */
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            background: #fff;
+            padding: 2px;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .15s;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(196, 92, 72, 0.25);
+        }
+        .send-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 14px rgba(196, 92, 72, 0.35);
+        }
+        .send-btn:active { transform: scale(0.96); }
+        .send-btn img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            transform: scale(1.4);
+            object-position: center 20%;
+        }
+
+        /* 麦克风按钮 */
+        .mic-btn {
+            width: 48px; height: 48px; border-radius: 50%;
+            border: 2px solid var(--green);
+            background: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .15s, background .15s;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(107, 142, 90, 0.25);
+        }
+        .mic-btn:hover { transform: scale(1.08); box-shadow: 0 4px 14px rgba(107, 142, 90, 0.35); }
+        .mic-btn:active { transform: scale(0.96); }
+        .mic-btn.recording {
+            background: var(--accent);
+            border-color: var(--accent);
+            animation: pulse 1.2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(196, 92, 72, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(196, 92, 72, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(196, 92, 72, 0); }
+        }
+
+        /* 朗读开关 */
+        .voice-toggle {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; color: var(--ink); cursor: pointer;
+            padding: 4px 8px; border-radius: 6px; background: var(--paper-light);
+            border: 1px solid var(--border);
+        }
+        .voice-toggle input { margin: 0; }
+
+        /* 录音提示 */
+        .voice-hint {
+            text-align: center; font-size: 12px; color: var(--accent);
+            padding: 4px 0; background: #fff;
+        }
+
+        /* 消息语音播放按钮 */
+        .msg-audio-btn {
+            display: inline-flex; align-items: center; gap: 4px;
+            margin-top: 6px; padding: 4px 10px;
+            border: 1px solid var(--border); background: var(--paper-light);
+            border-radius: 14px; font-size: 12px; color: var(--ink);
+            cursor: pointer; transition: background .15s;
+        }
+        .msg-audio-btn:hover { background: #efe8dc; }
+        .msg-audio-btn.playing { background: var(--accent-light); color: #fff; border-color: var(--accent); }
+    </style>
+</head>
+<body>
+    <!-- 登录弹窗 -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-title" data-i18n="cloudLoginTitle">云端师父控制台</div>
+            <div class="modal-subtitle" data-i18n="cloudLoginSubtitle">请输入管理密钥以连接云端书童</div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="cloudAddress">云端地址</label>
+                <input type="text" id="cloudBase" class="form-input" placeholder="https://your-cloud-server.example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="cloudMasterKey">管理密钥 (Master Key)</label>
+                <input type="password" id="masterKey" class="form-input" placeholder="输入 master key">
+            </div>
+            <button class="btn" onclick="doLogin()" style="width:100%" data-i18n="cloudConnect">连接</button>
+        </div>
+    </div>
+
+        <div class="topbar">
+            <div class="brand">
+                <div class="brand-avatar"><img src="/书童头像.jpg" alt="书童" onerror="this.style.display='none'; this.parentNode.innerHTML='📜'"></div>
+                <span data-i18n="cloudMasterTitle">伴读书童AI · 云端师父控制台</span>
+            </div>
+            <div class="topbar-actions">
+                <span id="connStatus" class="status-badge offline" data-i18n="cloudOffline">未连接</span>
+                <span id="soulVersion" style="font-size:13px;color:#888;">-</span>
+                <label class="voice-toggle" title="开启后，书童会用语音朗读回复">
+                    <input type="checkbox" id="voiceToggle" onchange="appState.voiceEnabled=this.checked; saveVoiceSetting();">
+                    <span data-i18n="voiceRead">🔊 朗读</span>
+                </label>
+                <button class="btn btn-sm btn-outline" data-i18n="cloudReLogin" onclick="showLogin()">重新登录</button>
+                <button class="btn btn-sm btn-outline" data-i18n-toggle onclick="bookboyI18n.toggleLanguage()" title="切换语言">中/EN</button>
+            </div>
+        </div>
+
+
+    <div class="app">
+        <div class="sidebar">
+            <div class="nav-item active" data-panel="chat" onclick="switchPanel('chat')">
+                <span class="nav-icon">💬</span><span data-i18n="navChat">聊天</span>
+            </div>
+            <div class="nav-item" data-panel="soul" onclick="switchPanel('soul')">
+                <span class="nav-icon">🔮</span><span data-i18n="navSoul">灵魂管理</span>
+            </div>
+            <div class="nav-item" data-panel="files" onclick="switchPanel('files')">
+                <span class="nav-icon">📁</span><span data-i18n="navFiles">文件</span>
+            </div>
+            <div class="nav-item" data-panel="families" onclick="switchPanel('families')">
+                <span class="nav-icon">🏠</span><span data-i18n="navFamilies">家庭档案</span>
+            </div>
+            <div class="nav-item" data-panel="subscriptions" onclick="switchPanel('subscriptions')">
+                <span class="nav-icon">👨‍👩‍👧</span><span data-i18n="navSubscriptions">订阅管理</span>
+            </div>
+            <div class="nav-item" data-panel="logs" onclick="switchPanel('logs')">
+                <span class="nav-icon">📜</span><span data-i18n="navLogs">日志</span>
+            </div>
+            <div class="nav-item" data-panel="robot" onclick="switchPanel('robot')">
+                <span class="nav-icon">🤖</span><span data-i18n="navRobot">机器人</span>
+            </div>
+            <div class="nav-item" data-panel="status" onclick="switchPanel('status')">
+                <span class="nav-icon">📊</span><span data-i18n="navStatus">状态</span>
+            </div>
+        </div>
+
+        <div class="main">
+            <!-- 聊天 -->
+            <div id="panel-chat" class="panel active">
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="chat-input-bar">
+                    <select id="chatMode" class="form-select" style="width:120px;">
+                        <option value="master">师父模式</option>
+                        <option value="parent">家长模式</option>
+                        <option value="child">孩子模式</option>
+                    </select>
+                    <textarea id="chatInput" class="chat-input" rows="1" data-i18n="chatPlaceholder" data-i18n-attr="placeholder" placeholder="想对书童说什么..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendChat();}"></textarea>
+                    <button class="mic-btn" id="micBtn" onclick="toggleRecording()" title="按住说话/停止录音" data-i18n="micRecord" data-i18n-attr="title">
+                        🎙️
+                    </button>
+                    <button class="send-btn" onclick="sendChat()" title="发送">
+                        <img src="/书童头像.jpg" alt="发送">
+                    </button>
+                </div>
+                <div class="voice-hint" id="voiceHint" style="display:none;">正在录音，再次点击麦克风停止</div>
+            </div>
+
+            <!-- 灵魂管理 -->
+            <div id="panel-soul" class="panel">
+                <div class="panel-body">
+                    <div class="card">
+                        <div class="card-title" data-i18n="soulManage">编辑灵魂文件</div>
+                        <div class="toolbar">
+                            <select id="soulType" class="form-select" style="width:180px;" onchange="loadSoul()">
+                                <option value="system_prompt">系统提示词</option>
+                                <option value="master_prompt">师父模式提示词</option>
+                                <option value="agents">AGENTS.md</option>
+                            </select>
+                            <button class="btn btn-green btn-sm" data-i18n="soulSave" onclick="saveSoul()">保存并热更新</button>
+                            <button class="btn btn-secondary btn-sm" data-i18n="soulReload" onclick="loadSoul()">重新加载</button>
+                            <button class="btn btn-outline btn-sm" data-i18n="soulReloadDisk" onclick="reloadSoul()">从磁盘重载</button>
+                        </div>
+                        <textarea id="soulContent" class="form-textarea"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文件浏览器 -->
+            <div id="panel-files" class="panel">
+                <div class="panel-header">
+                    <span data-i18n="fileBrowser">云端文件浏览器</span>
+                    <div>
+                        <button class="btn btn-sm btn-outline" data-i18n="fileRoot" onclick="loadFiles('/')">根目录</button>
+                        <button class="btn btn-sm btn-secondary" data-i18n="fileGoUp" onclick="fileGoUp()">返回上级</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="card">
+                        <div class="card-title" id="fileCurrentPath">/</div>
+                        <div id="fileList" class="file-list"></div>
+                    </div>
+                    <div class="card" id="fileViewerCard" style="display:none;">
+                        <div class="card-title" id="fileViewerTitle">文件内容</div>
+                        <pre id="fileViewerContent" class="file-viewer"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 家庭档案 -->
+            <div id="panel-families" class="panel">
+                <div class="panel-header">
+                    <span data-i18n="navFamilies">云端家庭档案</span>
+                    <button class="btn btn-sm btn-green" data-i18n="refresh" onclick="fetchFamilies()">刷新</button>
+                </div>
+                <div class="panel-body">
+                    <div class="card">
+                        <div class="card-title" data-i18n="familyList">已注册家庭列表</div>
+                        <div id="familiesList" class="file-list" style="gap:12px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 家庭详情 -->
+            <div id="panel-family-detail" class="panel">
+                <div class="panel-header">
+                    <button class="btn btn-sm btn-outline" onclick="backToFamilies()">← <span data-i18n="fileGoUp">返回家庭列表</span></button>
+                    <span id="familyDetailTitle">家庭详情</span>
+                    <button class="btn btn-sm btn-green" data-i18n="refresh" onclick="fetchFamilyDetail()">刷新</button>
+                </div>
+                <div class="panel-body">
+                    <div id="familyDetailContent"></div>
+                </div>
+            </div>
+
+            <!-- 订阅管理 -->
+            <div id="panel-subscriptions" class="panel">
+                <div class="panel-body">
+                    <div class="card">
+                        <div class="card-title" data-i18n="subscriptionList">家庭订阅列表</div>
+                        <table>
+                            <thead>
+                                <tr><th>家庭 ID</th><th>套餐</th><th>到期日</th><th>创建时间</th><th>密钥前缀</th></tr>
+                            </thead>
+                            <tbody id="subsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 日志 -->
+            <div id="panel-logs" class="panel">
+                <div class="panel-body">
+                    <div class="card">
+                        <div class="card-title" data-i18n="navLogs">最近管理操作</div>
+                        <div class="log-list" id="logList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 机器人 -->
+            <div id="panel-robot" class="panel">
+                <div class="panel-header">
+                    <span data-i18n="robotControl">云端机器人控制</span>
+                    <button class="btn btn-sm btn-green" data-i18n="refresh" onclick="loadRobotStatus()">刷新状态</button>
+                </div>
+                <div class="panel-body">
+                    <div class="card">
+                        <div class="card-title" data-i18n="robotConfig">连接配置</div>
+                        <div class="form-group">
+                            <label class="form-label">机器人控制服务地址（G1 HTTP 控制服务）</label>
+                            <input type="text" id="robotUrl" class="form-input" placeholder="http://192.168.0.248:8888">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">控制 Token（如有）</label>
+                            <input type="text" id="robotToken" class="form-input" placeholder="可选">
+                        </div>
+                        <button class="btn" data-i18n="robotTest" onclick="testRobotConnection()">测试连接</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">当前状态</div>
+                        <div id="robotStatus" class="stat-value">未连接</div>
+                        <pre id="robotStatusDetail" class="file-viewer" style="margin-top:12px; min-height:80px;">暂无状态信息</pre>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" data-i18n="robotActions">动作控制</div>
+                        <div class="toolbar">
+                            <button class="btn btn-sm" onclick="sendRobotAction('stand')">站立</button>
+                            <button class="btn btn-sm" onclick="sendRobotAction('sit')">坐下</button>
+                            <button class="btn btn-sm" onclick="sendRobotAction('wave')">挥手</button>
+                            <button class="btn btn-sm" onclick="sendRobotAction('bow')">鞠躬</button>
+                            <button class="btn btn-sm btn-secondary" onclick="sendRobotAction('stop')">停止</button>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">自定义动作 / TTS 文本</label>
+                            <input type="text" id="robotCustom" class="form-input" placeholder="输入动作名或要机器人说的话">
+                        </div>
+                        <button class="btn" onclick="sendRobotCustom()">执行</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 状态 -->
+            <div id="panel-status" class="panel">
+                <div class="panel-body">
+                    <div class="card">
+                        <div class="card-title" data-i18n="statusPanel">运行状态</div>
+                        <div class="grid-2">
+                            <div class="stat-item"><div class="stat-label">Soul 版本</div><div class="stat-value" id="statusVersion">-</div></div>
+                            <div class="stat-item"><div class="stat-label">语音后端</div><div class="stat-value" id="statusVoice">-</div></div>
+                            <div class="stat-item"><div class="stat-label">订阅家庭数</div><div class="stat-value" id="statusSubs">-</div></div>
+                            <div class="stat-item"><div class="stat-label">云端家庭数</div><div class="stat-value" id="statusFamilies">-</div></div>
+                            <div class="stat-item"><div class="stat-label">服务器时间</div><div class="stat-value" style="font-size:13px;" id="statusTime">-</div></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">灵魂文件</div>
+                        <table>
+                            <thead><tr><th>类型</th><th>大小</th><th>SHA256</th></tr></thead>
+                            <tbody id="statusFiles"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/i18n.js?v=3"></script>
+    <script>
+        let appState = {
+            cloudBase: localStorage.getItem('bookboy_cloud_base') || '',
+            masterKey: localStorage.getItem('bookboy_master_key') || '',
+            status: null,
+            voiceEnabled: localStorage.getItem('bookboy_voice_enabled') === 'true',
+            isRecording: false,
+            audioChunks: [],
+            mediaRecorder: null,
+            currentAudio: null,
+        };
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function showLogin() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('cloudBase').value = appState.cloudBase || window.location.origin;
+            document.getElementById('masterKey').value = appState.masterKey;
+        }
+
+        function doLogin() {
+            appState.cloudBase = document.getElementById('cloudBase').value.trim();
+            appState.masterKey = document.getElementById('masterKey').value.trim();
+
+            if (!appState.cloudBase || !appState.masterKey) {
+                showToast('请填写云端地址和管理密钥', 'error');
+                return;
+            }
+
+            localStorage.setItem('bookboy_cloud_base', appState.cloudBase);
+            localStorage.setItem('bookboy_master_key', appState.masterKey);
+
+            document.getElementById('loginModal').classList.add('hidden');
+            fetchStatus();
+            if (document.getElementById('chatMessages').children.length === 0) {
+                appendChat('assistant', '师父好，云端书童已就位。这是云端师父专用控制台，左侧可切换功能。', '点击 🔊 可播放语音；开启顶部"朗读"开关后，书童会自动语音回复。');
+            }
+        }
+
+        async function apiFetch(path, options = {}) {
+            const url = `${appState.cloudBase}${path}`;
+            options.headers = options.headers || {};
+            options.headers['Authorization'] = `Bearer ${appState.masterKey}`;
+            options.headers['Content-Type'] = 'application/json';
+
+            try {
+                const res = await fetch(url, options);
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.error || '请求失败');
+                }
+                return data;
+            } catch (e) {
+                document.getElementById('connStatus').textContent = bookboyI18n.getText('cloudOffline');
+                document.getElementById('connStatus').className = 'status-badge offline';
+                throw e;
+            }
+        }
+
+        async function fetchStatus() {
+            try {
+                const data = await apiFetch('/admin/status');
+                appState.status = data;
+
+                document.getElementById('connStatus').textContent = bookboyI18n.getText('cloudOnline');
+                document.getElementById('connStatus').className = 'status-badge online';
+                document.getElementById('soulVersion').textContent = data.soul_version || '-';
+
+                document.getElementById('statusVersion').textContent = data.soul_version || '-';
+                document.getElementById('statusVoice').textContent = data.voice_backend || '-';
+                document.getElementById('statusSubs').textContent = data.subscriptions_count || 0;
+                document.getElementById('statusFamilies').textContent = data.families_count || 0;
+                document.getElementById('statusTime').textContent = data.server_time || '-';
+
+                const filesTbody = document.getElementById('statusFiles');
+                filesTbody.innerHTML = '';
+                for (const [name, info] of Object.entries(data.soul_files || {})) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${name}</td><td>${info.size}</td><td>${info.sha256}</td>`;
+                    filesTbody.appendChild(tr);
+                }
+
+                renderLogs(data.recent_logs || []);
+            } catch (e) {
+                showToast('获取状态失败: ' + e.message, 'error');
+            }
+        }
+
+        function switchPanel(name) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`panel-${name}`).classList.add('active');
+            document.querySelector(`.nav-item[data-panel="${name}"]`).classList.add('active');
+
+            if (name === 'subscriptions') fetchSubscriptions();
+            if (name === 'status') fetchStatus();
+            if (name === 'soul') loadSoul();
+            if (name === 'files') loadFiles('/');
+            if (name === 'families') fetchFamilies();
+        }
+
+        // 家庭档案
+        let currentFamilyId = '';
+
+        async function fetchFamilies() {
+            try {
+                const data = await apiFetch('/admin/families');
+                renderFamilies(data.families || []);
+            } catch (e) {
+                showToast('获取家庭列表失败: ' + e.message, 'error');
+            }
+        }
+
+        function renderFamilies(families) {
+            const container = document.getElementById('familiesList');
+            container.innerHTML = '';
+            if (!families.length) {
+                container.innerHTML = '<div style="color:#888;padding:20px;">暂无家庭数据</div>';
+                return;
+            }
+            for (const f of families) {
+                const children = (f.children || []).map(c => `${c.name} ${c.age ? c.age + '岁' : ''} ${c.stage ? '· ' + c.stage : ''}`).join('<br>');
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.style.cssText = 'padding:14px; border:1px solid var(--border); background:#fff;';
+                div.innerHTML = `
+                    <span class="file-item-icon">🏠</span>
+                    <div class="file-item-name" style="flex:1;">
+                        <div style="font-weight:600;margin-bottom:4px;">${escapeHtml(f.name || '未命名')}</div>
+                        <div style="font-size:13px;color:#666;">${escapeHtml(f.family_id)} · ${f.member_count} 位成员</div>
+                        <div style="font-size:12px;color:#888;margin-top:4px;">${children || '无孩子信息'}</div>
+                        ${f.description ? `<div style="font-size:12px;color:#999;margin-top:4px;">${escapeHtml(f.description)}</div>` : ''}
+                    </div>
+                    <button class="btn btn-sm" onclick="event.stopPropagation(); viewFamily('${f.family_id}', '${escapeHtml(f.name || '').replace(/'/g, "\\'")}')">查看</button>
+                `;
+                div.onclick = () => viewFamily(f.family_id, f.name || '未命名');
+                container.appendChild(div);
+            }
+        }
+
+        function viewFamily(familyId, familyName) {
+            currentFamilyId = familyId;
+            document.getElementById('familyDetailTitle').textContent = familyName + ' 详情';
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('panel-family-detail').classList.add('active');
+            fetchFamilyDetail();
+        }
+
+        function backToFamilies() {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('panel-families').classList.add('active');
+            document.querySelector('.nav-item[data-panel="families"]').classList.add('active');
+            fetchFamilies();
+        }
+
+        async function fetchFamilyDetail() {
+            if (!currentFamilyId) return;
+            try {
+                const data = await apiFetch(`/admin/family/${encodeURIComponent(currentFamilyId)}`);
+                renderFamilyDetail(data.family || {});
+            } catch (e) {
+                showToast('获取家庭详情失败: ' + e.message, 'error');
+            }
+        }
+
+        function renderFamilyDetail(family) {
+            const container = document.getElementById('familyDetailContent');
+            const members = (family.members || []).map(m => {
+                const tags = [];
+                if (m.role) tags.push(m.role);
+                if (m.relation) tags.push(m.relation);
+                if (m.age !== undefined && m.age !== null) tags.push(m.age + '岁');
+                if (m.stage) tags.push(m.stage);
+                const quickTips = (m.quick_tips_child || []).map(t => `<span style="display:inline-block;background:#f0ebe1;padding:2px 8px;border-radius:4px;margin:2px;font-size:12px;">${escapeHtml(t)}</span>`).join('');
+                return `
+                    <div class="stat-item" style="margin-bottom:10px;">
+                        <div style="font-weight:600;margin-bottom:6px;">${escapeHtml(m.name || '未命名')}</div>
+                        <div style="font-size:13px;color:#666;margin-bottom:6px;">${tags.join(' · ')}</div>
+                        ${m.welcome_child ? `<div style="font-size:13px;color:#555;margin-bottom:6px;">问候语：${escapeHtml(m.welcome_child)}</div>` : ''}
+                        ${quickTips ? `<div>${quickTips}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-title">基本信息</div>
+                    <div class="grid-2">
+                        <div class="stat-item"><div class="stat-label">家庭 ID</div><div class="stat-value" style="font-size:14px;">${escapeHtml(family.family_id || currentFamilyId)}</div></div>
+                        <div class="stat-item"><div class="stat-label">家庭名称</div><div class="stat-value" style="font-size:14px;">${escapeHtml(family.name || '-')}</div></div>
+                        <div class="stat-item"><div class="stat-label">成员数</div><div class="stat-value">${(family.members || []).length}</div></div>
+                        <div class="stat-item"><div class="stat-label">孩子数</div><div class="stat-value">${(family.members || []).filter(m => m.role === '孩子').length}</div></div>
+                    </div>
+                    ${family.description ? `<div style="margin-top:14px;padding:12px;background:var(--paper-light);border-radius:8px;font-size:13px;color:#555;">${escapeHtml(family.description)}</div>` : ''}
+                </div>
+                <div class="card">
+                    <div class="card-title">家庭成员</div>
+                    ${members || '<div style="color:#888;">暂无成员信息</div>'}
+                </div>
+                <div class="card">
+                    <div class="card-title">操作</div>
+                    <div class="toolbar">
+                        <button class="btn btn-sm btn-green" onclick="showToast('编辑功能待扩展')">编辑家庭信息</button>
+                        <button class="btn btn-sm" onclick="showToast('开通订阅功能待扩展')">开通/续订服务</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 文件浏览器
+        let fileCurrentPath = '/';
+
+        async function loadFiles(path) {
+            try {
+                const data = await apiFetch(`/admin/files?path=${encodeURIComponent(path)}`);
+                fileCurrentPath = data.path;
+                document.getElementById('fileCurrentPath').textContent = data.path;
+
+                const listEl = document.getElementById('fileList');
+                listEl.innerHTML = '';
+
+                if (data.type === 'file') {
+                    document.getElementById('fileViewerCard').style.display = 'block';
+                    document.getElementById('fileViewerTitle').textContent = data.path;
+                    document.getElementById('fileViewerContent').textContent = data.content;
+                    return;
+                }
+
+                document.getElementById('fileViewerCard').style.display = 'none';
+
+                for (const item of data.items || []) {
+                    const div = document.createElement('div');
+                    div.className = 'file-item';
+                    const icon = item.type === 'dir' ? '📁' : '📄';
+                    const size = item.size !== null ? `(${formatFileSize(item.size)})` : '';
+                    div.innerHTML = `
+                        <span class="file-item-icon">${icon}</span>
+                        <span class="file-item-name">${escapeHtml(item.name)}</span>
+                        <span class="file-item-size">${size}</span>
+                    `;
+                    div.onclick = () => loadFiles(item.path);
+                    listEl.appendChild(div);
+                }
+            } catch (e) {
+                showToast('加载文件失败: ' + e.message, 'error');
+            }
+        }
+
+        function fileGoUp() {
+            const normalized = fileCurrentPath.replace(/\\/g, '/');
+            if (normalized === '/' || normalized.split('/').filter(Boolean).length <= 1) {
+                loadFiles('/');
+                return;
+            }
+            const parent = normalized.split('/').slice(0, -1).join('/') || '/';
+            loadFiles(parent);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === null || bytes === undefined) return '';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+            return (bytes / 1024 / 1024 / 1024).toFixed(1) + ' GB';
+        }
+
+        // 聊天
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const mode = document.getElementById('chatMode').value;
+            appendChat('user', message);
+            input.value = '';
+            input.rows = 1;
+
+            try {
+                const data = await apiFetch('/admin/chat', {
+                    method: 'POST',
+                    body: JSON.stringify({ messages: [{ role: 'user', content: message }], mode: mode }),
+                });
+                const meta = `后端: ${data.backend || 'auto'} · 耗时: ${data.cost_ms || '-'}ms · soul: ${data.soul_version || '-'}`;
+                const mid = appendChat('assistant', data.reply, meta);
+                if (appState.voiceEnabled) {
+                    // 延迟一点自动播放，让页面先渲染
+                    setTimeout(() => playMessageTts(mid), 200);
+                }
+            } catch (e) {
+                appendChat('assistant', '【错误】' + e.message);
+            }
+        }
+
+        function appendChat(role, text, meta, messageId) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `chat-message ${role}`;
+            const mid = messageId || 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+            div.dataset.messageId = mid;
+
+            const avatarHtml = role === 'user'
+                ? `<div class="msg-avatar"><img src="/static/师父头像.jpg" alt="师父" onerror="this.style.display='none'; this.parentNode.innerHTML='👤'"></div>`
+                : `<div class="msg-avatar"><img src="/书童头像.jpg" alt="书童" onerror="this.style.display='none'; this.parentNode.innerHTML='📜'"></div>`;
+            const metaHtml = meta ? `<div class="msg-meta">${meta}</div>` : '';
+            const audioBtn = role === 'assistant'
+                ? `<button class="msg-audio-btn" onclick="playMessageTts('${mid}', this)" title="朗读">🔊 朗读</button>`
+                : '';
+
+            div.innerHTML = `
+                ${avatarHtml}
+                <div class="msg-content">
+                    <div class="msg-bubble">${escapeHtml(text)}</div>
+                    ${audioBtn}
+                    ${metaHtml}
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return mid;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ═══════════════════════════════════════════════════
+        // 语音对话（TTS + STT）
+        // ═══════════════════════════════════════════════════
+        function saveVoiceSetting() {
+            localStorage.setItem('bookboy_voice_enabled', appState.voiceEnabled ? 'true' : 'false');
+        }
+
+        async function playMessageTts(messageId, btnEl) {
+            const msgDiv = document.querySelector(`.chat-message[data-message-id="${messageId}"]`);
+            if (!msgDiv) return;
+            const text = msgDiv.querySelector('.msg-bubble').textContent;
+            await playTts(text, btnEl);
+        }
+
+        async function playTts(text, btnEl) {
+            if (!text) return;
+            stopAudio();
+            let objectUrl = null;
+            try {
+                if (btnEl) {
+                    btnEl.classList.add('playing');
+                    btnEl.textContent = '🔊 播放中...';
+                }
+                const res = await fetch(`${appState.cloudBase}/api/cloud/tts`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${appState.masterKey}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text }),
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || `TTS 请求失败 ${res.status}`);
+                }
+                const contentType = res.headers.get('Content-Type') || '';
+                let audioUrl;
+                if (contentType.includes('application/json')) {
+                    const data = await res.json();
+                    if (!data.success || !data.audio_url) {
+                        throw new Error(data.error || '云端未返回音频');
+                    }
+                    audioUrl = data.audio_url.startsWith('/') ? appState.cloudBase + data.audio_url : data.audio_url;
+                } else {
+                    const blob = await res.blob();
+                    objectUrl = URL.createObjectURL(blob);
+                    audioUrl = objectUrl;
+                }
+                const audio = new Audio(audioUrl);
+                appState.currentAudio = audio;
+                audio.onended = () => {
+                    stopAudio();
+                    if (objectUrl) URL.revokeObjectURL(objectUrl);
+                };
+                audio.onerror = () => {
+                    stopAudio();
+                    showToast('语音播放失败', 'error');
+                };
+                await audio.play();
+            } catch (e) {
+                stopAudio();
+                showToast('语音合成失败: ' + e.message, 'error');
+                console.error(e);
+            }
+        }
+
+        function stopAudio() {
+            if (appState.currentAudio) {
+                appState.currentAudio.pause();
+                appState.currentAudio = null;
+            }
+            document.querySelectorAll('.msg-audio-btn').forEach(btn => {
+                btn.classList.remove('playing');
+                btn.textContent = '🔊 朗读';
+            });
+        }
+
+        async function toggleRecording() {
+            if (appState.isRecording) {
+                stopRecording();
+                return;
+            }
+            // 浏览器录音需要 HTTPS 或 localhost
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                showToast('当前为 HTTP 访问，浏览器禁止录音。请配置 HTTPS 域名后使用语音输入。', 'error');
+                return;
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mr = new MediaRecorder(stream);
+                appState.mediaRecorder = mr;
+                appState.audioChunks = [];
+                appState.isRecording = true;
+
+                mr.ondataavailable = e => {
+                    if (e.data.size > 0) appState.audioChunks.push(e.data);
+                };
+                mr.onstop = async () => {
+                    const blob = new Blob(appState.audioChunks, { type: 'audio/webm' });
+                    await sendStt(blob);
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                mr.onerror = () => {
+                    showToast('录音出错', 'error');
+                    resetRecording();
+                };
+
+                mr.start();
+                updateRecordingUI(true);
+            } catch (e) {
+                showToast('无法访问麦克风: ' + e.message, 'error');
+                resetRecording();
+            }
+        }
+
+        function stopRecording() {
+            if (appState.mediaRecorder && appState.mediaRecorder.state !== 'inactive') {
+                appState.mediaRecorder.stop();
+            }
+            resetRecording();
+        }
+
+        function resetRecording() {
+            appState.isRecording = false;
+            appState.mediaRecorder = null;
+            appState.audioChunks = [];
+            updateRecordingUI(false);
+        }
+
+        function updateRecordingUI(recording) {
+            const btn = document.getElementById('micBtn');
+            const hint = document.getElementById('voiceHint');
+            if (recording) {
+                btn.classList.add('recording');
+                btn.textContent = '⏹';
+                btn.title = '停止录音';
+                hint.style.display = 'block';
+            } else {
+                btn.classList.remove('recording');
+                btn.textContent = '🎙️';
+                btn.title = '按住说话/停止录音';
+                hint.style.display = 'none';
+            }
+        }
+
+        async function sendStt(blob) {
+            try {
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                await new Promise((resolve, reject) => {
+                    reader.onload = resolve;
+                    reader.onerror = reject;
+                });
+                const base64 = reader.result.split(',')[1];
+                const data = await apiFetch('/api/cloud/stt', {
+                    method: 'POST',
+                    body: JSON.stringify({ audio: base64 }),
+                });
+                const text = (data.text || '').trim();
+                if (text) {
+                    document.getElementById('chatInput').value = text;
+                    // 可选：自动发送
+                    // sendChat();
+                    showToast('识别结果: ' + text);
+                } else {
+                    showToast('没有识别到语音，请再说一次', 'error');
+                }
+            } catch (e) {
+                showToast('语音识别失败: ' + e.message, 'error');
+            }
+        }
+
+        // 灵魂管理
+        async function loadSoul() {
+            const type = document.getElementById('soulType').value;
+            try {
+                const data = await apiFetch(`/admin/soul?type=${type}`);
+                document.getElementById('soulContent').value = data.content || '';
+            } catch (e) {
+                showToast('加载失败: ' + e.message, 'error');
+            }
+        }
+
+        async function saveSoul() {
+            const type = document.getElementById('soulType').value;
+            const content = document.getElementById('soulContent').value;
+            try {
+                const data = await apiFetch('/admin/soul', {
+                    method: 'POST',
+                    body: JSON.stringify({ type, content }),
+                });
+                showToast(`已保存，新版本: ${data.new_version}`);
+                fetchStatus();
+            } catch (e) {
+                showToast('保存失败: ' + e.message, 'error');
+            }
+        }
+
+        async function reloadSoul() {
+            try {
+                const data = await apiFetch('/admin/reload', { method: 'POST', body: '{}' });
+                showToast(`已重新加载: ${data.new_version}`);
+                fetchStatus();
+            } catch (e) {
+                showToast('重新加载失败: ' + e.message, 'error');
+            }
+        }
+
+        // 订阅
+        async function fetchSubscriptions() {
+            try {
+                const data = await apiFetch('/admin/subscriptions');
+                const tbody = document.getElementById('subsTable');
+                tbody.innerHTML = '';
+                for (const sub of data.subscriptions || []) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${sub.family_id}</td><td>${sub.plan}</td><td>${sub.expires}</td><td>${sub.created_at}</td><td>${sub.key_prefix}</td>`;
+                    tbody.appendChild(tr);
+                }
+            } catch (e) {
+                showToast('获取订阅失败: ' + e.message, 'error');
+            }
+        }
+
+        // 日志
+        function renderLogs(logs) {
+            const container = document.getElementById('logList');
+            container.innerHTML = '';
+            for (const log of logs.slice().reverse()) {
+                const div = document.createElement('div');
+                div.className = 'log-item';
+                div.innerHTML = `<span class="log-time">${log.time}</span> [${log.action}] ${log.detail} <span style="color:#999">(${log.ip})</span>`;
+                container.appendChild(div);
+            }
+        }
+
+        // 机器人控制
+        async function loadRobotStatus() {
+            const statusEl = document.getElementById('robotStatus');
+            const detailEl = document.getElementById('robotStatusDetail');
+            statusEl.textContent = '查询中...';
+            try {
+                const data = await apiFetch('/admin/robot/status');
+                statusEl.textContent = data.connected ? '已连接' : '未连接';
+                statusEl.style.color = data.connected ? 'var(--green)' : 'var(--accent)';
+                detailEl.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                statusEl.textContent = '查询失败';
+                detailEl.textContent = e.message;
+            }
+        }
+
+        async function testRobotConnection() {
+            const url = document.getElementById('robotUrl').value.trim();
+            const token = document.getElementById('robotToken').value.trim();
+            if (!url) {
+                showToast('请输入机器人控制服务地址', 'error');
+                return;
+            }
+            try {
+                const data = await apiFetch('/admin/robot/config', {
+                    method: 'POST',
+                    body: JSON.stringify({ url, token }),
+                });
+                showToast(data.message || '配置已保存');
+                loadRobotStatus();
+            } catch (e) {
+                showToast('配置失败: ' + e.message, 'error');
+            }
+        }
+
+        async function sendRobotAction(action) {
+            try {
+                const data = await apiFetch('/admin/robot/action', {
+                    method: 'POST',
+                    body: JSON.stringify({ action }),
+                });
+                showToast(data.message || '指令已发送');
+            } catch (e) {
+                showToast('发送失败: ' + e.message, 'error');
+            }
+        }
+
+        async function sendRobotCustom() {
+            const text = document.getElementById('robotCustom').value.trim();
+            if (!text) return;
+            try {
+                const data = await apiFetch('/admin/robot/action', {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'custom', text }),
+                });
+                showToast(data.message || '指令已发送');
+            } catch (e) {
+                showToast('发送失败: ' + e.message, 'error');
+            }
+        }
+
+        // 初始化
+        window.onload = function() {
+            bookboyI18n.applyLanguage(bookboyI18n.getStoredLanguage());
+            document.getElementById('voiceToggle').checked = appState.voiceEnabled;
+            if (appState.cloudBase && appState.masterKey) {
+                document.getElementById('loginModal').classList.add('hidden');
+                fetchStatus();
+                appendChat('assistant', '师父好，云端书童已就位。这是云端师父专用控制台，左侧可切换功能。', '点击 🔊 可播放语音；开启顶部"朗读"开关后，书童会自动语音回复。');
+            } else {
+                showLogin();
+            }
+        };
+    </script>
+</body>
+</html>

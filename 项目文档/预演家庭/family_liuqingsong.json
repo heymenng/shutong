@@ -1,0 +1,40 @@
+{
+  "family_id": "family_liuqingsong",
+  "name": "刘劲松家庭",
+  "description": "师父兄长刘劲松伯伯之家",
+  "members": [
+    {
+      "user_id": "u_liuqingsong",
+      "name": "刘劲松",
+      "role": "家长",
+      "relation": "伯父/父亲"
+    },
+    {
+      "user_id": "u_liuqingsong_spouse",
+      "name": "待填写",
+      "role": "家长",
+      "relation": "伯母/母亲"
+    },
+    {
+      "user_id": "u_liuqingsong_child1",
+      "name": "待填写",
+      "role": "孩子",
+      "age": null,
+      "stage": "待填写",
+      "gender": "",
+      "grade": "",
+      "relation": "孩子"
+    },
+    {
+      "user_id": "u_liuqingsong_child2",
+      "name": "待填写",
+      "role": "孩子",
+      "age": null,
+      "stage": "待填写",
+      "gender": "",
+      "grade": "",
+      "relation": "孩子"
+    }
+  ],
+  "notes": "师父刘清源先生之兄刘劲松伯伯之家。一家四口，具体内容由刘劲松伯伯家庭自行填写。"
+}

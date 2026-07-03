@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书童连接测试</title>
+</head>
+<body style="font-family: sans-serif; padding: 40px; background: #f5f0e8;">
+    <h1>书童服务连接测试</h1>
+    <p style="font-size: 18px; color: #2d5a27;">如果您能看到这行字，说明网络连接正常。</p>
+    <p>当前时间：<span id="time"></span></p>
+    <button onclick="testApi()" style="padding: 10px 20px; font-size: 16px;">点击测试 API</button>
+    <div id="result" style="margin-top: 20px; padding: 15px; background: #fff; border-radius: 8px;"></div>
+
+    <script>
+        document.getElementById('time').textContent = new Date().toLocaleString('zh-CN');
+        async function testApi() {
+            const result = document.getElementById('result');
+            result.textContent = '正在请求...';
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                result.innerHTML = '<b style="color: green;">API 正常</b><br>在线：' + data.online + '<br>后端：' + data.backend;
+            } catch (e) {
+                result.innerHTML = '<b style="color: red;">API 请求失败</b><br>' + e.message;
+            }
+        }
+    </script>
+</body>
+</html>

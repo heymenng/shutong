@@ -1,0 +1,58 @@
+{
+  "default_family": {
+    "expires": "2099-12-31",
+    "plan": "developer",
+    "created_at": "2026-06-30T12:22:26",
+    "keys": [
+      {
+        "key": "bookkidai.com/robot/dev-default",
+        "device_id": "54e1af6ee76c8c721ce94e732ed79f1d",
+        "device_ip": "127.0.0.1",
+        "activated_at": "2026-07-02T16:11:48.519375",
+        "status": "active"
+      }
+    ]
+  },
+  "family_guodongling": {
+    "expires": "2099-12-31",
+    "plan": "family",
+    "created_at": "2026-06-27T10:25:00",
+    "keys": [
+      {
+        "key": "bookkidai.com/robot/guodongling",
+        "device_id": null,
+        "device_ip": null,
+        "activated_at": null,
+        "status": "active"
+      }
+    ]
+  },
+  "family_lanxin": {
+    "expires": "2099-12-31",
+    "plan": "family",
+    "created_at": "2026-06-27T10:03:00",
+    "keys": [
+      {
+        "key": "bookkidai.com/robot/lanxin",
+        "device_id": null,
+        "device_ip": null,
+        "activated_at": null,
+        "status": "active"
+      }
+    ]
+  },
+  "family_liuqingsong": {
+    "expires": "2099-12-31",
+    "plan": "family",
+    "created_at": "2026-06-27T12:08:00",
+    "keys": [
+      {
+        "key": "bookkidai.com/robot/liuqingsong",
+        "device_id": null,
+        "device_ip": null,
+        "activated_at": null,
+        "status": "active"
+      }
+    ]
+  }
+}

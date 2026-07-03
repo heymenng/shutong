@@ -1,0 +1,513 @@
+<!--
+    伴读书童AI · 墨童（家长助手）
+    ============================
+    面向家庭家长的独立页面：写朋友圈、给老师写信、整理家庭周报、育儿心得等。
+    生成内容自动保存到对应家庭的 家长创作/ 目录。
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伴读书童AI · 墨童</title>
+    <style>
+        :root {
+            --ink: #3d3229;
+            --paper: #f7f3e9;
+            --paper-light: #fffdf7;
+            --accent: #b54a3f;
+            --accent-light: #d47268;
+            --green: #7a9e7e;
+            --wood: #c4a77d;
+            --border: #e0d5c5;
+            --shadow: 0 2px 8px rgba(61,50,41,0.08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #e8dfd1 0%, #f0e6d6 100%);
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--paper);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: var(--paper-light);
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--wood);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .brand-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .brand-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .brand-subtitle {
+            font-size: 13px;
+            color: #7a6e5f;
+        }
+        .back-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .content {
+            padding: 24px;
+        }
+        .intro {
+            background: #fff8f7;
+            border: 1px solid var(--accent-light);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .template-card {
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .template-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .template-card.active {
+            border-color: var(--accent);
+            background: #fff8f7;
+        }
+        .template-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .template-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .template-desc {
+            font-size: 12px;
+            color: #7a6e5f;
+        }
+        .form-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .form-card.active { display: block; }
+        .field {
+            margin-bottom: 14px;
+        }
+        .field label {
+            display: block;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .field textarea,
+        .field input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .field textarea { resize: vertical; min-height: 80px; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: opacity .15s;
+        }
+        .btn:hover { opacity: .9; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-secondary { background: #e8e0d4; color: var(--ink); }
+        .btn-red { background: var(--accent); color: #fff; }
+        .result-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .result-card.active { display: block; }
+        .result-title-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .result-textarea {
+            width: 100%;
+            min-height: 240px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.7;
+            resize: vertical;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .creations-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .creation-item {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: var(--paper-light);
+        }
+        .creation-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .creation-meta {
+            font-size: 12px;
+            color: #7a6e5f;
+            margin-bottom: 8px;
+        }
+        .loading {
+            color: #7a6e5f;
+            font-size: 14px;
+            padding: 10px 0;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+        }
+        .notification.success { background: var(--green); }
+        .notification.error { background: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="brand">
+                <div class="brand-icon"><span class="default-avatar">📜</span></div>
+                <div>
+                    <div class="brand-title">墨童 · 家长助手</div>
+                    <div class="brand-subtitle">书童分身，帮家里写文案、整资料、记成长</div>
+                </div>
+            </div>
+            <a class="back-link" href="/family">← 返回家庭端</a>
+        </div>
+
+        <div class="content">
+            <div class="intro">
+                墨童是伴读书童AI的家长分身。孩子由书童陪伴，家长可以由墨童帮忙：写朋友圈、给老师写信、整理家庭周报、写育儿心得、做工作总结……生成好的内容会自动保存到这个家庭的文件夹里。
+            </div>
+
+            <div class="section-title">🖌 选择要生成的内容</div>
+            <div class="template-grid" id="templateGrid"></div>
+
+            <div class="form-card" id="formCard">
+                <div class="section-title" id="formTitle">填写内容</div>
+                <div id="formFields"></div>
+                <div class="actions">
+                    <button class="btn btn-green" onclick="generateContent()">生成文案</button>
+                    <button class="btn btn-secondary" onclick="closeForm()">取消</button>
+                </div>
+            </div>
+
+            <div class="result-card" id="resultCard">
+                <div class="section-title">✨ 生成结果</div>
+                <input type="text" class="result-title-input" id="resultTitle" placeholder="给这个创作起个标题">
+                <textarea class="result-textarea" id="resultContent"></textarea>
+                <div class="actions">
+                    <button class="btn btn-green" onclick="saveContent()">保存到家庭目录</button>
+                    <button class="btn btn-secondary" onclick="copyContent()">复制</button>
+                    <button class="btn btn-secondary" onclick="closeResult()">关闭</button>
+                </div>
+            </div>
+
+            <div class="creations-card">
+                <div class="section-title">📁 已保存的创作</div>
+                <div id="creationsList" class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        const FAMILY_ID = new URLSearchParams(window.location.search).get('family_id')
+            || (window.LOCKED_FAMILY_ID ? window.LOCKED_FAMILY_ID : 'default_family');
+        let templates = {};
+        let currentTemplate = null;
+
+        async function apiFetch(url, options = {}) {
+            const res = await fetch(url, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options
+            });
+            return res.json();
+        }
+
+        function showNotification(text, type = 'success') {
+            const el = document.getElementById('notification');
+            el.textContent = text;
+            el.className = 'notification ' + type;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        async function loadTemplates() {
+            const data = await apiFetch('/api/parent_assistant/templates');
+            templates = data.templates || {};
+            const grid = document.getElementById('templateGrid');
+            grid.innerHTML = Object.entries(templates).map(([id, t]) => `
+                <div class="template-card" data-id="${id}" onclick="selectTemplate('${id}')">
+                    <div class="template-icon">${t.icon}</div>
+                    <div class="template-name">${t.name}</div>
+                    <div class="template-desc">${t.description}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectTemplate(id) {
+            currentTemplate = id;
+            document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.template-card[data-id="${id}"]`).classList.add('active');
+
+            const t = templates[id];
+            document.getElementById('formCard').classList.add('active');
+            document.getElementById('formTitle').textContent = t.name;
+            const fieldsDiv = document.getElementById('formFields');
+            fieldsDiv.innerHTML = t.fields.map(field => {
+                const key = field.replace(/\//g, '_');
+                return `
+                    <div class="field">
+                        <label>${field}</label>
+                        <textarea class="pa-input" data-key="${key}" data-field="${field}" placeholder="请输入${field}..."></textarea>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('resultCard').classList.remove('active');
+        }
+
+        function closeForm() {
+            document.getElementById('formCard').classList.remove('active');
+            currentTemplate = null;
+            document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+        }
+
+        function getInputs() {
+            const inputs = {};
+            document.querySelectorAll('.pa-input').forEach(el => {
+                inputs[el.dataset.key] = el.value;
+                inputs[el.dataset.field] = el.value;
+            });
+            return inputs;
+        }
+
+        async function generateContent() {
+            if (!currentTemplate) return;
+            const btn = event.target;
+            btn.textContent = '生成中...';
+            btn.disabled = true;
+            try {
+                const data = await apiFetch('/api/parent_assistant/generate', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        template_id: currentTemplate,
+                        inputs: getInputs(),
+                        family_id: FAMILY_ID
+                    })
+                });
+                if (data.success) {
+                    document.getElementById('resultCard').classList.add('active');
+                    document.getElementById('resultContent').value = data.content;
+                    document.getElementById('resultTitle').value = '';
+                    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showNotification(data.error || '生成失败', 'error');
+                }
+            } catch (e) {
+                showNotification('生成失败: ' + e.message, 'error');
+            } finally {
+                btn.textContent = '生成文案';
+                btn.disabled = false;
+            }
+        }
+
+        async function saveContent() {
+            const title = document.getElementById('resultTitle').value.trim();
+            const content = document.getElementById('resultContent').value.trim();
+            if (!content) {
+                showNotification('内容不能为空', 'error');
+                return;
+            }
+            try {
+                const data = await apiFetch('/api/parent_assistant/save', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        template_id: currentTemplate || 'custom',
+                        title: title || '未命名',
+                        content: content,
+                        family_id: FAMILY_ID
+                    })
+                });
+                if (data.success) {
+                    showNotification('已保存到家庭目录');
+                    loadCreations();
+                } else {
+                    showNotification(data.error || '保存失败', 'error');
+                }
+            } catch (e) {
+                showNotification('保存失败: ' + e.message, 'error');
+            }
+        }
+
+        function copyContent() {
+            const text = document.getElementById('resultContent').value;
+            navigator.clipboard.writeText(text).then(() => showNotification('已复制到剪贴板'));
+        }
+
+        function closeResult() {
+            document.getElementById('resultCard').classList.remove('active');
+        }
+
+        async function loadCreations() {
+            const list = document.getElementById('creationsList');
+            try {
+                const data = await apiFetch('/api/parent_assistant/creations?family_id=' + encodeURIComponent(FAMILY_ID));
+                if (data.success && data.creations.length > 0) {
+                    list.innerHTML = data.creations.map(c => `
+                        <div class="creation-item">
+                            <div class="creation-title">${c.title}</div>
+                            <div class="creation-meta">${c.created} · ${c.filename}</div>
+                            <div class="actions">
+                                <button class="btn btn-green" onclick="viewCreation('${c.filename}')">查看</button>
+                                <button class="btn btn-red" onclick="deleteCreation('${c.filename}')">删除</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<div style="color:#7a6e5f;font-size:13px;">暂无已保存的创作</div>';
+                }
+            } catch (e) {
+                list.innerHTML = '<div style="color:#7a6e5f;font-size:13px;">加载失败</div>';
+            }
+        }
+
+        async function viewCreation(filename) {
+            try {
+                const data = await apiFetch('/api/parent_assistant/creation?family_id=' + encodeURIComponent(FAMILY_ID) + '&filename=' + encodeURIComponent(filename));
+                if (data.success) {
+                    document.getElementById('resultCard').classList.add('active');
+                    document.getElementById('resultTitle').value = filename.replace(/\.md$/, '');
+                    document.getElementById('resultContent').value = data.content;
+                    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (e) {
+                showNotification('读取失败', 'error');
+            }
+        }
+
+        async function deleteCreation(filename) {
+            if (!confirm('确定删除这个创作吗？')) return;
+            try {
+                const data = await apiFetch('/api/parent_assistant/delete', {
+                    method: 'POST',
+                    body: JSON.stringify({ family_id: FAMILY_ID, filename })
+                });
+                if (data.success) {
+                    showNotification('已删除');
+                    loadCreations();
+                } else {
+                    showNotification(data.error || '删除失败', 'error');
+                }
+            } catch (e) {
+                showNotification('删除失败', 'error');
+            }
+        }
+
+        async function init() {
+            await loadTemplates();
+            await loadCreations();
+        }
+
+        init();
+    </script>
+</body>
+</html>

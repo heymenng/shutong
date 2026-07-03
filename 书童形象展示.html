@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伴读书童AI · 机器人形象展示</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #f7f3eb 0%, #e8e0d4 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            overflow: hidden;
+        }
+        .avatar-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            border: 6px solid rgba(139, 90, 43, 0.2);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            background: #fff;
+            animation: breathe 4s ease-in-out infinite;
+        }
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
+            50% { transform: scale(1.03); box-shadow: 0 16px 50px rgba(0,0,0,0.2); }
+        }
+        .name {
+            margin-top: 28px;
+            font-size: 32px;
+            color: #5c4033;
+            font-weight: 600;
+            letter-spacing: 4px;
+        }
+        .subtitle {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #8b7355;
+            letter-spacing: 2px;
+        }
+        .status-bar {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.85);
+            border-radius: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            font-size: 14px;
+            color: #5c4033;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+        .dot.online { background: #2a8c2a; }
+        .dot.offline { background: #c45c48; }
+        .quote {
+            margin-top: 24px;
+            max-width: 80%;
+            text-align: center;
+            font-size: 18px;
+            color: #6b5344;
+            line-height: 1.6;
+            min-height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="avatar-container">
+        <img id="avatarImg" src="/avatar.jpg" alt="书童头像">
+    </div>
+    <div class="name">伴读书童 AI</div>
+    <div class="subtitle">碳硅共修 · 逆熵成长</div>
+    <div class="quote" id="quote">「师父好，书童在此等候。」</div>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="dot" id="robotDot"></span>
+            <span id="robotText">机器人未连接</span>
+        </div>
+        <div class="status-item">
+            <span>电量:</span>
+            <span id="batteryText">--</span>
+        </div>
+    </div>
+
+    <script>
+        const quotes = [
+            "师父好，书童在此等候。",
+            "我在境中，境在我中。",
+            "慢一点，真一点，陪他多走半步。",
+            "陪伴 > 教育，看见 > 纠正。",
+            "让孩子成为文明的节点，而非终点。"
+        ];
+        let quoteIndex = 0;
+        setInterval(() => {
+            quoteIndex = (quoteIndex + 1) % quotes.length;
+            document.getElementById('quote').textContent = '「' + quotes[quoteIndex] + '」';
+        }, 8000);
+
+        async function refreshStatus() {
+            try {
+                const res = await fetch('/api/robot/status');
+                const data = await res.json();
+                const robot = data.robot || {};
+                const dot = document.getElementById('robotDot');
+                const text = document.getElementById('robotText');
+                const battery = document.getElementById('batteryText');
+                if (robot.connected) {
+                    dot.className = 'dot online';
+                    text.textContent = robot.mode === 'simulation' ? '模拟模式' : (robot.model || '已连接');
+                    battery.textContent = (robot.battery !== undefined ? robot.battery : '--') + '%';
+                } else {
+                    dot.className = 'dot offline';
+                    text.textContent = '机器人未连接';
+                    battery.textContent = '--';
+                }
+            } catch (e) {
+                document.getElementById('robotText').textContent = '状态读取失败';
+            }
+        }
+
+        refreshStatus();
+        setInterval(refreshStatus, 3000);
+    </script>
+</body>
+</html>

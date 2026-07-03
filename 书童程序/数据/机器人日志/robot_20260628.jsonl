@@ -1,0 +1,12 @@
+{"timestamp": "2026-06-28T08:26:11.344544", "type": "adapter_init", "detail": "模式=simulation, 型号=h1", "mode": "simulation", "model": "h1"}
+{"timestamp": "2026-06-28T08:26:11.344723", "type": "action", "detail": "stand", "mode": "simulation", "model": "h1"}
+{"timestamp": "2026-06-28T08:26:11.344775", "type": "action", "detail": "wave", "mode": "simulation", "model": "h1"}
+{"timestamp": "2026-06-28T08:26:20.056116", "type": "adapter_init", "detail": "模式=real, 型号=h1", "mode": "real", "model": "h1"}
+{"timestamp": "2026-06-28T08:31:10.114148", "type": "adapter_init", "detail": "模式=simulation, 型号=h1", "mode": "simulation", "model": "h1"}
+{"timestamp": "2026-06-28T08:31:10.114315", "type": "action", "detail": "stand", "mode": "simulation", "model": "h1"}
+{"timestamp": "2026-06-28T08:31:10.114587", "type": "action", "detail": "wave", "mode": "simulation", "model": "h1"}
+{"timestamp": "2026-06-28T08:31:10.114654", "type": "adapter_init", "detail": "模式=real, 型号=h1", "mode": "real", "model": "h1"}
+{"timestamp": "2026-06-28T08:54:33.756943", "type": "adapter_init", "detail": "模式=simulation, 型号=h1", "mode": "simulation", "model": "h1"}
+{"timestamp": "2026-06-28T08:54:33.757104", "type": "action", "detail": "stand", "mode": "simulation", "model": "h1"}
+{"timestamp": "2026-06-28T08:54:34.262454", "type": "action", "detail": "wave", "mode": "simulation", "model": "h1"}
+{"timestamp": "2026-06-28T08:54:35.767826", "type": "action", "detail": "stop", "mode": "simulation", "model": "h1"}

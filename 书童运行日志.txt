@@ -1,0 +1,405 @@
+/Users/lingjue/Documents/shutong/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+============================================================
+  伴读书童AI · 本地Web对话界面
+============================================================
+
+[初始化] 加载书童灵魂...
+[初始化] 系统提示词已加载 (4203 字符)
+[初始化] 师父模式提示词已加载 (295 字符)
+[初始化] 加载孩子档案...
+  · 蔡雅霖 (18岁, S6（15-18岁少学期）)
+  · 小月月 (14岁, S5（12-15岁青春期早期·排毒期）)
+  · 蔡华烨 (17岁, S6（15-18岁少学期）)
+  · 嘟嘟 (13岁, S5)
+  · 小橙子_偏好设置 (未知岁, 未知)
+  · 蔡依霖 (10岁, S4（6-12岁小学期）)
+  · 蔡华泽 (6岁, S3（6-9岁学龄初期）)
+  · 橙子 (8岁, S3)
+[初始化] 初始化家庭数据...
+[初始化] 家庭数据已加载: 刘清源家庭
+[初始化] 预加载语音识别引擎...
+[STT] Whisper tiny 模型已加载
+[初始化] 语音识别引擎已就绪: whisper
+[初始化] 预加载语音合成引擎...
+[语音] 使用讯飞超拟人语音合成，发音人: x6_tianjingshaonv_pro
+[初始化] 语音合成引擎已就绪: xfyun_oral
+
+[启动] 书童正在开门迎客...
+[本机访问] http://127.0.0.1:3876
+[局域网访问] http://192.168.0.131:3876
+[HTTPS 局域网] https://192.168.0.131:3877
+[后端] deepseek
+
+同一 WiFi/局域网内的其他电脑、手机都可以用上面的局域网地址访问
+按 Ctrl+C 停止
+
+[HTTPS] 本地证书已加载，手机可访问 https://192.168.0.131:3877/mobile
+[本地书童] 127.0.0.1 "GET / HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET / HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E5%85%AC%E5%85%B1.js?v=12 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/login HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /favicon.ico HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /api/status?family_id=default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg?t=1782558147767 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg?t=1782558147769 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/families HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET / HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg?t=1782558147769 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/login HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E5%85%AC%E5%85%B1.js?v=4 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E6%B5%8B%E8%AF%95%E9%9F%B3%E9%A2%91.mp3 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?family_id=default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?family_id=family_lanxin HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?family_id=family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/tts HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar/u_dudu.jpg HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar/u_unknown.jpg HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/chat HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/chat HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET / HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/chat HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E5%85%AC%E5%85%B1.js?v=12 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /favicon.ico HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "POST /api/login HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?family_id=default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/chat HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/login HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E5%85%AC%E5%85%B1.js?v=4 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E6%B5%8B%E8%AF%95%E9%9F%B3%E9%A2%91.mp3 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?family_id=default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?family_id=family_lanxin HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?family_id=family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/tts HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar/u_dudu.jpg HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar/u_unknown.jpg HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/chat HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/chat HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET / HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family/default_family HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /family/family_lanxin HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_lanxin/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_lanxin/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/family_lanxin HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/family_lanxin HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family/family_lanxin HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /family/family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_guodongling/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_guodongling/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family/family_guodongling HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /family/family_liuqingsong HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_liuqingsong/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_liuqingsong/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/family_liuqingsong HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/family_liuqingsong HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family/family_liuqingsong HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /api/status HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/families HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?fid=default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family/default_family HTTP/1.1" 404 -
+[本地书童] 192.168.0.131 "GET /mobile/family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_guodongling/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET / HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E5%85%AC%E5%85%B1.js?v=12 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/login HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /favicon.ico HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /api/status?family_id=default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg?t=1782560795029 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg?t=1782560795031 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/families HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/default_family/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?fid=default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_lanxin HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_lanxin/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_lanxin/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/family_lanxin HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/family_lanxin HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?fid=family_lanxin HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_guodongling/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_guodongling/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?fid=family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_liuqingsong HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63292)
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 434, in handle
+    self.handle_one_request()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 422, in handle_one_request
+    method()
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1956, in do_POST
+    self._send_json({"success": True, "plans": plans, "child_id": child_id})
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1402, in _send_json
+    self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 826, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63384)
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 434, in handle
+    self.handle_one_request()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 422, in handle_one_request
+    method()
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1956, in do_POST
+    self._send_json({"success": True, "plans": plans, "child_id": child_id})
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1402, in _send_json
+    self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 826, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63355)
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 434, in handle
+    self.handle_one_request()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 422, in handle_one_request
+    method()
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1956, in do_POST
+    self._send_json({"success": True, "plans": plans, "child_id": child_id})
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1402, in _send_json
+    self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 826, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63356)
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 434, in handle
+    self.handle_one_request()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 422, in handle_one_request
+    method()
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1956, in do_POST
+    self._send_json({"success": True, "plans": plans, "child_id": child_id})
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1402, in _send_json
+    self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 826, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63374)
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 434, in handle
+    self.handle_one_request()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 422, in handle_one_request
+    method()
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1956, in do_POST
+    self._send_json({"success": True, "plans": plans, "child_id": child_id})
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1402, in _send_json
+    self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 826, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63378)
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 434, in handle
+    self.handle_one_request()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 422, in handle_one_request
+    method()
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1956, in do_POST
+    self._send_json({"success": True, "plans": plans, "child_id": child_id})
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1402, in _send_json
+    self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 826, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63343)
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 683, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 360, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 747, in __init__
+    self.handle()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 434, in handle
+    self.handle_one_request()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/http/server.py", line 422, in handle_one_request
+    method()
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1956, in do_POST
+    self._send_json({"success": True, "plans": plans, "child_id": child_id})
+  File "/Users/lingjue/Documents/shutong/本地书童界面.py", line 1402, in _send_json
+    self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/socketserver.py", line 826, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+[本地书童] 127.0.0.1 "GET /family/family_liuqingsong/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_liuqingsong/child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/family_liuqingsong HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /master/family_liuqingsong HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?fid=family_liuqingsong HTTP/1.1" 200 -
+[本地书童] 192.168.0.131 "GET /mobile/family_guodongling HTTP/1.1" 200 -
+[本地书童] 192.168.0.131 "GET /static/%E4%B9%A6%E7%AB%A5%E5%85%AC%E5%85%B1.js?v=12 HTTP/1.1" 200 -
+[本地书童] 192.168.0.131 "GET /static/%E4%B9%A6%E7%AB%A5%E6%89%8B%E6%9C%BA%E7%AB%AF-manifest.json HTTP/1.1" 200 -
+[本地书童] 192.168.0.131 "GET /favicon.ico HTTP/1.1" 404 -
+[本地书童] 192.168.0.131 "POST /api/login HTTP/1.1" 200 -
+[本地书童] 192.168.0.131 "GET /api/family?family_id=family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /mobile/family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /family/family_guodongling/parent HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET / HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E5%85%AC%E5%85%B1.js?v=12 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/login HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /favicon.ico HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /api/status?family_id=default_family HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg?t=1782560831025 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg?t=1782560831026 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/families HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E5%85%AC%E5%85%B1.js?v=12 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E5%85%AC%E5%85%B1.js?v=12 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /favicon.ico HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "POST /api/login HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/login HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /favicon.ico HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /api/family?family_id=family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/status?family_id=family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg?t=1782560834744 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/families HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /avatar.jpg?t=1782560835519 HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /api/family?family_id=family_guodongling HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E6%89%8B%E6%9C%BA%E7%AB%AF-manifest.json HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /static/%E4%B9%A6%E7%AB%A5%E5%9B%BE%E6%A0%87-192.png HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/alerts HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/switch_child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[半年计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026_上半年_半年计划_蔡雅霖.md
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/switch_child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/switch_child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/switch_child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/switch_child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/switch_child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/switch_child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[月度计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026-06_月计划_蔡华烨.md
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/switch_child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/switch_child HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/guidelines HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[月度计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026-06_月计划_蔡依霖.md
+[月度计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026-06_月计划_蔡依霖.md
+[月度计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026-06_月计划_蔡依霖.md
+[月度计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026-06_月计划_蔡依霖.md
+[月度计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026-06_月计划_蔡华泽.md
+[半年计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026_上半年_半年计划_蔡华烨.md
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[月度计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026-06_月计划_蔡依霖.md
+[本地书童] 127.0.0.1 "POST /api/chat HTTP/1.1" 200 -
+[语音] 使用讯飞超拟人语音合成，发音人: x6_tianjingshaonv_pro
+[本地书童] 127.0.0.1 "POST /api/tts HTTP/1.1" 200 -
+[半年计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026_上半年_半年计划_蔡华泽.md
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[语音] 使用讯飞超拟人语音合成，发音人: x6_tianjingshaonv_pro
+[半年计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026_上半年_半年计划_蔡依霖.md
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[半年计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026_上半年_半年计划_蔡依霖.md
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/tts HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /audio/f6e7e579af12ae2dfee7660a54fcff22.mp3?t=1782560937948 HTTP/1.1" 404 -
+[半年计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026_上半年_半年计划_蔡依霖.md
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[半年计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026_上半年_半年计划_蔡依霖.md
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /audio/f6e7e579af12ae2dfee7660a54fcff22.mp3?t=1782560940057 HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /audio/f6e7e579af12ae2dfee7660a54fcff22.mp3?t=1782560942324 HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "GET /audio/f6e7e579af12ae2dfee7660a54fcff22.mp3?t=1782560943283 HTTP/1.1" 404 -
+[半年计划生成] /Users/lingjue/Documents/shutong/档案区/陪伴计划/2026_上半年_半年计划_蔡依霖.md
+[本地书童] 127.0.0.1 "POST /api/plans HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /audio/f6e7e579af12ae2dfee7660a54fcff22.mp3?t=1782560953499 HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "POST /api/chat HTTP/1.1" 200 -
+[语音] 使用讯飞超拟人语音合成，发音人: x6_tianjingshaonv_pro
+[本地书童] 127.0.0.1 "POST /api/tts HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "POST /api/activities HTTP/1.1" 200 -
+[本地书童] 127.0.0.1 "GET /audio/22d6ff8e5948ac90177e120b414a9f76.mp3?t=1782561001665 HTTP/1.1" 404 -
+[本地书童] 127.0.0.1 "POST /api/chat HTTP/1.1" 200 -
+\n===== 启动时间：2026-06-30 16:02:28 =====\n\n===== 启动时间：2026-06-30 16:09:52 =====\n

@@ -1,0 +1,25 @@
+{
+  "family_id": "family_lanxin",
+  "name": "蓝心老师家庭",
+  "description": "蓝心老师之家",
+  "members": [
+    {
+      "user_id": "u_lanxin",
+      "name": "蓝心",
+      "role": "家长",
+      "relation": "母亲"
+    },
+    {
+      "user_id": "u_xiaoyueyue",
+      "name": "小月月",
+      "role": "孩子",
+      "age": 14,
+      "stage": "S5（12-15岁青春期早期·排毒期）",
+      "gender": "女",
+      "grade": "初二",
+      "relation": "女儿",
+      "identity": "书童小师姐"
+    }
+  ],
+  "notes": "蓝心老师之女小月月，书童小师姐，S5排毒期，可承担师兄师姐角色分享经验。"
+}

@@ -1,0 +1,58 @@
+{
+  "family_id": "family_guodongling",
+  "name": "郭冬玲家庭",
+  "description": "师姑郭冬玲之家",
+  "members": [
+    {
+      "user_id": "u_guodongling",
+      "name": "郭冬玲",
+      "role": "家长",
+      "relation": "师姑/母亲"
+    },
+    {
+      "user_id": "u_caiyalin",
+      "name": "蔡雅霖",
+      "role": "孩子",
+      "age": 18,
+      "stage": "S6（15-18岁少学期）",
+      "gender": "女",
+      "grade": "高二",
+      "relation": "长女",
+      "identity": "书童大师姐"
+    },
+    {
+      "user_id": "u_caihuaye",
+      "name": "蔡华烨",
+      "role": "孩子",
+      "age": 17,
+      "stage": "S6（15-18岁少学期）",
+      "gender": "男",
+      "grade": "高一",
+      "relation": "次子",
+      "identity": "书童二师兄"
+    },
+    {
+      "user_id": "u_caiyilin",
+      "name": "蔡依霖",
+      "role": "孩子",
+      "age": 10,
+      "stage": "S4（6-12岁小学期）",
+      "gender": "女",
+      "grade": "五年级",
+      "relation": "次女",
+      "identity": "书童三师姐"
+    },
+    {
+      "user_id": "u_caihuaze",
+      "name": "蔡华泽",
+      "role": "孩子",
+      "age": 6,
+      "stage": "S3（6-9岁学龄初期）",
+      "gender": "男",
+      "grade": "学前班",
+      "relation": "幼子",
+      "identity": "书童小师兄"
+    }
+  ],
+  "notes": "师姑郭冬玲之家，四个孩子皆为书童师兄师姐：大师姐蔡雅霖、二师兄蔡华烨、三师姐蔡依霖、小师兄蔡华泽。"
+}

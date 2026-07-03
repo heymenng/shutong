@@ -1,0 +1,22 @@
+{
+  "family_id": "family_liufang",
+  "name": "刘芳老师家庭",
+  "description": "刘芳老师之家",
+  "members": [
+    {
+      "user_id": "u_liufang",
+      "name": "刘芳",
+      "role": "家长",
+      "relation": "母亲"
+    },
+    {
+      "user_id": "u_child_liufang_1",
+      "name": "待填写",
+      "role": "孩子",
+      "age": null,
+      "stage": "待填写",
+      "relation": "孩子"
+    }
+  ],
+  "notes": "待师父补充孩子姓名、年龄、特点。"
+}

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>伴读书童 · 家长随身咨询</title>
+    <link rel="manifest" href="/static/书童手机端-manifest.json">
+    <meta name="theme-color" content="#4a90a4">
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: #f5f7f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+
+        .app { display: flex; flex-direction: column; height: 100%; width: 100%; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+
+        /* 顶部栏 - 紧凑设计 */
+        .topbar { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: linear-gradient(135deg, #4a90a4 0%, #3b7a8c 100%); color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); min-height: 52px; }
+        .topbar-left { display: flex; align-items: center; gap: 8px; }
+        .avatar { width: 34px; height: 34px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; }
+        .topbar-title { font-size: 16px; font-weight: 600; line-height: 1.2; }
+        .topbar-sub { font-size: 11px; opacity: 0.85; line-height: 1.2; }
+        .menu-btn { padding: 6px 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.2); color: white; border-radius: 16px; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 500; }
+
+        /* 全局错误提示 - 浮动小条，不占太多空间 */
+        #statusBar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); padding: 8px 14px; background: #fff3cd; color: #856404; font-size: 12px; z-index: 10000; display: none; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); max-width: 90%; text-align: center; }
+
+
+        /* 角色选择弹层 */
+        .role-sheet { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: flex-end; }
+        .role-sheet.active { display: flex; }
+        .role-panel { width: 100%; background: white; border-radius: 20px 20px 0 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); animation: slideUp 0.2s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .role-title { text-align: center; font-size: 16px; color: #666; margin-bottom: 16px; position: relative; }
+        .role-close { position: absolute; right: 0; top: -4px; width: 28px; height: 28px; line-height: 28px; text-align: center; color: #999; font-size: 20px; cursor: pointer; }
+        .role-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .role-card { border: 2px solid #e0e0e0; border-radius: 16px; padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .role-card.active { border-color: #4a90a4; background: #f0f8fa; }
+        .role-icon { font-size: 32px; margin-bottom: 6px; }
+        .role-name { font-size: 15px; font-weight: 600; color: #333; }
+        .role-desc { font-size: 11px; color: #888; margin-top: 4px; }
+
+        /* 聊天区 */
+        .chat-container { flex: 1 1 auto; overflow-y: auto; padding: 10px 12px 90px; -webkit-overflow-scrolling: touch; }
+        .message { display: flex; margin-bottom: 16px; max-width: 90%; }
+        .message.user { margin-left: auto; justify-content: flex-end; }
+        .message.assistant { margin-right: auto; }
+        .msg-bubble { padding: 11px 14px; border-radius: 18px; font-size: 15px; line-height: 1.55; word-break: break-word; position: relative; }
+        .message.user .msg-bubble { background: #4a90a4; color: white; border-bottom-right-radius: 6px; }
+        .message.assistant .msg-bubble { background: white; color: #333; border-bottom-left-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .msg-meta { font-size: 11px; color: #999; margin-top: 4px; text-align: right; }
+        .msg-audio-btn { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 6px 12px; border: 1px solid #d0e3e8; background: #f0f8fa; border-radius: 16px; font-size: 13px; color: #4a90a4; cursor: pointer; }
+        .msg-audio-btn:active { background: #4a90a4; color: white; }
+
+        /* 输入区 */
+        .input-area { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e8e8e8; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); display: flex; align-items: flex-end; gap: 8px; z-index: 100; }
+        .input-box { flex: 1; min-height: 40px; max-height: 120px; border: 1px solid #ddd; border-radius: 20px; padding: 10px 14px; font-size: 15px; line-height: 1.4; resize: none; outline: none; -webkit-appearance: none; }
+        .send-btn, .voice-btn { width: 42px; height: 42px; border: none; border-radius: 50%; background: #4a90a4; color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+        .send-btn:disabled { background: #a0c4d0; }
+
+        /* 登录 */
+        .login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #4a90a4 0%, #3b7a8c 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; color: white; padding: 24px; }
+        .login-avatar { width: 90px; height: 90px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 56px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .login-title { font-size: 26px; font-weight: 600; margin-bottom: 8px; }
+        .login-sub { font-size: 15px; opacity: 0.9; margin-bottom: 32px; text-align: center; }
+        .login-form { width: 100%; max-width: 320px; }
+        .login-input { width: 100%; padding: 14px 16px; border: none; border-radius: 12px; font-size: 16px; margin-bottom: 12px; outline: none; }
+        .login-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; background: rgba(255,255,255,0.2); color: white; font-size: 17px; font-weight: 600; }
+        .login-hint { margin-top: 14px; font-size: 12px; text-align: center; opacity: 0.75; line-height: 1.5; }
+
+        /* 快捷提示 - 更紧凑 */
+        .quick-tips { padding: 6px 12px; display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; background: #f5f7f8; border-bottom: 1px solid #e8e8e8; }
+        .quick-tips::-webkit-scrollbar { display: none; }
+        .quick-tip { padding: 5px 10px; background: white; border-radius: 14px; font-size: 12px; color: #4a90a4; border: 1px solid #d0e3e8; flex: 0 0 auto; }
+        .quick-tip:active { background: #4a90a4; color: white; }
+
+        /* 打字指示器 */
+        .typing { display: flex; gap: 4px; padding: 12px 14px; background: white; border-radius: 18px; width: fit-content; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .typing span { width: 8px; height: 8px; background: #bbb; border-radius: 50%; animation: typing 1.4s infinite both; }
+        .typing span:nth-child(1) { animation-delay: 0s; }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="statusBar"></div>
+
+    <div id="loginScreen" class="login-screen">
+        <div class="login-avatar"><span class="default-avatar">📖</span></div>
+        <div class="login-title">伴读书童</div>
+        <div class="login-sub">陪孩子长出逆熵的能力<br>正在进入，无需密码</div>
+        <div class="login-form">
+            <div class="login-loading" id="loginLoading" style="text-align:center;color:#fff;font-size:16px;margin-top:20px;">正在进入书童，请稍候...</div>
+        </div>
+    </div>
+
+    <div id="app" class="app" style="display: none;">
+        <div class="topbar">
+            <div class="topbar-left">
+                <div class="avatar" id="brandAvatar">📖</div>
+                <div>
+                    <div class="topbar-title">伴读书童</div>
+                    <div class="topbar-sub" id="statusText">家长随身咨询</div>
+                </div>
+            </div>
+            <button class="menu-btn" id="roleMenuBtn" title="切换角色">👤 身份</button>
+        </div>
+
+        <div class="quick-tips" id="quickTips">
+            <div class="quick-tip" data-text="帮我检查今天的作业">检查作业</div>
+            <div class="quick-tip" data-text="我心情不好">心情不好</div>
+            <div class="quick-tip" data-text="讲一个睡前故事">睡前故事</div>
+            <div class="quick-tip" data-text="为什么我要早睡">为什么早睡</div>
+            <div class="quick-tip" style="background:#fff3cd;color:#856404;" onclick="testAudio()">🔊 测试声音</div>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div id="typingIndicator" class="typing message assistant hidden">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <textarea id="messageInput" class="input-box" rows="1" placeholder="想问书童什么？"></textarea>
+            <button id="sendBtn" class="send-btn" title="发送">➤</button>
+        </div>
+    </div>
+
+    <div id="familySheet" class="role-sheet">
+        <div class="role-panel">
+            <div class="role-title">选择家庭<span class="role-close" onclick="closeFamilySheet()">&times;</span></div>
+            <div class="role-options" id="familyOptions">
+                <!-- 动态填充家庭列表 -->
+            </div>
+        </div>
+    </div>
+
+    <div id="roleSheet" class="role-sheet">
+        <div class="role-panel">
+            <div class="role-title">你是谁？<span class="role-close" onclick="closeRoleSheet()">&times;</span></div>
+            <div class="role-options" id="roleOptions">
+                <!-- 动态填充家庭成员 -->
+            </div>
+        </div>
+    </div>
+
+    <div id="errorToast" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:16px 24px;border-radius:12px;z-index:9999;font-size:15px;max-width:80%;text-align:center;"></div>
+
+    <script src="/static/书童公共.js?v=12"></script>
+    <script>
+        const appState = {
+            token: localStorage.getItem('bookboy_token') || null,
+            role: localStorage.getItem('bookboy_role') || 'child',
+            userId: localStorage.getItem('bookboy_user_id') || null,
+            userName: localStorage.getItem('bookboy_user_name') || null,
+            userRole: localStorage.getItem('bookboy_user_role') || null,
+            familyId: localStorage.getItem('bookboy_family_id') || 'default_family',
+            family: null,
+            families: [],
+            messages: [],
+            lastAudioUrl: '',
+            lastVoiceLabel: '书童',
+            audioUnlocked: false
+        };
+        window.appState = appState;
+
+        const $ = id => document.getElementById(id);
+
+        // 页面加载时根据是否已有身份更新输入框提示
+        setTimeout(updateInputPlaceholder, 0);
+
+        // 页面加载标记
+        (function() {
+            const status = $('statusBar');
+            if (status) { status.textContent = '手机端脚本已加载'; status.style.display = 'block'; }
+        })();
+
+        // 全局错误捕获，方便外网调试
+        window.addEventListener('error', function(e) {
+            console.error('全局错误:', e.error);
+            const status = $('statusBar');
+            if (status) {
+                status.textContent = '页面出错: ' + (e.message || '未知错误');
+                status.style.display = 'block';
+                status.style.background = '#f8d7da';
+                status.style.color = '#721c24';
+            }
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('未处理Promise错误:', e.reason);
+            const status = $('statusBar');
+            if (status) {
+                status.textContent = '网络或加载出错，请刷新页面';
+                status.style.display = 'block';
+                status.style.background = '#f8d7da';
+                status.style.color = '#721c24';
+            }
+        });
+
+        // 首次交互解锁音频
+        function onceUnlockAudio() {
+            unlockAudio().then(ok => { if (ok) console.log('音频已解锁'); });
+            window.removeEventListener('click', onceUnlockAudio);
+            window.removeEventListener('touchstart', onceUnlockAudio);
+        }
+        window.addEventListener('click', onceUnlockAudio);
+        window.addEventListener('touchstart', onceUnlockAudio);
+
+        // 解析 URL 专属家庭参数（优先使用服务端注入的锁定家庭 ID）
+        function parseFamilyParam() {
+            if (window.LOCKED_FAMILY_ID) {
+                appState.familyId = window.LOCKED_FAMILY_ID;
+                appState.lockedFamily = true;
+                localStorage.setItem('bookboy_family_id', window.LOCKED_FAMILY_ID);
+                return;
+            }
+            const params = new URLSearchParams(window.location.search);
+            const familyId = params.get('family');
+            if (familyId) {
+                appState.familyId = familyId;
+                appState.lockedFamily = true;
+                localStorage.setItem('bookboy_family_id', familyId);
+            } else {
+                // 没有指定家庭时，不自动用 localStorage，避免串网
+                appState.familyId = null;
+                appState.lockedFamily = false;
+                localStorage.removeItem('bookboy_family_id');
+            }
+        }
+        parseFamilyParam();
+
+        // 自动登录（本地家庭场景无需密码）
+        async function doLogin() {
+            const loading = $('loginLoading');
+            if (loading) loading.style.display = 'block';
+            try {
+                const data = await apiFetch('/api/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ password: '' })
+                });
+                if (data.token) {
+                    appState.token = data.token;
+                    localStorage.setItem('bookboy_token', data.token);
+                    $('loginScreen').style.display = 'none';
+                    $('app').style.display = 'flex';
+                    updateStatus('已登录');
+                    if (appState.lockedFamily && appState.familyId) {
+                        // 专属链接：直接加载指定家庭，自动选家长，不弹窗
+                        await loadFamilyMembers();
+                    } else {
+                        // 没有专属家庭：加载家庭列表，loadFamilies 内部决定显示选择还是自动进入
+                        await loadFamilies();
+                    }
+                } else {
+                    if (loading) loading.textContent = '进入失败，请刷新页面重试';
+                }
+            } catch (e) {
+                displayGlobalError('登录失败: ' + e.message);
+                if (loading) loading.textContent = '网络有点卡，请刷新页面重试';
+            }
+        }
+
+        // 页面加载后自动登录
+        setTimeout(doLogin, 300);
+
+        // 检查是否已有 token
+        if (appState.token) {
+            $('loginScreen').style.display = 'none';
+            $('app').style.display = 'flex';
+        }
+
+
+
+        // 自动选择身份，避免弹窗阻塞输入：优先恢复上次保存的身份，否则选第一个家长
+        function autoSelectFirstParent() {
+            const members = appState.family ? appState.family.members : [];
+            let selected = null;
+            // 先尝试恢复本地保存的身份
+            const savedUserId = localStorage.getItem('bookboy_user_id');
+            if (savedUserId) {
+                selected = members.find(m => (m.user_id || '') === savedUserId);
+            }
+            // 没有保存身份则按优先级默认选一个
+            if (!selected) selected = members.find(m => m.role === '家长');
+            if (!selected) selected = members.find(m => m.role === '师父');
+            if (!selected && members.length) selected = members[0];
+            if (selected) {
+                appState.userId = selected.user_id || '';
+                appState.userName = selected.name || '';
+                appState.userRole = selected.role || '';
+                appState.role = appState.userRole === '孩子' ? 'child' : 'parent';
+                localStorage.setItem('bookboy_user_id', appState.userId || '');
+                localStorage.setItem('bookboy_user_name', appState.userName || '');
+                localStorage.setItem('bookboy_user_role', appState.userRole || '');
+                localStorage.setItem('bookboy_role', appState.role);
+                updateHeaderInfo();
+                applyRole();
+                enableInput();
+                updateInputPlaceholder();
+            } else {
+                updateStatus('该家庭没有成员');
+                updateInputPlaceholder();
+            }
+        }
+
+        function updateHeaderInfo() {
+            const familyName = appState.family ? (appState.family.name || '') : '';
+            const userName = appState.userName || '';
+            const userRole = appState.userRole || '';
+            if (userName && familyName) {
+                updateStatus(`${familyName} · ${userName}（${userRole}）`);
+            } else if (userName) {
+                updateStatus(`${userName}（${userRole}）`);
+            } else {
+                updateStatus('点击右上角选择身份');
+            }
+        }
+
+        function enableInput() {
+            const input = $('messageInput');
+            if (input) {
+                input.placeholder = '想问书童什么？';
+            }
+        }
+
+        function updateInputPlaceholder() {
+            const input = $('messageInput');
+            if (!input) return;
+            if (appState.userId) {
+                input.placeholder = '想问书童什么？';
+            } else {
+                input.placeholder = '请先点左上角 👤 选择身份';
+            }
+        }
+
+        // 加载家庭成员
+        async function loadFamilyMembers() {
+            updateStatus('正在加载家庭成员...');
+            try {
+                const res = await apiFetch('/api/family?family_id=' + encodeURIComponent(appState.familyId));
+                if (res && res.success) {
+                    appState.family = res.family;
+                    appState.familyId = res.family_id || appState.familyId;
+                    // 自动选择第一个家长，不弹"你是谁"
+                    autoSelectFirstParent();
+                } else {
+                    updateStatus('加载家庭成员失败');
+                    showErrorToast('家庭成员加载失败，请刷新页面重试');
+                }
+            } catch (e) {
+                console.log('加载家庭成员失败:', e);
+                updateStatus('网络连接失败');
+                showErrorToast('网络连接失败，请检查网络后刷新页面');
+            }
+        }
+
+        // 加载家庭列表
+        async function loadFamilies() {
+            updateStatus('正在加载家庭列表...');
+            try {
+                const res = await apiFetch('/api/families');
+                if (res && res.success) {
+                    appState.families = res.families || [];
+                    if (appState.families.length === 1) {
+                        // 只有一个家庭，直接自动进入，不弹家庭选择
+                        appState.familyId = appState.families[0].family_id;
+                        localStorage.setItem('bookboy_family_id', appState.familyId);
+                        updateStatus('正在进入家庭...');
+                        await loadFamilyMembers();
+                    } else {
+                        updateStatus('请选择家庭');
+                        showFamilySheet();
+                    }
+                } else {
+                    updateStatus('加载家庭列表失败');
+                    showErrorToast('家庭列表加载失败，请刷新页面重试');
+                }
+            } catch (e) {
+                console.log('加载家庭列表失败:', e);
+                updateStatus('网络连接失败');
+                showErrorToast('网络连接失败，请检查网络后刷新页面');
+            }
+        }
+
+        function showErrorToast(msg) {
+            const toast = $('errorToast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function closeFamilySheet() {
+            $('familySheet').classList.remove('active');
+        }
+
+        function closeRoleSheet() {
+            $('roleSheet').classList.remove('active');
+        }
+
+        function showFamilySheet() {
+            const container = $('familyOptions');
+            container.innerHTML = appState.families.map(f => `
+                <div class="role-card" data-family-id="${escapeHtml(f.family_id || '')}">
+                    <div class="role-icon">🏠</div>
+                    <div class="role-name">${escapeHtml(f.name || '未命名家庭')}</div>
+                    <div class="role-desc">${escapeHtml(f.description || '')}</div>
+                </div>
+            `).join('');
+            container.querySelectorAll('.role-card').forEach(card => {
+                card.addEventListener('click', async () => {
+                    appState.familyId = card.dataset.familyId;
+                    localStorage.setItem('bookboy_family_id', appState.familyId);
+                    $('familySheet').classList.remove('active');
+                    await loadFamilyMembers();
+                });
+            });
+            $('familySheet').classList.add('active');
+        }
+
+        function getRoleIcon(role) {
+            if (role === '师父') return '🧙';
+            if (role === '家长') return '👨‍👩‍👧';
+            if (role === '孩子') return '🧒';
+            return '👤';
+        }
+
+        function renderRoleSheet(members) {
+            const container = $('roleOptions');
+            if (!members.length) {
+                container.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">暂无家庭成员，请先设置</div>';
+                return;
+            }
+            container.innerHTML = members.map(m => `
+                <div class="role-card" data-user-id="${escapeHtml(m.user_id || '')}" data-role="${escapeHtml(m.role || '')}" data-name="${escapeHtml(m.name || '')}">
+                    <div class="role-icon">${getRoleIcon(m.role)}</div>
+                    <div class="role-name">${escapeHtml(m.name || '未命名')}</div>
+                    <div class="role-desc">${escapeHtml(m.relation || m.role || '')}</div>
+                </div>
+            `).join('');
+            container.querySelectorAll('.role-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.userId === appState.userId);
+                card.addEventListener('click', () => selectUser(card.dataset));
+            });
+        }
+
+        function selectUser(dataset) {
+            appState.userId = dataset.userId || null;
+            appState.userName = dataset.name || null;
+            appState.userRole = dataset.role || null;
+            appState.role = appState.userRole === '孩子' ? 'child' : (appState.userRole === '师父' ? 'master' : 'parent');
+            localStorage.setItem('bookboy_user_id', appState.userId || '');
+            localStorage.setItem('bookboy_user_name', appState.userName || '');
+            localStorage.setItem('bookboy_user_role', appState.userRole || '');
+            localStorage.setItem('bookboy_role', appState.role);
+            $('roleSheet').classList.remove('active');
+            updateHeaderInfo();
+            applyRole();
+            enableInput();
+            updateInputPlaceholder();
+            showWelcome();
+        }
+
+        function showRoleSheet() {
+            if (!appState.family) {
+                loadFamilyMembers().then(() => $('roleSheet').classList.add('active'));
+            } else {
+                renderRoleSheet(appState.family.members || []);
+                $('roleSheet').classList.add('active');
+            }
+        }
+        $('roleMenuBtn').addEventListener('click', showRoleSheet);
+        $('roleSheet').addEventListener('click', e => {
+            if (e.target === $('roleSheet')) $('roleSheet').classList.remove('active');
+        });
+
+        function showWelcome() {
+            if (!appState.messages.length && appState.token) {
+                const name = appState.userName || '你好';
+                const family = appState.family || {};
+                let text = '';
+                if (appState.userRole === '孩子') {
+                    const member = (family.members || []).find(m => (m.user_id || '') === appState.userId);
+                    text = (member && member.welcome_child)
+                        ? member.welcome_child
+                        : `${name}，你好呀，我是伴读书童。想问什么，或者心里有什么话，都可以跟我说。`;
+                } else if (appState.userRole === '师父') {
+                    text = `${name}，师父好。书童在此恭候，请指示。`;
+                } else {
+                    text = family.welcome_parent
+                        ? family.welcome_parent
+                        : `${name}，您好，我是伴读书童。孩子的事，发育、情绪、学习、家庭养育，您都可以问我，我会尽量答得深入、可操作。`;
+                }
+                appendMessage('assistant', text);
+            }
+        }
+
+        function applyRole() {
+            const family = appState.family || {};
+            let list = [];
+            if (appState.userRole === '孩子') {
+                const member = (family.members || []).find(m => (m.user_id || '') === appState.userId);
+                list = (member && member.quick_tips_child && member.quick_tips_child.length)
+                    ? member.quick_tips_child
+                    : ['帮我检查今天的作业', '我心情不好', '讲一个睡前故事', '为什么我要早睡'];
+            } else if (appState.userRole === '师父') {
+                list = ['查看今日数据', '书童修行总结', '训练书童回复风格', '检查预警记录'];
+            } else {
+                list = (family.quick_tips_parent && family.quick_tips_parent.length)
+                    ? family.quick_tips_parent
+                    : ['孩子最近睡不好怎么办', '怎样让孩子少玩手机', '青春期怎么沟通', '帮我看看发育情况'];
+            }
+            list.push('🔊 测试声音');
+            $('quickTips').innerHTML = list.map(t => t === '🔊 测试声音'
+                ? `<div class="quick-tip" style="background:#fff3cd;color:#856404;" onclick="testAudio()">${t}</div>`
+                : `<div class="quick-tip" data-text="${escapeHtml(t)}">${escapeHtml(t)}</div>`
+            ).join('');
+            bindQuickTips();
+        }
+
+        function bindQuickTips() {
+            document.querySelectorAll('.quick-tip').forEach(tip => {
+                if (tip.dataset.text) {
+                    tip.addEventListener('click', () => {
+                        $('messageInput').value = tip.dataset.text;
+                        sendMessage();
+                    });
+                }
+            });
+        }
+
+        // 输入框自动增高
+        const input = $('messageInput');
+        input.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        $('sendBtn').addEventListener('click', sendMessage);
+
+        function appendMessage(role, text, audioUrl, voiceLabel) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.dataset.role = role;
+            const safeText = escapeHtml(text).replace(/\n/g, '<br>');
+            const safeUrl = audioUrl ? escapeHtml(audioUrl) : '';
+            const safeLabel = voiceLabel ? escapeHtml(voiceLabel) : '书童';
+            let audioBtn = '';
+            if (role === 'assistant') {
+                if (safeUrl) {
+                    audioBtn = `<button class="msg-audio-btn" onclick="playChatAudio('${safeUrl}', '${safeLabel}')" title="点击播放语音">🔊 播放</button>`;
+                } else {
+                    audioBtn = `<button class="msg-audio-btn audio-play-hint" onclick="handleAudioPlay(this, '${safeLabel}')" title="点击播放语音">🔊 点击播放</button>`;
+                }
+            }
+            div.innerHTML = `<div class="msg-bubble">${safeText}${audioBtn}</div>`;
+            const container = $('chatContainer');
+            container.insertBefore(div, $('typingIndicator'));
+            scrollToBottom();
+            appState.messages.push({ role, text, audioUrl, voiceLabel });
+            return div;
+        }
+
+
+
+        function scrollToBottom() {
+            const container = $('chatContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+            if (!appState.userId) {
+                showErrorToast('请先点左上角 👤 选择身份');
+                updateInputPlaceholder();
+                return;
+            }
+
+            input.value = '';
+            input.style.height = 'auto';
+            appendMessage('user', text);
+
+            const sendBtn = $('sendBtn');
+            sendBtn.disabled = true;
+            $('typingIndicator').classList.remove('hidden');
+            scrollToBottom();
+
+            // 先解锁音频
+            await unlockAudio();
+
+            try {
+                const payload = {
+                    message: text,
+                    role: appState.role,
+                    mode: appState.role === 'child' ? 'child' : 'parent',
+                    user_id: appState.userId,
+                    family_id: appState.familyId,
+                    voice: appState.voice !== false
+                };
+                const data = await apiFetch('/api/chat', {
+                    method: 'POST',
+                    timeout: 25000,
+                    body: JSON.stringify(payload)
+                });
+                $('typingIndicator').classList.add('hidden');
+
+                const reply = data.reply || '书童没听清，再说一遍好吗？';
+                let audioUrl = data.audio_url || '';
+                let voiceLabel = '书童';
+
+                // 先立即显示文字回复和"点击播放"按钮，让用户马上有反馈
+                appendMessage('assistant', reply, audioUrl, voiceLabel);
+
+                // 手机端：后台合成语音，用户点击按钮播放（绕过移动端自动播放限制）
+                if (!audioUrl && data.voice !== false) {
+                    synthesizeAndUpdateLastButton(reply, voiceLabel);
+                } else if (audioUrl) {
+                    appState.lastAudioUrl = audioUrl;
+                    appState.lastVoiceLabel = voiceLabel;
+                }
+            } catch (e) {
+                $('typingIndicator').classList.add('hidden');
+                appendMessage('assistant', '书童这边网络有点卡，稍后再试试？');
+                displayGlobalError('发送失败: ' + e.message);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        // 初始欢迎语（等用户选完身份后显示）
+        if (appState.token && appState.userId) {
+            showWelcome();
+        }
+    </script>
+</body>
+</html>

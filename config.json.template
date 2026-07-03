@@ -1,0 +1,13 @@
+{
+  "cloud_api_base": "https://your-cloud-server.example.com",
+  "family_id": "default_family",
+  "api_key": "请向师父或管理员申请订阅密钥",
+  "voice_enabled": true,
+  "local_data_dir": "书童程序/数据",
+  "unitree_enabled": false,
+  "unitree_mode": "simulation",
+  "unitree_model": "g1",
+  "g1_http_enabled": false,
+  "g1_http_control_url": "http://192.168.0.248:8888",
+  "g1_http_control_token": ""
+}
