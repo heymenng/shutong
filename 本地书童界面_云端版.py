@@ -43,6 +43,15 @@ except Exception as _g1_err:
     G1HTTPClient = None
     print(f"[机器人] G1HTTPClient 导入失败: {_g1_err}")
 
+# 摄像头支持
+try:
+    from 书童程序.核心.感官系统 import VisionSensor
+    _vision_sensor = VisionSensor(journal_dir=PROJECT_ROOT / "书童程序" / "数据" / "感官日志")
+    print("[摄像头] VisionSensor 已初始化")
+except Exception as _vision_err:
+    _vision_sensor = None
+    print(f"[摄像头] VisionSensor 初始化失败: {_vision_err}")
+
 # ═══════════════════════════════════════════
 # 配置
 # ═══════════════════════════════════════════
@@ -401,6 +410,7 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
         return parsed.path, urllib.parse.parse_qs(parsed.query)
 
     def do_GET(self):
+        global g1_client
         path, query = self._parse_path()
 
         # 首页
@@ -449,6 +459,30 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
                 return
             self.send_error(404)
             return
+
+        # 摄像头拍照（实时画面）
+        if path == "/camera.jpg":
+            global _vision_sensor
+            if _vision_sensor is None:
+                return self._send_json({"error": "Camera not initialized"}, 503)
+            try:
+                import cv2
+                frame = _vision_sensor.capture_frame(save=False)
+                if frame is None:
+                    return self._send_json({"error": "Failed to capture frame"}, 503)
+                _, buf = cv2.imencode(".jpg", frame)
+                if not _:
+                    return self._send_json({"error": "JPEG encode failed"}, 500)
+                data = buf.tobytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/jpeg")
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("Cache-Control", "no-cache, no-store")
+                self.end_headers()
+                self.wfile.write(data)
+                return
+            except Exception as e:
+                return self._send_json({"error": str(e)}, 500)
 
         # 音频缓存
         if path.startswith("/audio/"):
