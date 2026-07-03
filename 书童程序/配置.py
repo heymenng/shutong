@@ -19,14 +19,18 @@ CONFIG = {
     "daily_workflow_on_startup": True,  # 启动时是否执行每日工作流（固定流程代码化）
     
     # ──────────────────────────────────────────
-    # 机器人对接配置（宇树科技 Unitree）
+    # 机器人对接配置（宇树科技 Unitree G1）
     # ──────────────────────────────────────────
-    "unitree_enabled": False,           # 是否启用宇树机器人对接
+    "unitree_enabled": False,           # 是否启用宇树机器人对接（旧DDS模式）
     "unitree_mode": "simulation",       # "simulation"模拟模式 / "real"真实模式
-    "unitree_model": "h1",              # h1 / h2 / go2 / b2 / g1
+    "unitree_model": "g1",              # g1 / h1 / h2 / go2 / b2
     "unitree_network_interface": "en0", # macOS 默认 en0；Ubuntu 可能是 enp3s0
     "unitree_domain_id": 0,             # DDS domain ID
     "unitree_robot_ip": "192.168.123.161",  # 宇树机器人默认 IP
+    "g1_http_enabled": True,            # 是否启用 G1 HTTP 控制模式（推荐）
+    "g1_control_url": "http://192.168.0.248:8888",  # G1 PC2 HTTP 控制服务地址
+    "g1_http_control_url": "http://192.168.0.248:8888",
+    "g1_http_control_token": "",        # 如有鉴权 token 请填入
     
     # ──────────────────────────────────────────
     # 后端模型配置

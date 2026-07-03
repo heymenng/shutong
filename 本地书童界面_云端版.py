@@ -64,7 +64,8 @@ DEFAULT_CONFIG = {
     "voice_enabled": True,
     "voice_backend": "xfyun_oral",
     "voice_name": "x6_tianjingshaonv_pro",
-    "g1_control_url": "",
+    "g1_control_url": "http://192.168.0.248:8888",
+    "g1_http_enabled": True,
 }
 
 
