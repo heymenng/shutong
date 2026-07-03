@@ -26,15 +26,49 @@ import requests
 
 
 class G1HTTPClient:
-    """G1 机器人 HTTP 控制客户端"""
+    """G1 机器人 HTTP 控制客户端
 
-    # 运动控制 /action 安全动作子集（V2 已剔除不生效或危险动作）
-    SAFE_ACTIONS = {
-        "stand", "squat", "stop",
+    【2026-07-03 源码级安全勘误】已读取 PC2 上 robot_control_server.py 源码，
+    以下动作的真实实现与字面含义严重不符，必须严格遵守：
+
+    1. stand（站立恢复）= Damp() 失力 → 0.5s 延迟 → Squat2StandUp() 从蹲姿站起
+       ⚠️ 机器人已站立时发送 stand 会先失力倒塌！仅用于从蹲姿恢复站立。
+
+    2. lie_to_stand（趴倒恢复）= Damp() 失力 → 0.5s 延迟 → Lie2StandUp() 从趴姿站起
+       ⚠️ 机器人站立时发送会先失力倒塌！仅用于从瘫倒/趴姿恢复站立。
+
+    3. damp（失力）= 纯 Damp()，电机断电，机器人直接瘫倒
+       ⚠️ 危险！仅在紧急保护时使用，正常情况绝不用。
+
+    4. squat（蹲下）= StandUp2Squat()，从站立姿势蹲下
+       ✅ 安全，仅站立时使用。
+
+    5. stop（停止）= StopMove()，停止当前运动
+       ✅ 安全，任何时候可用。
+
+    6. forward/back/left/right/turn_left/turn_right/move = 行走动作
+       ✅ 安全，仅站立时使用。
+    """
+
+    # 任何时候都安全的动作
+    SAFE_ANYTIME_ACTIONS = {"stop"}
+
+    # 仅机器人站立时可安全执行的动作
+    SAFE_WHEN_STANDING = {
+        "squat",
         "forward", "back", "left", "right", "turn_left", "turn_right", "move",
     }
 
-    # 运动控制 /action 完整动作列表（含 damp/lie_to_stand，仅高权限使用）
+    # 仅机器人瘫倒/趴姿时可安全执行的恢复动作（会先调用 Damp 失力）
+    SAFE_WHEN_COLLAPSED = {"lie_to_stand"}
+
+    # 仅机器人蹲姿时可安全执行的恢复动作（会先调用 Damp 失力）
+    SAFE_WHEN_SQUATTING = {"stand"}
+
+    # 绝不允许自动执行的致命动作
+    FORBIDDEN_ACTIONS = {"damp", "lie_down"}
+
+    # 完整动作列表（用于校验）
     ALL_ACTIONS = {
         "damp", "stand", "squat", "lie_to_stand", "stop", "move",
         "forward", "back", "left", "right", "turn_left", "turn_right",
@@ -141,37 +175,77 @@ class G1HTTPClient:
         except Exception as e:
             return {"ok": False, "error": str(e)}
 
-    # 书童动作名 → (端点, G1 动作名) 映射
-    # V2 说明：wave/shake_hand/dance 等已改为手臂动作
+    # 书童动作名 → (端点, G1 动作名, 安全状态要求) 映射
+    # 2026-07-03 已按 robot_control_server.py 源码校正：
+    #   stand  = Damp() + Squat2StandUp()  【仅蹲姿时安全，站立时发会塌！】
+    #   lie_to_stand = Damp() + Lie2StandUp() 【仅瘫倒时安全，站立时发会塌！】
     BOOKBOY_TO_G1_ACTION = {
+        # ── 站立恢复（仅蹲姿→站立，站立时发送会失力倒塌！）──
         "stand": ("action", "stand"),
-        "sit": ("action", "squat"),           # 书童的"坐下"对应 G1 的蹲下
-        "lie_down": ("action", "damp"),       # 书童的"趴下"对应 G1 damp（仅在明确需要失力保护时使用）
-        "wave": ("arm_action", "face_wave"),
-        "walk": ("action", "forward"),
+        "recovery_from_squat": ("action", "stand"),
+
+        # ── 趴倒恢复（仅瘫倒→站立，站立时发送会失力倒塌！）──
+        "recovery": ("action", "lie_to_stand"),      # 从瘫倒恢复站立
+        "lie_to_stand": ("action", "lie_to_stand"),
+
+        # ── 正常姿势变换（站立时安全）──
+        "sit": ("action", "squat"),                   # 蹲下
+        "squat": ("action", "squat"),
+
+        # ── 急停（任何时候安全）──
         "stop": ("action", "stop"),
-        "follow": ("action", "move"),         # 跟随用 move 原地微调示意
-        "dance": ("arm_action", "face_wave"), # 跳舞用手臂挥手
-        "recovery": ("action", "stand"),      # 恢复站立
+
+        # ── 行走（仅站立时安全）──
+        "walk": ("action", "forward"),
+        "forward": ("action", "forward"),
+        "back": ("action", "back"),
+        "left": ("action", "left"),
+        "right": ("action", "right"),
+        "turn_left": ("action", "turn_left"),
+        "turn_right": ("action", "turn_right"),
+        "follow": ("action", "move"),
+        "move": ("action", "move"),
+
+        # ── 手臂动作（与身体姿势无关，安全）──
+        "wave": ("arm_action", "face_wave"),
+        "dance": ("arm_action", "face_wave"),
         "shake_hand": ("arm_action", "shake_hand_arm"),
         "clap": ("arm_action", "clap"),
         "heart": ("arm_action", "heart"),
         "hug": ("arm_action", "hug"),
         "high_five": ("arm_action", "high_five"),
+        "hands_up": ("arm_action", "hands_up"),
+        "release_arm": ("arm_action", "release_arm"),
+        "two_hand_kiss": ("arm_action", "two_hand_kiss"),
+
+        # ── 致命动作（绝不允许）──
+        # "lie_down": ("action", "damp"),   # ❌ 已禁用：damp 会导致失力瘫倒
     }
 
     def execute_action_safe(self, action: str, retry_once: bool = True, **kwargs) -> dict:
         """
         执行动作，遇到 409 忙时退避重试一次。
-        stop/damp 等急停动作直接发送，不重试。
         自动把书童动作名映射为 G1 控制服务动作名，并自动路由到 /action 或 /arm_action。
+
+        【安全规则】已按 robot_control_server.py 源码校正：
+        - stand / lie_to_stand 都会先调用 Damp() 失力，仅在对应姿势下安全
+        - damp 已列入禁止列表，绝不允许自动执行
         """
-        endpoint, g1_action = self.BOOKBOY_TO_G1_ACTION.get(action, ("action", action))
+        mapped = self.BOOKBOY_TO_G1_ACTION.get(action)
+        if not mapped:
+            return {"ok": False, "error": f"未知动作: {action}"}
+
+        endpoint, g1_action = mapped[0], mapped[1]
+
+        # 致命动作拦截
+        if g1_action in self.FORBIDDEN_ACTIONS:
+            return {"ok": False, "error": f"动作 '{g1_action}' 已被禁用（会导致失力瘫倒）"}
 
         if endpoint == "arm_action":
             return self.execute_arm_action(g1_action)
 
-        if g1_action in ("stop", "damp"):
+        # stop 任何时候直接发送，不重试
+        if g1_action == "stop":
             return self.execute_action(g1_action, **kwargs)
 
         result = self.execute_action(g1_action, **kwargs)
@@ -179,6 +253,39 @@ class G1HTTPClient:
             time.sleep(0.3)
             return self.execute_action(g1_action, **kwargs)
         return result
+
+    def recover_from_collapsed(self) -> dict:
+        """
+        从瘫倒状态安全恢复站立。
+        底层实现：Damp() 失力 → 0.5s 延迟 → Lie2StandUp() 从趴姿站起
+        执行后需等待至少 5 秒让机器人完成站起，期间绝不要再发其他动作指令。
+        """
+        return self.execute_action("lie_to_stand")
+
+    def recover_from_squat(self) -> dict:
+        """
+        从蹲姿安全恢复站立。
+        底层实现：Damp() 失力 → 0.5s 延迟 → Squat2StandUp() 从蹲姿站起
+        ⚠️ 机器人站立时发送会先失力倒塌！仅用于从蹲姿恢复。
+        """
+        return self.execute_action("stand")
+
+    def safe_stand_up(self, current_pose: str = "unknown") -> dict:
+        """
+        根据当前姿势选择正确的站立恢复方式。
+
+        Args:
+            current_pose: "standing" | "squat" | "collapsed" | "unknown"
+        """
+        if current_pose == "collapsed":
+            return self.recover_from_collapsed()
+        elif current_pose == "squat":
+            return self.recover_from_squat()
+        elif current_pose == "standing":
+            return {"ok": True, "message": "机器人已在站立状态，无需恢复"}
+        else:
+            # 姿势未知时，优先尝试 lie_to_stand（覆盖瘫倒和蹲姿两种情况）
+            return self.recover_from_collapsed()
 
     def speak_tts(self, text: str, speaker_id: int = 0) -> dict:
         """调用 G1 内置 TTS 播放文字"""
