@@ -117,11 +117,13 @@ voice_engine = None
 g1_client = None
 
 
-def init_g1_client():
-    """初始化 G1 机器人控制客户端"""
+def init_g1_client(force: bool = False):
+    """初始化 G1 机器人控制客户端（支持重复调用以自动重连）"""
     global g1_client
     if not G1HTTPClient:
         print("[机器人] G1HTTPClient 未加载，跳过初始化")
+        return
+    if g1_client and not force:
         return
     url = CONFIG.get("g1_control_url", "").strip() or os.environ.get("G1_CONTROL_URL", "").strip()
     if not url:
@@ -134,8 +136,10 @@ def init_g1_client():
             print(f"[机器人] G1 控制客户端已连接: {url}")
         else:
             print(f"[机器人] G1 控制服务连接测试失败: {health.get('error', 'unknown')}")
+            g1_client = None
     except Exception as e:
         print(f"[机器人] G1 初始化失败: {e}")
+        g1_client = None
 
 
 def _play_audio_on_g1(audio_url: str):
@@ -554,11 +558,13 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
             token = self.headers.get("Authorization", "").replace("Bearer ", "")
             session = sessions.get(token, {})
             robot_connected = False
+            if not g1_client:
+                init_g1_client()
             if g1_client:
                 try:
                     robot_connected = g1_client.health().get("ok") is True
                 except Exception:
-                    pass
+                    g1_client = None
             return self._send_json({
                 "children": children,
                 "current_child": current_child,
