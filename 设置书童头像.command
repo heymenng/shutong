@@ -23,7 +23,7 @@ fi
 echo "您选择的文件: $FILE"
 
 # 复制到书童头像位置
-cp "$FILE" "本地书童头像.jpg"
+cp "$FILE" "static/本地书童头像.jpg"
 
 if [ $? -eq 0 ]; then
     echo ""

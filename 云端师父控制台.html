@@ -394,7 +394,7 @@
 
         <div class="topbar">
             <div class="brand">
-                <div class="brand-avatar"><img src="/书童头像.jpg" alt="书童" onerror="this.style.display='none'; this.parentNode.innerHTML='📜'"></div>
+                <div class="brand-avatar"><img src="/static/书童头像.jpg" alt="书童" onerror="this.style.display='none'; this.parentNode.innerHTML='📜'"></div>
                 <span data-i18n="cloudMasterTitle">伴读书童AI · 云端师父控制台</span>
             </div>
             <div class="topbar-actions">
@@ -453,7 +453,7 @@
                         🎙️
                     </button>
                     <button class="send-btn" onclick="sendChat()" title="发送">
-                        <img src="/书童头像.jpg" alt="发送">
+                        <img src="/static/书童头像.jpg" alt="发送">
                     </button>
                 </div>
                 <div class="voice-hint" id="voiceHint" style="display:none;">正在录音，再次点击麦克风停止</div>
@@ -929,7 +929,7 @@
 
             const avatarHtml = role === 'user'
                 ? `<div class="msg-avatar"><img src="/static/师父头像.jpg" alt="师父" onerror="this.style.display='none'; this.parentNode.innerHTML='👤'"></div>`
-                : `<div class="msg-avatar"><img src="/书童头像.jpg" alt="书童" onerror="this.style.display='none'; this.parentNode.innerHTML='📜'"></div>`;
+                : `<div class="msg-avatar"><img src="/static/书童头像.jpg" alt="书童" onerror="this.style.display='none'; this.parentNode.innerHTML='📜'"></div>`;
             const metaHtml = meta ? `<div class="msg-meta">${meta}</div>` : '';
             const audioBtn = role === 'assistant'
                 ? `<button class="msg-audio-btn" onclick="playMessageTts('${mid}', this)" title="朗读">🔊 朗读</button>`

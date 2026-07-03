@@ -370,8 +370,8 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
         return self._inject_avatar(content)
 
     def _inject_avatar(self, html_content: str) -> str:
-        """把 书童头像.jpg 以 base64 内嵌到 HTML，替换默认 emoji 头像占位"""
-        avatar_path = PROJECT_ROOT / "书童头像.jpg"
+        """把 static/书童头像.jpg 以 base64 内嵌到 HTML，替换默认 emoji 头像占位"""
+        avatar_path = PROJECT_ROOT / "static/书童头像.jpg"
         if not avatar_path.exists():
             return html_content
         try:
@@ -524,9 +524,9 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
 
-        # 书童头像图片（兼容 /avatar.jpg 和 /书童头像.jpg）
-        if path in ("/avatar.jpg", "/书童头像.jpg"):
-            avatar_path = PROJECT_ROOT / "书童头像.jpg"
+        # 书童头像图片（兼容 /avatar.jpg 和 /static/书童头像.jpg）
+        if path in ("/avatar.jpg", "/static/书童头像.jpg"):
+            avatar_path = PROJECT_ROOT / "static/书童头像.jpg"
             if avatar_path.exists():
                 self._send_static(avatar_path)
                 return
@@ -570,7 +570,7 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
                 "require_login": False,
                 "role": session.get("role", "adult"),
                 "family_id": family_id,
-                "has_avatar": (PROJECT_ROOT / "书童头像.jpg").exists(),
+                "has_avatar": (PROJECT_ROOT / "static/书童头像.jpg").exists(),
                 "robot_connected": robot_connected,
             })
 

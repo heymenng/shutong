@@ -47,7 +47,7 @@ EXCLUDES = {
     "云端数据区",
     # 师父专属入口与工具（家庭安装包不应包含）
     "师父PC端.html",
-    "师父头像.jpg",
+        "static/师父头像.jpg",
     "设置书童头像.command",
     "解锁核心文件.command",
     "锁定核心文件.command",
@@ -69,7 +69,7 @@ EXCLUDES = {
     "每日陪伴记录",
     # 完整本地服务端（云端版安装包只保留 本地书童界面_云端版.py）
     "本地书童界面.py",
-    "本地书童头像.jpg",
+    "static/本地书童头像.jpg",
     # 知识库：云端版安装包不保留，知识调用走云端
     "知识库",
     # 开发/检查脚本，家庭用户不需要
@@ -319,7 +319,7 @@ def cleanup_files_by_package_type(package_dir: Path, package_type: str):
     # 所有家庭包都不应包含师父专属文件和内部文件
     always_remove = [
         "师父PC端.html",
-        "师父头像.jpg",
+    "static/师父头像.jpg",
         "设置书童头像.command",
         "解锁核心文件.command",
         "锁定核心文件.command",
