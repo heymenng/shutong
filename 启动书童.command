@@ -187,6 +187,18 @@ else:
     print("  ⚠️ 问候语音发送失败")
 PYTHON_SCRIPT
 
+# ── 6. 自动打开书童对话界面 ──
+echo ""
+echo "[6/6] 打开书童对话界面..."
+BOOKBOY_URL="http://127.0.0.1:3876"
+# 尝试用默认浏览器打开
+if command -v open >/dev/null 2>&1; then
+    open "$BOOKBOY_URL" >/dev/null 2>&1
+    echo "  ✅ 浏览器已打开: $BOOKBOY_URL"
+else
+    echo "  ℹ️  请手动打开浏览器访问: $BOOKBOY_URL"
+fi
+
 # ── 完成 ──
 echo ""
 echo "============================================================"
@@ -197,9 +209,10 @@ echo "  🤖 书童身体: G1 机器人（已站立待命）"
 echo "  🧠 书童大脑: 本地服务 http://127.0.0.1:3876"
 echo "  📡 身体连接: http://${G1_IP}:${G1_PORT}"
 echo ""
-echo "  您可以直接对书童说："
-echo "    "往前走"、"后退"、"左转"、"右转""
-echo "    "挥挥手"、"鼓鼓掌"、"比个心""
+echo "  💬 对话界面已自动打开，您可以直接打字跟书童聊天"
+echo "  🎤 也可以对书童说："
+echo "     "往前走"、"后退"、"左转"、"右转""
+echo "     "挥挥手"、"鼓鼓掌"、"比个心""
 echo ""
 echo "  按任意键关闭此窗口..."
 read -n 1 -s -r
