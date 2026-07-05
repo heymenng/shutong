@@ -46,16 +46,16 @@ class VoiceEngine:
         self.cache_dir = project_root / "03-引擎区" / "书童程序" / "数据" / "语音缓存"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         
-        # 根据配置选择后端，默认优先 edge-tts
-        preferred_backend = CONFIG.get("voice_backend", "auto")
-        
-        if preferred_backend == "auto":
-            # 自动选择：优先 edge-tts，其次 say，最后 pyttsx3
+            # 根据配置选择后端
+        # 书童常规声音：讯飞超拟人语音 x6_tianjingshaonv_pro（天津少女）
+        # 禁止默认把 macOS say 当“系统测试音”使用
+        preferred_backend = CONFIG.get("voice_backend", "xfyun_oral")
+
+        if preferred_backend == "xfyun_oral":
+            if self._try_xfyun_oral():
+                return
+            print("[语音] ⚠️ 讯飞超拟人语音不可用，尝试回退到 edge-tts")
             if self._try_edge_tts():
-                return
-            if platform.system() == 'Darwin' and self._try_say():
-                return
-            if self._try_pyttsx3():
                 return
         elif preferred_backend == "edge-tts":
             if self._try_edge_tts():
@@ -73,7 +73,17 @@ class VoiceEngine:
         elif preferred_backend == "pyttsx3":
             if self._try_pyttsx3():
                 return
-        
+        elif preferred_backend == "auto":
+            # 自动选择：优先讯飞，其次 edge-tts，最后 say / pyttsx3
+            if self._try_xfyun_oral():
+                return
+            if self._try_edge_tts():
+                return
+            if platform.system() == 'Darwin' and self._try_say():
+                return
+            if self._try_pyttsx3():
+                return
+
         print("[语音] 无可用 TTS 引擎，语音功能已禁用")
     
     # ═══════════════════════════════════════════
@@ -90,7 +100,49 @@ class VoiceEngine:
             return True
         except ImportError:
             return False
-    
+
+    def _try_xfyun_oral(self):
+        """尝试初始化讯飞超拟人语音（书童常规声音：天津少女 x6_tianjingshaonv_pro）"""
+        try:
+            from .讯飞超拟人语音 import XfyunOralTTS
+            tts = XfyunOralTTS()
+            # 先做一次空合成，验证密钥和网络可用性
+            test_bytes = tts.synthesize_to_bytes("你好")
+            if test_bytes is None:
+                print(f"[语音] 讯飞超拟人语音不可用: {tts.error_msg}")
+                return False
+            self.backend = 'xfyun_oral'
+            voice_name = CONFIG.get("voice_name", "x6_tianjingshaonv_pro")
+            print(f"[语音] 使用讯飞超拟人语音引擎，声音: {voice_name}")
+            return True
+        except ImportError as e:
+            print(f"[语音] 讯飞 SDK 未安装: {e}")
+            return False
+        except Exception as e:
+            print(f"[语音] 讯飞超拟人语音初始化失败: {e}")
+            return False
+
+    def _speak_xfyun_oral(self, text):
+        """使用讯飞超拟人语音播放"""
+        from .讯飞超拟人语音 import XfyunOralTTS, play_audio_bytes
+
+        segments = self._split_text(text, max_len=120)
+        for i, segment in enumerate(segments, 1):
+            segment = segment.strip()
+            if not segment:
+                continue
+            filtered = self._filter_for_tts(segment)
+            if not filtered:
+                continue
+
+            tts = XfyunOralTTS()
+            audio_bytes = tts.synthesize_to_bytes(filtered)
+            if audio_bytes:
+                play_audio_bytes(audio_bytes)
+                print(f"  [语音播放完成 ({i}/{len(segments)}]")
+            else:
+                raise RuntimeError(f"讯飞合成失败: {tts.error_msg}")
+
     def _try_say(self):
         """尝试初始化 macOS say"""
         try:
@@ -140,16 +192,22 @@ class VoiceEngine:
         engines_to_try = [
             (original_backend, original_engine),
         ]
-        if original_backend != 'say' and platform.system() == 'Darwin':
-            engines_to_try.append(('say', None))
-        if original_backend != 'pyttsx3':
-            engines_to_try.append(('pyttsx3', None))
+        # 如果首选是讯飞超拟人语音，只允许回退到 edge-tts，禁止自动切到 macOS say 测试音
+        if original_backend == 'xfyun_oral':
+            engines_to_try.append(('edge-tts', None))
+        else:
+            if original_backend != 'say' and platform.system() == 'Darwin':
+                engines_to_try.append(('say', None))
+            if original_backend != 'pyttsx3':
+                engines_to_try.append(('pyttsx3', None))
         
         last_error = None
         for backend, engine in engines_to_try:
             try:
                 if backend == 'edge-tts':
                     self._speak_edge_tts(clean_text)
+                elif backend == 'xfyun_oral':
+                    self._speak_xfyun_oral(clean_text)
                 elif backend == 'say':
                     self._say_long_text(clean_text)
                 elif backend == 'pyttsx3':

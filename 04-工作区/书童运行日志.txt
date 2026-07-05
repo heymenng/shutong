@@ -226,3 +226,31 @@ BrokenPipeError: [Errno 32] Broken pipe
 BrokenPipeError: [Errno 32] Broken pipe
 ----------------------------------------
 ----------------------------------------
+\n===== 启动时间：2026-07-05 21:00:26 =====\n\n===== 启动时间：2026-07-05 21:00:36 =====\n[摄像头] VisionSensor 已初始化
+============================================================
+伴读书童AI · 云端版本地服务壳
+============================================================
+[本地] 家庭 ID: default_family
+[本地] 云端地址: https://bookkidai.com
+[本地] 监听地址: 0.0.0.0:3876
+============================================================
+[语音] 使用 Edge-TTS 引擎，声音: zh-CN-XiaoyiNeural
+[语音] 本地语音引擎已初始化: edge-tts
+[机器人] G1 控制服务连接测试失败: HTTPConnectionPool(host='192.168.0.248', port=8888): Max retries exceeded with url: /health (Caused by NewConnectionError("HTTPConnection(host='192.168.0.248', port=8888): Failed to establish a new connection: [Errno 65] No route to host"))
+[本地] 正在连接云端...
+[本地] 云端连接成功，soul 版本: 09c9676de0d099b2
+[本地家庭] 正在从云端同步家庭基本信息...
+[本地家庭] 本地已存在家庭数据，保留本地版本（如需覆盖请手动同步）
+Traceback (most recent call last):
+  File "/Users/lingjue/Documents/shutong/06-对接区/本地书童界面_云端版.py", line 971, in <module>
+    main()
+  File "/Users/lingjue/Documents/shutong/06-对接区/本地书童界面_云端版.py", line 959, in main
+    server = NoDNSHTTPServer((HOST, PORT), BookBoyCloudHandler)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.13_4/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socketserver.py", line 457, in __init__
+    self.server_bind()
+  File "/Users/lingjue/Documents/shutong/06-对接区/本地书童界面_云端版.py", line 40, in server_bind
+    socketserver.TCPServer.server_bind(self)
+  File "/opt/homebrew/Cellar/python@3.12/3.12.13_4/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+OSError: [Errno 48] Address already in use

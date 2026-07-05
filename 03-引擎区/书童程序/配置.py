@@ -3,6 +3,32 @@
 import os
 from pathlib import Path
 
+
+def _load_dotenv():
+    """从本地 .env 文件加载环境变量，优先于 config.json 中的硬编码值。"""
+    root = Path(__file__).resolve().parents[2]
+    candidates = [
+        root / ".env",
+        root / "01-配置区" / ".env",
+    ]
+    for env_path in candidates:
+        if env_path.exists():
+            try:
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k, v = k.strip(), v.strip().strip('"').strip("'")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+            except Exception:
+                pass
+
+
+_load_dotenv()
+
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "02-知识库区" / "训练素材"
 
@@ -46,9 +72,11 @@ CONFIG = {
     # ──────────────────────────────────────────
     # 语音配置
     # ──────────────────────────────────────────
+    # 书童常规声音：讯飞超拟人语音 "x6_tianjingshaonv_pro"（天津少女）
+    # 仅在网络异常或密钥未配置时，才允许回退到 edge-tts；禁止默认使用 macOS say 作为测试音
     "voice_enabled": True,
-    "voice_backend": "edge-tts",  # "edge-tts" / "say" / "pyttsx3"
-    "voice_name": "zh-CN-XiaoyiNeural",  # Edge-TTS 声音：zh-CN-XiaoyiNeural / zh-CN-XiaoxiaoNeural 等
+    "voice_backend": "xfyun_oral",  # xfyun_oral / edge-tts / say / pyttsx3
+    "voice_name": "x6_tianjingshaonv_pro",  # 讯飞超拟人音色：天津少女
     "voice_rate": 110,  # 语速（仅 say/pyttsx3 有效）
     
     # ──────────────────────────────────────────
@@ -97,3 +125,9 @@ CONFIG = {
 }
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
+# 讯飞超拟人语音（x6_tianjingshaonv_pro 等音色）密钥
+# 请写入 01-配置区/.env：XFYUN_APP_ID=xxx XFYUN_API_KEY=xxx XFYUN_API_SECRET=xxx
+XFYUN_APP_ID = os.getenv("XFYUN_APP_ID", "")
+XFYUN_API_KEY = os.getenv("XFYUN_API_KEY", "")
+XFYUN_API_SECRET = os.getenv("XFYUN_API_SECRET", "")
