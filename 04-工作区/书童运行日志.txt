@@ -254,3 +254,4 @@ Traceback (most recent call last):
   File "/opt/homebrew/Cellar/python@3.12/3.12.13_4/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socketserver.py", line 478, in server_bind
     self.socket.bind(self.server_address)
 OSError: [Errno 48] Address already in use
+\n===== 启动时间：2026-07-05 21:12:34 =====\n
