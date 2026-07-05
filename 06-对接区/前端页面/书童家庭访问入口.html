@@ -73,11 +73,6 @@
             color: white;
         }
         .link-btn.child:hover { background: #6a8a6e; }
-        .link-btn.master {
-            background: #7a6fa3;
-            color: white;
-        }
-        .link-btn.master:hover { background: #6a5f8f; }
         .link-btn.mobile {
             background: #4a90a4;
             color: white;
@@ -143,7 +138,6 @@
             <a id="link-child" class="link-btn child" href="#" data-i18n="childPortal">👶 孩子端</a>
             <a id="link-mobile" class="link-btn mobile" href="#" data-i18n="mobilePortal">📱 手机端</a>
             <a id="link-motong" class="link-btn motong" href="#" data-i18n="motongPortal">✍️ 墨童（家长助手）</a>
-            <a id="link-master" class="link-btn master" href="#" data-i18n="masterPortal">🎓 师父控制台</a>
         </div>
 
         <div class="divider"></div>
@@ -170,13 +164,12 @@
         document.getElementById('link-child').href = `${base}/family/${familyId}/child`;
         document.getElementById('link-mobile').href = `${base}/mobile/${familyId}`;
         document.getElementById('link-motong').href = `${base}/motong/${familyId}`;
-        document.getElementById('link-master').href = `${base}/master/${familyId}`;
         document.getElementById('current-url').textContent = base;
 
-        // 根据安装包类型隐藏不该出现的入口
+        // 师父控制台是特殊入口，不在家庭访问入口显示
         const visibility = {
-            full: ['parent','child','mobile','motong','master'],
-            parent: ['parent','motong','master'],
+            full: ['parent','child','mobile','motong'],
+            parent: ['parent','motong'],
             child: ['child'],
             mobile: ['mobile']
         };
@@ -185,8 +178,7 @@
             'parent': 'link-parent',
             'child': 'link-child',
             'mobile': 'link-mobile',
-            'motong': 'link-motong',
-            'master': 'link-master'
+            'motong': 'link-motong'
         };
         for (const [key, id] of Object.entries(map)) {
             const el = document.getElementById(id);
