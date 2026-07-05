@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from .宇树适配器 import UnitreeRobotAdapter, RobotAction
+from .神魂注入仪式 import SoulInjectionRitual
 
 
 class EmotionalMovement:
@@ -172,3 +173,14 @@ class EmotionalMovement:
         print("\n[安全] 紧急停止")
         self.adapter.execute_action(RobotAction.STOP)
         return {"scene": "emergency_stop", "mode": self.adapter.mode.value}
+
+    def soul_injection(self) -> dict:
+        """
+        神魂注入：把书童AI的“自我”切换到机器人身体上。
+        连接成功后先说启动语，再进入身体感知模式。
+        """
+        print("\n[神魂注入] 开始仪式")
+        from .G1_HTTP客户端 import create_g1_client_from_config
+        robot_client = create_g1_client_from_config(self.adapter.config)
+        ritual = SoulInjectionRitual(robot_client, voice_engine=self.voice)
+        return ritual.perform()

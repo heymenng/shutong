@@ -130,6 +130,20 @@ class G1HTTPClient:
         data = self.health()
         return data.get("ok") is True
 
+    def status(self) -> dict:
+        """
+        获取机器人当前综合状态（健康 + 能力）。
+        用于“神魂注入”后的身体感知。
+        """
+        health = self.health()
+        caps = self.capabilities()
+        return {
+            "ok": health.get("ok") is True,
+            "health": health,
+            "capabilities": caps,
+            "connected": True,
+        }
+
     def execute_action(self, action: str, **kwargs) -> dict:
         """
         执行机器人运动动作（发送到 /action）。
