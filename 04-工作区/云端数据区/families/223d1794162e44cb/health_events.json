@@ -1,0 +1,24 @@
+[
+  {
+    "family_hash": "223d1794162e44cb",
+    "child_hash": "65eeac0d46a91264",
+    "event_type": "挑食",
+    "season": "2026-夏季",
+    "week": "2026-W27",
+    "severity": "严重",
+    "duration_days": null,
+    "recovery_status": "未知",
+    "reported_at": "2026-07-05T17:06:47.699763"
+  },
+  {
+    "family_hash": "223d1794162e44cb",
+    "child_hash": "d176724754aeb6b3",
+    "event_type": "挑食",
+    "season": "2026-夏季",
+    "week": "2026-W27",
+    "severity": "严重",
+    "duration_days": null,
+    "recovery_status": "未知",
+    "reported_at": "2026-07-05T17:06:47.700089"
+  }
+]

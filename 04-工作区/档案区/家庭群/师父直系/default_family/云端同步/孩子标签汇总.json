@@ -1,0 +1,49 @@
+[
+  {
+    "name": "嘟嘟",
+    "child_hash": "65eeac0d46a91264",
+    "age_group": "12-15岁",
+    "gender": "男",
+    "development_stage": "S5",
+    "attention_tags": [
+      "注意力不集中",
+      "睡眠不足",
+      "运动不足",
+      "屏幕时间过长",
+      "情绪波动"
+    ],
+    "ability_tags": [
+      "价值观成熟",
+      "好奇心强",
+      "认知优秀",
+      "社交良好",
+      "性格健康"
+    ],
+    "medical_tags": []
+  },
+  {
+    "name": "橙子",
+    "child_hash": "d176724754aeb6b3",
+    "age_group": "6-9岁",
+    "gender": "男",
+    "development_stage": "S3",
+    "attention_tags": [
+      "挑食",
+      "语文薄弱",
+      "数学困难",
+      "睡眠不足",
+      "运动不足",
+      "屏幕时间过长",
+      "情绪波动"
+    ],
+    "ability_tags": [
+      "好奇心强",
+      "动手优秀",
+      "社交良好",
+      "逻辑思维强"
+    ],
+    "medical_tags": [
+      "挑食"
+    ]
+  }
+]

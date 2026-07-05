@@ -1,4 +1,0 @@
-requests
-pyttsx3
-numpy
-scikit-learn

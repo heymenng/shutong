@@ -1,0 +1,41 @@
+{
+  "family_id": "family_lanxin",
+  "name": "蓝心老师家庭",
+  "description": "蓝心老师之家",
+  "members": [
+    {
+      "user_id": "u_lanxin",
+      "name": "蓝心",
+      "role": "家长",
+      "relation": "母亲",
+      "education": "待填写",
+      "field": "教育"
+    },
+    {
+      "user_id": "u_xiaoyueyue",
+      "name": "小月月",
+      "role": "孩子",
+      "age": 14,
+      "stage": "S5（12-15岁青春期早期·排毒期）",
+      "gender": "女",
+      "grade": "初二",
+      "relation": "女儿",
+      "identity": "书童小师姐",
+      "quick_tips_child": [
+        "帮我检查今天的作业",
+        "我心情不好",
+        "讲一个睡前故事",
+        "我想聊聊朋友的事"
+      ],
+      "welcome_child": "小月月，你好。书童小师姐在这里陪你。作业、心情、朋友、未来，都可以聊。"
+    }
+  ],
+  "notes": "蓝心老师之女小月月，书童小师姐，S5排毒期，可承担师兄师姐角色分享经验。",
+  "quick_tips_parent": [
+    "小月月青春期情绪怎么应对",
+    "初二学习压力大怎么办",
+    "孩子手机使用怎么约定",
+    "母女沟通不畅怎么办"
+  ],
+  "welcome_parent": "蓝心，您好。这里是蓝心老师家庭的书童主控台。小月月的成长、学习、情绪都可以在这里查看。"
+}
