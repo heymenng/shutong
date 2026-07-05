@@ -90,6 +90,28 @@ DEFAULT_CONFIG = {
 }
 
 
+def load_dotenv():
+    """从本地 .env 文件加载环境变量（用于 BOOKBOY_API_KEY 等敏感配置）。"""
+    candidates = [
+        PROJECT_ROOT / ".env",
+        PROJECT_ROOT / "01-配置区" / ".env",
+    ]
+    for env_path in candidates:
+        if env_path.exists():
+            try:
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k, v = k.strip(), v.strip().strip('"').strip("'")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+            except Exception as e:
+                print(f"[配置] 读取 {env_path} 失败: {e}")
+
+
 def load_config():
     """加载本地配置文件"""
     if CONFIG_FILE.exists():
@@ -105,12 +127,13 @@ def load_config():
     return DEFAULT_CONFIG.copy()
 
 
+load_dotenv()
 CONFIG = load_config()
 
 # 云端配置（本地模式：指向本地 cloud_server.py）
 CLOUD_BASE = CONFIG.get("cloud_api_base", "http://127.0.0.1:5000").rstrip("/")
 FAMILY_ID = CONFIG.get("family_id", "default_family")
-API_KEY = CONFIG.get("api_key", "local-dev-key")
+API_KEY = os.environ.get("BOOKBOY_API_KEY", CONFIG.get("api_key", "local-dev-key"))
 
 
 def get_device_id():

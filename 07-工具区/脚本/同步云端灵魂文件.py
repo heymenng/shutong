@@ -107,7 +107,7 @@ def main():
     load_dotenv()
     config = load_config()
     base_url = config.get("cloud_api_base", "https://bookkidai.com")
-    api_key = config.get("api_key", "")
+    api_key = os.environ.get("BOOKBOY_API_KEY", config.get("api_key", ""))
     family_id = config.get("family_id", "")
     master_key = os.environ.get("BOOKBOY_MASTER_KEY", "")
 

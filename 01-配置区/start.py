@@ -14,6 +14,37 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+
+def load_dotenv():
+    """从本地 .env 文件加载环境变量（用于 BOOKBOY_API_KEY 等敏感配置）。"""
+    candidates = [
+        PROJECT_ROOT / ".env",
+        PROJECT_ROOT / "01-配置区" / ".env",
+    ]
+    for env_path in candidates:
+        if env_path.exists():
+            try:
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k, v = k.strip(), v.strip().strip('"').strip("'")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+            except Exception as e:
+                print(f"[配置] 读取 {env_path} 失败: {e}")
+
+
+load_dotenv()
+
+
+def _get_api_key(cfg):
+    """优先从环境变量获取 api_key，其次 config.json。"""
+    return os.environ.get("BOOKBOY_API_KEY", cfg.get("api_key", ""))
+
+
 if platform.system() == "Windows":
     PYTHON = PROJECT_ROOT / ".venv" / "Scripts" / "python.exe"
 else:
@@ -28,13 +59,13 @@ CONFIG_FILE = PROJECT_ROOT / "01-配置区" / "config.json"
 def is_cloud_mode(cfg):
     """根据配置判断是否为云端模式"""
     cloud_api_base = cfg.get("cloud_api_base", "")
-    api_key = cfg.get("api_key", "")
+    api_key = _get_api_key(cfg)
     return (
         cloud_api_base
-        and cloud_api_base
         and api_key
         and "订阅密钥" not in api_key
         and "请向师父" not in api_key
+        and not api_key.startswith("__")
     )
 
 
@@ -56,13 +87,13 @@ def check_config():
         sys.exit(1)
 
     family_id = cfg.get("family_id", "")
-    api_key = cfg.get("api_key", "")
+    api_key = _get_api_key(cfg)
     cloud_api_base = cfg.get("cloud_api_base", "")
 
     if not family_id or family_id == "default_family" or "您的家庭ID" in family_id:
         print("[警告] config.json 中的 family_id 尚未配置")
-    if not api_key or "订阅密钥" in api_key or "请向师父" in api_key:
-        print("[警告] config.json 中的 api_key 尚未配置")
+    if not api_key or "订阅密钥" in api_key or "请向师父" in api_key or api_key.startswith("__"):
+        print("[警告] config.json 中的 api_key 尚未配置（请设置 01-配置区/.env 中的 BOOKBOY_API_KEY）")
         if cloud_api_base:
             print("[提示] 当前配置为云端模式，需要填写正确的 api_key 才能连接云端")
         else:

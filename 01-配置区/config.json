@@ -1,7 +1,7 @@
 {
   "cloud_api_base": "https://bookkidai.com",
   "family_id": "default_family",
-  "api_key": "family-aliyun-1a5a906946fb855a",
+  "api_key": "__BOOKBOY_API_KEY__",
   "voice_enabled": true,
   "voice_backend": "xfyun_oral",
   "voice_name": "x6_tianjingshaonv_pro",
