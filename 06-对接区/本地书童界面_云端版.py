@@ -721,10 +721,9 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
         data = self._get_request_json()
 
         # 登录（云端版简化：本地不校验密码，由云端授权）
+        # 师父是独立入口，不能通过家庭登录口的 password == "master" 进入
         if path == "/api/login":
             role = "adult"
-            if data.get("password") == "master":
-                role = "master"
             token = secrets.token_urlsafe(32)
             sessions[token] = {"role": role, "family_id": FAMILY_ID, "created_at": time.time()}
             return self._send_json({

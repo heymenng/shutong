@@ -2493,8 +2493,6 @@ input{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:
 input:focus{border-color:#8B7355}
 .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;cursor:pointer;background:#8B7355;color:#fff;transition:all 0.2s;margin-bottom:8px}
 .btn:hover{background:#7a6348}
-.btn-secondary{background:#5c6bc0}
-.btn-secondary:hover{background:#4a59a8}
 .error{color:#d32f2f;font-size:13px;margin-top:8px;display:none}
 .link{text-align:center;margin-top:16px;font-size:13px}
 .link a{color:#8B7355;text-decoration:none}
@@ -2508,7 +2506,6 @@ input:focus{border-color:#8B7355}
 <div class="error" id="error"></div>
 <button type="submit" class="btn">登录</button>
 </form>
-<button class="btn btn-secondary" onclick="window.location.href='/master'">师父入口</button>
 <div class="link">没有账号？<a href="/register">注册</a></div>
 </div>
 <script>
