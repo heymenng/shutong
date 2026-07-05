@@ -33,6 +33,12 @@ ENV/
 /04-工作区/日志/
 /05-交付区/临时交付/
 
+# Secrets and local credentials (never commit)
+.env
+*.key
+01-配置区/.env
+01-配置区/*.key
+
 # Bookboy runtime data (privacy sensitive)
 /03-引擎区/书童程序/数据/修行记录/
 /03-引擎区/书童程序/数据/感官日志/

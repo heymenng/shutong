@@ -33,6 +33,28 @@ SOUL_FILE_MAP = {
 }
 
 
+def load_dotenv():
+    """从本地 .env 文件加载环境变量，用于读取 BOOKBOY_MASTER_KEY 等敏感配置。"""
+    candidates = [
+        PROJECT_ROOT / ".env",
+        PROJECT_ROOT / "01-配置区" / ".env",
+    ]
+    for env_path in candidates:
+        if env_path.exists():
+            try:
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k, v = k.strip(), v.strip().strip('"').strip("'")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+            except Exception as e:
+                print(f"[警告] 读取 {env_path} 失败: {e}")
+
+
 def load_config():
     if not CONFIG_PATH.exists():
         print(f"[错误] 未找到配置文件: {CONFIG_PATH}")
@@ -82,6 +104,7 @@ def sha256_text(text: str, full: bool = False) -> str:
 
 
 def main():
+    load_dotenv()
     config = load_config()
     base_url = config.get("cloud_api_base", "https://bookkidai.com")
     api_key = config.get("api_key", "")
