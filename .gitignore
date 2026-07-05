@@ -38,6 +38,7 @@ ENV/
 *.key
 01-配置区/.env
 01-配置区/*.key
+01-配置区/.ssh/
 
 # Bookboy runtime data (privacy sensitive)
 /03-引擎区/书童程序/数据/修行记录/
