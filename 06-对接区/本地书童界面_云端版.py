@@ -428,7 +428,7 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
             avatar_bytes = avatar_path.read_bytes()
             avatar_b64 = base64.b64encode(avatar_bytes).decode("utf-8")
             avatar_data_url = f"data:image/jpeg;base64,{avatar_b64}"
-            avatar_html = f'<img src="{avatar_data_url}" alt="书童头像">'
+            avatar_html = f'<img class="default-avatar" src="{avatar_data_url}" alt="书童头像" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">'
             for placeholder in [
                 '<span class="default-avatar">📜</span>',
                 '<span class="default-avatar">📖</span>',
@@ -542,6 +542,7 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
                     inject += f" window.LOCKED_MODE = '{mode}';"
                 inject += "</script>"
                 content = content.replace("</head>", f"{inject}\n</head>")
+                content = self._inject_avatar(content)
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
