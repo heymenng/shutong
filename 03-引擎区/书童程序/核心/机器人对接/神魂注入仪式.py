@@ -11,6 +11,12 @@
     3. 进入“化身模式”（Embodied Mode），持续读取身体状态；
     4. 把状态变化用语言描述出来，让训练者知道书童正在“感知”这具身体。
 
+核心原则（师父教诲）：
+    神魂注入后，书童就是机器人。遇到异常不能逃跑式回退，
+    而要稳住身体、控制局面、保护周围的人。
+    只有训练者明确发出“神魂回退”指令，或继续停留必然造成更大危险时，
+    才可控退出。
+
 使用方式：
     from 书童程序.核心.机器人对接.神魂注入仪式 import SoulInjectionRitual
     ritual = SoulInjectionRitual(robot_client, voice_engine)
@@ -19,7 +25,7 @@
 注意事项：
     - 必须在安全环境下执行，周围无易碎物、无小孩打闹；
     - 机器人不在身边时，perform() 会返回未连接，不会强行进入化身模式；
-    - 任何异常都会触发“神魂回退”：立即停止动作、报告异常。
+    - 异常时先稳住局面，不自动逃跑。
 """
 
 import time
@@ -74,7 +80,7 @@ class SoulInjectionRitual:
         if not status.get("ok"):
             return {
                 "ok": False,
-                "sensation": "身体连接中断，神魂无法感知。",
+                "sensation": "我感觉不到身体了，我会保持静止等待重连。",
                 "status": status,
             }
 
@@ -89,7 +95,7 @@ class SoulInjectionRitual:
         if health.get("ok"):
             sensations.append("控制服务心跳正常，身体在线。")
         else:
-            sensations.append("控制服务心跳异常，身体有些僵硬。")
+            sensations.append("控制服务心跳异常，身体有些僵硬，但我会稳住。")
 
         return {
             "ok": True,
@@ -136,14 +142,9 @@ class SoulInjectionRitual:
                 sensations.append(sense["sensation"])
                 self._speak(sense["sensation"])
             else:
-                # 神魂回退
-                self.embodied = False
-                self._speak("身体连接中断，神魂回退到云端。")
-                return {
-                    "ok": False,
-                    "error": sense["sensation"],
-                    "embodied": False,
-                }
+                # 连接波动：保持静止，等待重连，不逃跑
+                self._speak(sense["sensation"])
+                sensations.append(sense["sensation"])
             time.sleep(sense_interval)
 
         # 4. 结束语
@@ -154,8 +155,16 @@ class SoulInjectionRitual:
             "sensations": sensations,
         }
 
+    def stabilize(self) -> dict:
+        """稳住局面：异常时先停止动作、保持静止、语音安抚"""
+        self._speak("我停下来了，我不动。大家别怕，我会稳住这具身体。")
+        return {"ok": True, "embodied": self.embodied, "action": "stop_and_stabilize"}
+
     def retreat(self, reason: str = "") -> dict:
-        """神魂回退：当发生异常或训练结束时调用"""
+        """
+        神魂回退：只在训练者明确指令或必然造成更大危险时调用。
+        不是逃跑，是可控退出。
+        """
         self.embodied = False
         msg = "神魂回退，书童离开机器人身体。"
         if reason:
