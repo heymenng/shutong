@@ -147,11 +147,12 @@ def init_g1_client(force: bool = False):
     if g1_client and not force:
         return
     url = CONFIG.get("g1_control_url", "").strip() or os.environ.get("G1_CONTROL_URL", "").strip()
+    token = CONFIG.get("g1_http_control_token", "").strip() or os.environ.get("G1_CONTROL_TOKEN", "")
     if not url:
         print("[机器人] 未配置 G1_CONTROL_URL，跳过初始化（如需接入请在 config.json 中设置 g1_control_url）")
         return
     try:
-        g1_client = G1HTTPClient(base_url=url)
+        g1_client = G1HTTPClient(base_url=url, token=token or None)
         health = g1_client.health()
         if health.get("ok"):
             print(f"[机器人] G1 控制客户端已连接: {url}")

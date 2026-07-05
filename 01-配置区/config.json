@@ -6,11 +6,11 @@
   "voice_backend": "xfyun_oral",
   "voice_name": "x6_tianjingshaonv_pro",
   "local_data_dir": "03-引擎区/书童程序/数据",
-  "unitree_enabled": false,
-  "unitree_mode": "simulation",
+  "unitree_enabled": true,
+  "unitree_mode": "real",
   "unitree_model": "g1",
   "g1_http_enabled": true,
   "g1_control_url": "http://192.168.0.248:8888",
   "g1_http_control_url": "http://192.168.0.248:8888",
-  "g1_http_control_token": ""
+  "g1_http_control_token": "123"
 }

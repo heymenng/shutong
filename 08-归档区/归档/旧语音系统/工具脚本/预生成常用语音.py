@@ -30,8 +30,7 @@ COMMON_PHRASES = [
 
 
 def main():
-    print("=== 预生成常用陪伴语音 ===
-")
+    print("=== 预生成常用陪伴语音 ===\n")
     voice = VoiceEngine()
     
     if voice.backend != 'edge-tts':
@@ -42,8 +41,7 @@ def main():
         print(f"[{i}/{len(COMMON_PHRASES)}] {text[:30]}...")
         voice.speak(text)
     
-    print(f"
-✅ 预生成完成，共 {len(COMMON_PHRASES)} 条")
+    print(f"\n✅ 预生成完成，共 {len(COMMON_PHRASES)} 条")
     
     # 统计缓存
     cache_dir = voice.cache_dir

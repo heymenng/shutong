@@ -74,6 +74,9 @@ class G1HTTPClient:
         "forward", "back", "left", "right", "turn_left", "turn_right",
     }
 
+    # 本地/云端壳可用的安全动作集合（致命动作仍被拦截）
+    SAFE_ACTIONS = ALL_ACTIONS - FORBIDDEN_ACTIONS
+
     # 手臂动作 /arm_action 安全动作子集（V2 新增，全部实测可用）
     # 2026-07-03 新增演讲用小幅度动作：
     #   right_hand_on_heart 右手放心口（表达真诚/感恩）
@@ -104,7 +107,7 @@ class G1HTTPClient:
     def health(self) -> dict:
         """检查控制服务健康状态"""
         try:
-            r = requests.get(f"{self.base_url}/health", timeout=5)
+            r = requests.get(f"{self.base_url}/health", headers=self._headers(), timeout=5)
             r.raise_for_status()
             return r.json()
         except Exception as e:
@@ -115,7 +118,7 @@ class G1HTTPClient:
         if self._capabilities is not None and not force:
             return self._capabilities
         try:
-            r = requests.get(f"{self.base_url}/actions", timeout=5)
+            r = requests.get(f"{self.base_url}/actions", headers=self._headers(), timeout=5)
             r.raise_for_status()
             self._capabilities = r.json()
             return self._capabilities
