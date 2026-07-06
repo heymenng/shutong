@@ -9,7 +9,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-BASE = Path("/Users/lingjue/Documents/shutong")
+
+def _project_root() -> Path:
+    p = Path(__file__).resolve()
+    for parent in p.parents:
+        if (parent / "01-配置区").exists():
+            return parent
+    return p.parents[2]
+
+
+BASE = _project_root()
 GENERATOR = BASE / "07-工具区/工具脚本/生成笑话音频.py"
 AUDIO_DIR = BASE / "05-交付区/产品交付/书童音频节目/音频节目"
 JOKE_BASE = BASE / "05-交付区/产品交付/书童音频节目/笑话库"
@@ -20,9 +29,11 @@ JOKE_FILES = [
     "按角色/台湾书童/软软做蛋糕.md",
     "按角色/陕西书童/秦娃修椅子.md",
     "按角色/伴读书童/小师弟点醒.md",
+    "按角色/三个书童/买菜记.md",
     "按类型/深度寓意笑话/AI 问禅师.md",
     "按类型/成语新解/对牛弹琴.md",
     "按类型/成语新解/掩耳盗铃.md",
+    "按类型/方言相声/三个书童拜师父.md",
     "按类型/历史深度笑话/苏东坡请客.md",
     "按类型/历史深度笑话/王阳明赏花.md",
     "按类型/历史深度笑话/庄子观鱼.md",

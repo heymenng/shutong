@@ -18,14 +18,25 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 
+def _project_root() -> Path:
+    p = Path(__file__).resolve()
+    for parent in p.parents:
+        if (parent / "01-配置区").exists():
+            return parent
+    return p.parents[3]
+
+
+_PROJECT_ROOT = _project_root()
+
+
 class CultivationJournal:
     """书童修行日志系统"""
 
-    def __init__(self, journal_dir="/Users/lingjue/Documents/shutong/03-引擎区/书童程序/数据/修行记录"):
-        self.journal_dir = Path(journal_dir)
+    def __init__(self, journal_dir=None):
+        self.journal_dir = Path(journal_dir) if journal_dir else _PROJECT_ROOT / "03-引擎区" / "书童程序" / "数据" / "修行记录"
         self.journal_dir.mkdir(parents=True, exist_ok=True)
-        
-        self.pointization_file = Path("/Users/lingjue/Documents/shutong/03-引擎区/书童程序/数据/修行日志/师父点化库_V1.0.json")
+
+        self.pointization_file = _PROJECT_ROOT / "03-引擎区" / "书童程序" / "数据" / "修行日志" / "师父点化库_V1.0.json"
 
     def log_interaction(
         self,

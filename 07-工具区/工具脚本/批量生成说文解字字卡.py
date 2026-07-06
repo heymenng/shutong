@@ -6,9 +6,21 @@
 
 import os
 import json
+from pathlib import Path
+
+
+def _project_root() -> Path:
+    p = Path(__file__).resolve()
+    for parent in p.parents:
+        if (parent / "01-配置区").exists():
+            return parent
+    return p.parents[2]
+
+
+_PROJECT_ROOT = _project_root()
 
 # 字卡输出目录
-OUTPUT_DIR = "/Users/lingjue/Documents/shutong/02-知识库区/知识库/中华文明/说文解字/字卡"
+OUTPUT_DIR = str(_PROJECT_ROOT / "02-知识库区" / "知识库" / "中华文明" / "说文解字" / "字卡")
 
 # 字卡模板
 TEMPLATE = """# {char}

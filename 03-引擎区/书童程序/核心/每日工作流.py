@@ -18,6 +18,17 @@ from pathlib import Path
 from typing import Dict, List
 
 
+def _project_root() -> Path:
+    p = Path(__file__).resolve()
+    for parent in p.parents:
+        if (parent / "01-配置区").exists():
+            return parent
+    return p.parents[3]
+
+
+_PROJECT_ROOT = _project_root()
+
+
 class DailyWorkflow:
     """
     书童每日工作流
@@ -325,7 +336,7 @@ class DailyWorkflow:
     def _append_to_companion_log(self, child_name, task_name, content):
         """自动追加到陪伴日志"""
         date_str = datetime.now().strftime("%Y-%m-%d")
-        log_file = Path("/Users/lingjue/Documents/shutong/04-工作区/档案区/陪伴日志") / f"{date_str}_{child_name}.md"
+        log_file = _PROJECT_ROOT / "04-工作区" / "档案区" / "陪伴日志" / f"{date_str}_{child_name}.md"
         log_file.parent.mkdir(parents=True, exist_ok=True)
         
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -420,7 +431,7 @@ class DailyWorkflow:
         missing = []
         
         for child in self.bookboy.profile_manager.get_all_children():
-            log_file = Path("/Users/lingjue/Documents/shutong/04-工作区/档案区/陪伴日志") / f"{date_str}_{child.name}.md"
+            log_file = _PROJECT_ROOT / "04-工作区" / "档案区" / "陪伴日志" / f"{date_str}_{child.name}.md"
             if not log_file.exists():
                 missing.append(child.name)
         
@@ -447,7 +458,7 @@ class DailyWorkflow:
         today = datetime.now().strftime("%Y-%m-%d")
         
         # 统计今日陪伴日志
-        log_dir = Path("/Users/lingjue/Documents/shutong/04-工作区/档案区/陪伴日志")
+        log_dir = _PROJECT_ROOT / "04-工作区" / "档案区" / "陪伴日志"
         today_logs = list(log_dir.glob(f"{today}_*.md"))
         
         # 预警情况

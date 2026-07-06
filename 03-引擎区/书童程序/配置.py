@@ -29,7 +29,7 @@ def _load_dotenv():
 
 _load_dotenv()
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "02-知识库区" / "训练素材"
 
 CONFIG = {

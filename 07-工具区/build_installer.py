@@ -108,7 +108,7 @@ EXCLUDES = {
     # 内部工具/测试音频/运行时日志/云端专用依赖，不进家庭安装包
     "03-引擎区/书童程序/工具",
     "03-引擎区/static/测试音频.mp3",
-    "书童运行日志.txt",
+    "04-工作区/书童运行日志.txt",
     "config.json.template",
     "requirements_cloud.txt",
 }

@@ -6,8 +6,20 @@
 
 import os
 import random
+from pathlib import Path
 
-OUTPUT_DIR = "/Users/lingjue/Documents/shutong/02-知识库区/知识库/中华文明/说文解字/字卡"
+
+def _project_root() -> Path:
+    p = Path(__file__).resolve()
+    for parent in p.parents:
+        if (parent / "01-配置区").exists():
+            return parent
+    return p.parents[2]
+
+
+_PROJECT_ROOT = _project_root()
+
+OUTPUT_DIR = str(_PROJECT_ROOT / "02-知识库区" / "知识库" / "中华文明" / "说文解字" / "字卡")
 
 # 完整的305字清单（60已有 + 245新建）
 ALL_CHARS = {

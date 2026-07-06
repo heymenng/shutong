@@ -26,11 +26,22 @@ except ImportError:
     CONFIG = {}
 
 
+def _project_root() -> Path:
+    p = Path(__file__).resolve()
+    for parent in p.parents:
+        if (parent / "01-配置区").exists():
+            return parent
+    return p.parents[3]
+
+
+_PROJECT_ROOT = _project_root()
+
+
 class SensorySystem:
     """书童感官系统：视觉 + 听觉"""
-    
+
     def __init__(self, journal_dir=None, config=None):
-        self.journal_dir = Path(journal_dir) if journal_dir else Path("/Users/lingjue/Documents/shutong/03-引擎区/书童程序/数据/感官日志")
+        self.journal_dir = Path(journal_dir) if journal_dir else _PROJECT_ROOT / "03-引擎区" / "书童程序" / "数据" / "感官日志"
         self.journal_dir.mkdir(parents=True, exist_ok=True)
         self.config = config or CONFIG
         
@@ -428,8 +439,8 @@ class VisionSensor:
 class AudioSensor:
     """听觉传感器：麦克风 + 语音识别"""
     
-    def __init__(self, journal_dir, config=None):
-        self.journal_dir = Path(journal_dir) if journal_dir else Path("/Users/lingjue/Documents/shutong/03-引擎区/书童程序/数据/感官日志")
+    def __init__(self, journal_dir=None, config=None):
+        self.journal_dir = Path(journal_dir) if journal_dir else _PROJECT_ROOT / "03-引擎区" / "书童程序" / "数据" / "感官日志"
         self.recording = False
         self.last_audio_path = None
         self.config = config or {}

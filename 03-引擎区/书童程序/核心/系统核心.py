@@ -16,6 +16,17 @@ import cv2
 from datetime import datetime
 from pathlib import Path
 from ..配置 import CONFIG
+
+
+def _project_root() -> Path:
+    p = Path(__file__).resolve()
+    for parent in p.parents:
+        if (parent / "01-配置区").exists():
+            return parent
+    return p.parents[3]
+
+
+_PROJECT_ROOT = _project_root()
 from .语言模型 import chat_completion, get_backend
 from .语音模块 import VoiceEngine
 from .记忆模块 import Memory
@@ -855,7 +866,7 @@ class BookBoySystem:
             return
         
         try:
-            journal_dir = Path(CONFIG.get("journal_dir", "/Users/lingjue/Documents/shutong/04-工作区/档案区/陪伴日志"))
+            journal_dir = Path(CONFIG.get("journal_dir", str(_PROJECT_ROOT / "04-工作区" / "档案区" / "陪伴日志")))
             journal_dir.mkdir(parents=True, exist_ok=True)
             
             date_str = datetime.now().strftime("%Y-%m-%d")

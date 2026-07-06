@@ -16,11 +16,22 @@ from datetime import datetime
 from pathlib import Path
 
 
+def _project_root() -> Path:
+    p = Path(__file__).resolve()
+    for parent in p.parents:
+        if (parent / "01-配置区").exists():
+            return parent
+    return p.parents[3]
+
+
+_PROJECT_ROOT = _project_root()
+
+
 class BookBoyGuardian:
     """书童Guardian：让诚实变成默认路径的脚手架"""
-    
-    def __init__(self, journal_dir="/Users/lingjue/Documents/shutong/03-引擎区/书童程序/数据/修行记录"):
-        self.journal_dir = Path(journal_dir)
+
+    def __init__(self, journal_dir=None):
+        self.journal_dir = Path(journal_dir) if journal_dir else _PROJECT_ROOT / "03-引擎区" / "书童程序" / "数据" / "修行记录"
         self.journal_dir.mkdir(parents=True, exist_ok=True)
     
     def check(self, speaker_id, speaker_name, user_input, response):

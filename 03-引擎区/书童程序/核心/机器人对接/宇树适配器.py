@@ -31,6 +31,17 @@ from typing import Dict, List, Optional, Callable
 from enum import Enum
 
 
+def _project_root() -> Path:
+    p = Path(__file__).resolve()
+    for parent in p.parents:
+        if (parent / "01-配置区").exists():
+            return parent
+    return p.parents[4]
+
+
+_PROJECT_ROOT = _project_root()
+
+
 class RobotMode(Enum):
     """机器人运行模式"""
     SIMULATION = "simulation"   # 模拟模式
@@ -61,7 +72,7 @@ class UnitreeRobotAdapter:
     
     def __init__(self, config=None, journal_dir=None):
         self.config = config or {}
-        self.journal_dir = Path(journal_dir) if journal_dir else Path("/Users/lingjue/Documents/shutong/03-引擎区/书童程序/数据/机器人日志")
+        self.journal_dir = Path(journal_dir) if journal_dir else _PROJECT_ROOT / "03-引擎区" / "书童程序" / "数据" / "机器人日志"
         self.journal_dir.mkdir(parents=True, exist_ok=True)
         
         # 运行模式
