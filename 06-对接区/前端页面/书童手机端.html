@@ -106,6 +106,25 @@
         .schedule-add input, .schedule-add select { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; outline: none; }
         .schedule-add button { padding: 10px 16px; background: #4a90a4; color: white; border: none; border-radius: 10px; font-size: 14px; }
 
+        /* 成长记录面板 */
+        .growth-sheet { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 2600; display: none; align-items: flex-end; }
+        .growth-sheet.active { display: flex; }
+        .growth-panel { width: 100%; max-height: 85vh; background: white; border-radius: 20px 20px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); animation: slideUp 0.2s ease; display: flex; flex-direction: column; }
+        .growth-title { text-align: center; font-size: 16px; color: #333; margin-bottom: 12px; position: relative; font-weight: 600; }
+        .growth-close { position: absolute; right: 0; top: -4px; width: 28px; height: 28px; line-height: 28px; text-align: center; color: #999; font-size: 20px; cursor: pointer; }
+        .growth-list { flex: 1; overflow-y: auto; margin-bottom: 12px; }
+        .growth-item { padding: 12px; border-bottom: 1px solid #f0f0f0; }
+        .growth-date { font-size: 12px; color: #4a90a4; font-weight: 600; }
+        .growth-content { font-size: 14px; color: #333; margin-top: 4px; line-height: 1.5; }
+        .growth-img { max-width: 100%; max-height: 160px; border-radius: 10px; margin-top: 8px; display: block; }
+        .growth-meta { font-size: 11px; color: #888; margin-top: 4px; }
+        .growth-empty { text-align: center; color: #888; padding: 30px 0; font-size: 14px; }
+        .growth-add { padding-top: 10px; border-top: 1px solid #e8e8e8; display: flex; flex-direction: column; gap: 8px; }
+        .growth-add input, .growth-add textarea, .growth-add select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; outline: none; box-sizing: border-box; }
+        .growth-add textarea { min-height: 60px; resize: vertical; }
+        .growth-add button { padding: 10px 16px; background: #7a9e7e; color: white; border: none; border-radius: 10px; font-size: 14px; }
+        .growth-photo-btn { background: #8b7355; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 14px; }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -139,6 +158,7 @@
             <div class="quick-tip" data-text="讲一个睡前故事">睡前故事</div>
             <div class="quick-tip" data-text="为什么我要早睡">为什么早睡</div>
             <div class="quick-tip" onclick="openSchedulePanel()">📅 今日安排</div>
+            <div class="quick-tip" style="background:#e8f5e9;color:#2e7d32;" onclick="openGrowthPanel()">🌱 成长记录</div>
             <div class="quick-tip" style="background:#fff3cd;color:#856404;" onclick="testAudio()">🔊 测试声音</div>
         </div>
 
@@ -192,6 +212,30 @@
                     <option value="sleep">睡觉</option>
                 </select>
                 <button onclick="addScheduleItem()">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成长记录面板 -->
+    <div id="growthSheet" class="growth-sheet">
+        <div class="growth-panel">
+            <div class="growth-title">成长记录<span class="growth-close" onclick="closeGrowthPanel()">&times;</span></div>
+            <div id="growthList" class="growth-list"></div>
+            <div class="growth-add">
+                <input type="date" id="growthDate">
+                <select id="growthCategory">
+                    <option value="milestone">里程碑</option>
+                    <option value="quote">童言童语</option>
+                    <option value="photo">精彩瞬间</option>
+                    <option value="height">身高体重</option>
+                    <option value="study">学习进步</option>
+                    <option value="other">其他</option>
+                </select>
+                <textarea id="growthContent" placeholder="记录下今天的小成长..."></textarea>
+                <input type="file" id="growthImageInput" accept="image/*" style="display:none" onchange="handleGrowthImageSelect(event)">
+                <button class="growth-photo-btn" onclick="$('growthImageInput').click()">📷 添加照片</button>
+                <div id="growthImagePreview"></div>
+                <button onclick="addGrowthItem()">保存记录</button>
             </div>
         </div>
     </div>
@@ -825,6 +869,108 @@
             try {
                 const data = await apiFetch('/api/schedule/' + id, { method: 'DELETE' });
                 if (data.success) loadSchedule();
+            } catch (e) {
+                showErrorToast('删除失败');
+            }
+        }
+
+        // 成长记录
+        let pendingGrowthImage = null;
+        function openGrowthPanel() {
+            $('growthSheet').classList.add('active');
+            if (!$('growthDate').value) $('growthDate').value = new Date().toISOString().slice(0, 10);
+            loadGrowth();
+        }
+        function closeGrowthPanel() {
+            $('growthSheet').classList.remove('active');
+        }
+        $('growthSheet').addEventListener('click', e => {
+            if (e.target === $('growthSheet')) closeGrowthPanel();
+        });
+
+        async function handleGrowthImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            $('growthImagePreview').innerHTML = '<span style="font-size:12px;color:#888;">压缩中...</span>';
+            try {
+                pendingGrowthImage = await compressImage(file, 1280, 0.85);
+                if (pendingGrowthImage.length > 5 * 1024 * 1024) {
+                    showErrorToast('图片太大');
+                    pendingGrowthImage = null; $('growthImagePreview').innerHTML = '';
+                    return;
+                }
+                $('growthImagePreview').innerHTML = `<img src="${pendingGrowthImage}" style="max-height:80px;border-radius:8px;">`;
+            } catch (e) {
+                showErrorToast('图片处理失败');
+                pendingGrowthImage = null; $('growthImagePreview').innerHTML = '';
+            }
+        }
+
+        async function loadGrowth() {
+            const list = $('growthList');
+            list.innerHTML = '<div class="growth-empty">加载中...</div>';
+            try {
+                const data = await apiFetch('/api/growth', { method: 'GET' });
+                if (!data.success) {
+                    list.innerHTML = '<div class="growth-empty">加载失败</div>';
+                    return;
+                }
+                renderGrowth(data.items || []);
+            } catch (e) {
+                list.innerHTML = '<div class="growth-empty">网络异常</div>';
+            }
+        }
+
+        function renderGrowth(items) {
+            const list = $('growthList');
+            if (!items.length) {
+                list.innerHTML = '<div class="growth-empty">还没有成长记录，添加第一条吧</div>';
+                return;
+            }
+            const labels = { milestone: '里程碑', quote: '童言童语', photo: '精彩瞬间', height: '身高体重', study: '学习进步', other: '其他' };
+            list.innerHTML = items.map(item => `
+                <div class="growth-item">
+                    <div class="growth-date">${item.date || ''} · ${labels[item.category] || item.category}</div>
+                    <div class="growth-content">${escapeHtml(item.content || '')}</div>
+                    ${item.image ? `<img src="${escapeHtml(item.image)}" class="growth-img" onclick="window.open(this.src)">` : ''}
+                    <div class="growth-meta">${item.created_by ? escapeHtml(item.created_by) + ' · ' : ''}${(item.tags || []).join(' ')}</div>
+                    <button onclick="deleteGrowthItem('${item.id}')" style="background:none;border:none;color:#999;font-size:14px;padding:4px 0;">🗑 删除</button>
+                </div>
+            `).join('');
+        }
+
+        async function addGrowthItem() {
+            const date = $('growthDate').value;
+            const category = $('growthCategory').value;
+            const content = $('growthContent').value.trim();
+            if (!content && !pendingGrowthImage) {
+                showErrorToast('请填写内容或添加照片');
+                return;
+            }
+            try {
+                const data = await apiFetch('/api/growth', {
+                    method: 'POST',
+                    body: JSON.stringify({ date, category, content, image: pendingGrowthImage })
+                });
+                if (data.success) {
+                    $('growthContent').value = '';
+                    pendingGrowthImage = null;
+                    $('growthImagePreview').innerHTML = '';
+                    $('growthImageInput').value = '';
+                    loadGrowth();
+                } else {
+                    showErrorToast(data.error || '保存失败');
+                }
+            } catch (e) {
+                showErrorToast('保存失败');
+            }
+        }
+
+        async function deleteGrowthItem(id) {
+            if (!confirm('确定删除这条记录吗？')) return;
+            try {
+                const data = await apiFetch('/api/growth/' + id, { method: 'DELETE' });
+                if (data.success) loadGrowth();
             } catch (e) {
                 showErrorToast('删除失败');
             }

@@ -1268,6 +1268,37 @@
         </div>
     </div>
 
+    <!-- 成长记录弹窗 -->
+    <div class="modal-overlay" id="growthModal" onclick="closeGrowthPanel(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">成长记录</div>
+                <button class="modal-close" onclick="closeGrowthPanel()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="growthList" style="max-height:45vh;overflow-y:auto;margin-bottom:16px;"></div>
+                <div style="display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:1px solid #e8e0d3;">
+                    <div style="display:flex;gap:8px;">
+                        <input type="date" id="growthDate" style="padding:8px;border:1px solid #d9cfc0;border-radius:8px;flex:1;">
+                        <select id="growthCategory" style="padding:8px;border:1px solid #d9cfc0;border-radius:8px;flex:1;">
+                            <option value="milestone">里程碑</option>
+                            <option value="quote">童言童语</option>
+                            <option value="photo">精彩瞬间</option>
+                            <option value="height">身高体重</option>
+                            <option value="study">学习进步</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <textarea id="growthContent" placeholder="记录下今天的小成长..." rows="3" style="padding:8px;border:1px solid #d9cfc0;border-radius:8px;resize:vertical;"></textarea>
+                    <input type="file" id="growthImageInput" accept="image/*" style="display:none" onchange="handleGrowthImageSelect(event)">
+                    <button class="btn-small" onclick="document.getElementById('growthImageInput').click()">📷 添加照片</button>
+                    <div id="growthImagePreview"></div>
+                    <button class="btn-small" onclick="addGrowthItem()" style="background:#7a9e7e;color:#fff;">保存记录</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="app">
         <!-- 侧边栏 -->
         <aside class="sidebar">
@@ -1416,6 +1447,10 @@
                     <div class="dashboard-card" onclick="openSchedulePanel()">
                         <div class="dashboard-icon">✅</div>
                         <div class="dashboard-label">今日安排</div>
+                    </div>
+                    <div class="dashboard-card" onclick="openGrowthPanel()">
+                        <div class="dashboard-icon">🌱</div>
+                        <div class="dashboard-label">成长记录</div>
                     </div>
                     <div class="dashboard-card" onclick="document.getElementById('alertsSection').scrollIntoView({behavior:'smooth'})">
                         <div class="dashboard-icon">🔔</div>
@@ -1723,6 +1758,106 @@
             try {
                 const data = await apiFetch('/api/schedule/' + id, { method: 'DELETE' });
                 if (data.success) loadSchedule();
+            } catch (e) {
+                showError('删除失败');
+            }
+        }
+
+        // 成长记录
+        let pendingGrowthImage = null;
+        function openGrowthPanel() {
+            document.getElementById('growthModal').classList.add('active');
+            const dateInput = document.getElementById('growthDate');
+            if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+            loadGrowth();
+        }
+        function closeGrowthPanel() {
+            document.getElementById('growthModal').classList.remove('active');
+        }
+
+        async function handleGrowthImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const preview = document.getElementById('growthImagePreview');
+            preview.innerHTML = '<span style="font-size:12px;color:#888;">压缩中...</span>';
+            try {
+                pendingGrowthImage = await compressImage(file);
+                if (pendingGrowthImage.length > 5 * 1024 * 1024) {
+                    showError('图片太大');
+                    pendingGrowthImage = null; preview.innerHTML = '';
+                    return;
+                }
+                preview.innerHTML = `<img src="${pendingGrowthImage}" style="max-height:80px;border-radius:8px;">`;
+            } catch (e) {
+                showError('图片处理失败');
+                pendingGrowthImage = null; preview.innerHTML = '';
+            }
+        }
+
+        async function loadGrowth() {
+            const list = document.getElementById('growthList');
+            list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">加载中...</div>';
+            try {
+                const data = await apiFetch('/api/growth', { method: 'GET' });
+                if (!data.success) {
+                    list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">加载失败</div>';
+                    return;
+                }
+                renderGrowth(data.items || []);
+            } catch (e) {
+                list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">网络异常</div>';
+            }
+        }
+
+        function renderGrowth(items) {
+            const list = document.getElementById('growthList');
+            if (!items.length) {
+                list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">还没有成长记录，添加第一条吧</div>';
+                return;
+            }
+            const labels = { milestone: '里程碑', quote: '童言童语', photo: '精彩瞬间', height: '身高体重', study: '学习进步', other: '其他' };
+            list.innerHTML = items.map(item => `
+                <div style="padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                    <div style="font-size:12px;color:#7a9e7e;font-weight:600;">${item.date || ''} · ${labels[item.category] || item.category}</div>
+                    <div style="font-size:14px;color:#333;margin-top:4px;line-height:1.5;">${safeEscape(item.content || '')}</div>
+                    ${item.image ? `<img src="${safeEscape(item.image)}" style="max-width:100%;max-height:160px;border-radius:10px;margin-top:8px;cursor:pointer;" onclick="window.open(this.src)">` : ''}
+                    <button onclick="deleteGrowthItem('${item.id}')" style="background:none;border:none;color:#999;font-size:13px;padding:4px 0;cursor:pointer;">🗑 删除</button>
+                </div>
+            `).join('');
+        }
+
+        async function addGrowthItem() {
+            const date = document.getElementById('growthDate').value;
+            const category = document.getElementById('growthCategory').value;
+            const content = document.getElementById('growthContent').value.trim();
+            if (!content && !pendingGrowthImage) {
+                showError('请填写内容或添加照片');
+                return;
+            }
+            try {
+                const data = await apiFetch('/api/growth', {
+                    method: 'POST',
+                    body: JSON.stringify({ date, category, content, image: pendingGrowthImage })
+                });
+                if (data.success) {
+                    document.getElementById('growthContent').value = '';
+                    pendingGrowthImage = null;
+                    document.getElementById('growthImagePreview').innerHTML = '';
+                    document.getElementById('growthImageInput').value = '';
+                    loadGrowth();
+                } else {
+                    showError(data.error || '保存失败');
+                }
+            } catch (e) {
+                showError('保存失败');
+            }
+        }
+
+        async function deleteGrowthItem(id) {
+            if (!confirm('确定删除这条记录吗？')) return;
+            try {
+                const data = await apiFetch('/api/growth/' + id, { method: 'DELETE' });
+                if (data.success) loadGrowth();
             } catch (e) {
                 showError('删除失败');
             }

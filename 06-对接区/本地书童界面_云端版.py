@@ -903,6 +903,15 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
             item_id = path[len("/api/schedule/"):]
             return self._send_json(cloud_request(f"/api/cloud/schedule/{item_id}", {}, method="DELETE"))
 
+        # 成长记录：本地透传到云端
+        if path == "/api/growth" and method == "GET":
+            return self._send_json(cloud_request("/api/cloud/growth", {}))
+        if path == "/api/growth" and method == "POST":
+            return self._send_json(cloud_request("/api/cloud/growth", data))
+        if path.startswith("/api/growth/") and method == "DELETE":
+            record_id = path[len("/api/growth/"):]
+            return self._send_json(cloud_request(f"/api/cloud/growth/{record_id}", {}, method="DELETE"))
+
         # 切换当前孩子
         if path == "/api/switch_child":
             token = self.headers.get("Authorization", "").replace("Bearer ", "")

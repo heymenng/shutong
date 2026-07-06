@@ -88,6 +88,7 @@ DEFAULT_EDGE_VOICE = "zh-CN-YunxiNeural"
 from 书童程序.核心.语言模型 import chat_completion
 from 书童程序.核心.语音模块 import VoiceEngine
 from 书童程序.核心 import 日程安排 as schedule_lib
+from 书童程序.核心 import 成长记录 as growth_lib
 
 # 云端强制使用讯飞 STT（whisper 模型太大不适合服务器）
 try:
@@ -1369,6 +1370,67 @@ def cloud_schedule_delete(item_id):
         if schedule_lib.delete_item(data_dir, item_id):
             return jsonify({"success": True})
         return jsonify({"success": False, "error": "日程项不存在"}), 404
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════
+# 成长记录接口
+# ═══════════════════════════════════════════════════
+
+def _get_family_growth_dir(family_id: str) -> Path:
+    return CLOUD_FAMILY_DIR / family_id
+
+
+@app.route("/api/cloud/growth", methods=["GET"])
+def cloud_growth_get():
+    """获取成长记录列表"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    try:
+        data_dir = _get_family_growth_dir(family_id)
+        category = request.args.get("category")
+        limit = int(request.args.get("limit", 50))
+        items = growth_lib.list_records(data_dir, limit=limit, category=category)
+        stats = growth_lib.get_stats(data_dir)
+        return jsonify({"success": True, "items": items, "stats": stats})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/cloud/growth", methods=["POST"])
+def cloud_growth_post():
+    """新增成长记录"""
+    family_id, sub, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    data = request.get_json(silent=True) or {}
+    created_by = ""
+    if sub:
+        created_by = sub.get("role", "")
+    try:
+        data_dir = _get_family_growth_dir(family_id)
+        item = growth_lib.add_record(data_dir, data, created_by=created_by)
+        return jsonify({"success": True, "item": item})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/cloud/growth/<record_id>", methods=["DELETE"])
+def cloud_growth_delete(record_id):
+    """删除成长记录"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    try:
+        data_dir = _get_family_growth_dir(family_id)
+        if growth_lib.delete_record(data_dir, record_id):
+            return jsonify({"success": True})
+        return jsonify({"success": False, "error": "记录不存在"}), 404
     except Exception as e:
         traceback.print_exc()
         return jsonify({"success": False, "error": str(e)}), 500
