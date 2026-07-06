@@ -9,13 +9,15 @@
 """
 
 import sys
-import os
+from pathlib import Path
 
 # 添加项目根目录到路径
-project_root = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, project_root)
+project_root = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / "03-引擎区"))
 
-from 书童程序.核心.语音模块 import VoiceEngine
+from 书童程序.核心.语音模块 import VoiceEngine  # noqa: E402
+from 书童程序.配置 import CONFIG  # noqa: E402
 
 # 15秒自我介绍脚本
 # 约45-50字，语速110时约15秒
@@ -27,8 +29,17 @@ print("=" * 50)
 print(f"\n文字脚本：\n{SELF_INTRO}\n")
 print("开始播放...\n")
 
-engine = VoiceEngine()
-engine.speak(SELF_INTRO)
+# 临时切换到美佳声音（edge-tts）
+original_name = CONFIG.get("voice_name")
+original_backend = CONFIG.get("voice_backend")
+CONFIG["voice_backend"] = "edge-tts"
+CONFIG["voice_name"] = "zh-CN-MeijiaNeural"
+try:
+    engine = VoiceEngine()
+    engine.speak(SELF_INTRO)
+finally:
+    CONFIG["voice_name"] = original_name
+    CONFIG["voice_backend"] = original_backend
 
 print("\n播放完成！")
 print(f"字数：{len(SELF_INTRO)} 字")
