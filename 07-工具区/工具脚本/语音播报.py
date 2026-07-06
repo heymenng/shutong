@@ -24,17 +24,18 @@ def main():
     parser.add_argument("--voice", default=None, help="指定 Edge-TTS 声音，如 zh-CN-liaoning-XiaobeiNeural")
     args = parser.parse_args()
     
+    original_name = CONFIG.get("voice_name")
+    original_backend = CONFIG.get("voice_backend")
+    CONFIG["voice_backend"] = "edge-tts"
     if args.voice:
-        original = CONFIG.get("voice_name")
         CONFIG["voice_name"] = args.voice
-        try:
-            engine = VoiceEngine()
-            engine.speak(args.text)
-        finally:
-            CONFIG["voice_name"] = original
-    else:
+
+    try:
         engine = VoiceEngine()
         engine.speak(args.text)
+    finally:
+        CONFIG["voice_name"] = original_name
+        CONFIG["voice_backend"] = original_backend
 
 
 if __name__ == "__main__":

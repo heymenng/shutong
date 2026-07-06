@@ -9,16 +9,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+project_root = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / "03-引擎区"))
 
-def _project_root() -> Path:
-    p = Path(__file__).resolve()
-    for parent in p.parents:
-        if (parent / "01-配置区").exists():
-            return parent
-    return p.parents[2]
+from 书童程序.工具.项目根目录 import get_project_root  # noqa: E402
 
 
-BASE = _project_root()
+BASE = get_project_root()
 GENERATOR = BASE / "07-工具区/工具脚本/生成笑话音频.py"
 AUDIO_DIR = BASE / "05-交付区/产品交付/书童音频节目/音频节目"
 JOKE_BASE = BASE / "05-交付区/产品交付/书童音频节目/笑话库"

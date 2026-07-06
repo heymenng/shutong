@@ -22,12 +22,34 @@ from datetime import datetime
 from pathlib import Path
 
 # 添加项目根目录到路径
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+from 书童程序.工具.项目根目录 import get_project_root
 
-from 书童程序.核心.语音模块 import VoiceEngine
-from 书童程序.核心.记忆模块 import Memory
-from 书童程序.配置 import CONFIG
+_PROJECT_ROOT = get_project_root()
+sys.path.insert(0, str(_PROJECT_ROOT))
+sys.path.insert(0, str(_PROJECT_ROOT / "03-引擎区"))
+
+from 书童程序.核心.语音模块 import VoiceEngine  # noqa: E402
+from 书童程序.核心.记忆模块 import Memory  # noqa: E402
+from 书童程序.配置 import CONFIG  # noqa: E402
+
+
+def _load_all_child_names() -> list[str]:
+    """从 04-工作区/档案区/家庭群 下的 family.json 动态加载所有孩子名字"""
+    family_base = _PROJECT_ROOT / "04-工作区" / "档案区" / "家庭群"
+    names = set()
+    if not family_base.exists():
+        return []
+    for family_json in family_base.rglob("family.json"):
+        try:
+            data = json.loads(family_json.read_text(encoding="utf-8"))
+            for member in data.get("members", []):
+                if member.get("role") == "孩子":
+                    name = str(member.get("name", "")).strip()
+                    if name:
+                        names.add(name)
+        except Exception:
+            continue
+    return sorted(names)
 
 
 class ExternalAIBridge:
@@ -41,10 +63,10 @@ class ExternalAIBridge:
         self.memory.load_latest_session(child_id)
         self.journal_dir = Path(CONFIG["journal_dir"])
         self.journal_dir.mkdir(parents=True, exist_ok=True)
-        self.archive_journal_dir = project_root / "04-工作区" / "档案区" / "陪伴日志"
+        self.archive_journal_dir = _PROJECT_ROOT / "04-工作区" / "档案区" / "陪伴日志"
         self.archive_journal_dir.mkdir(parents=True, exist_ok=True)
         # 会话身份状态文件
-        self.identity_state_file = project_root / "03-引擎区" / "书童程序" / "数据" / "当前对话身份.json"
+        self.identity_state_file = _PROJECT_ROOT / "03-引擎区" / "书童程序" / "数据" / "当前对话身份.json"
     
     def get_current_speaker(self, default="unknown"):
         """读取当前会话的说话者身份"""
@@ -223,7 +245,6 @@ class ExternalAIBridge:
         
         # 9. 隐私保护检查
         # 注意：这里只检查真实孩子的名字，虚构人物（如笑话里的小明）不触发
-        # TODO: 应该从档案区/孩子档案动态加载真实孩子名字
         # 当前对话对象的名字不应该触发提醒（比如称呼孩子本人）
         current_child_aliases = set()
         if child_id and child_id != "default":
@@ -234,9 +255,10 @@ class ExternalAIBridge:
             elif child_id == "嘟嘟":
                 current_child_aliases.add("嘟嘟")
         
-        other_children_names = ['嘟嘟', '小橙子', '橙子']  # 真实孩子名字（TODO: 动态加载）
+        # 动态加载所有孩子名字，无档案时回退到默认示例
+        all_child_names = _load_all_child_names() or ['嘟嘟', '小橙子', '橙子']
         # 排除当前对话对象
-        other_children_names = [name for name in other_children_names if name not in current_child_aliases]
+        other_children_names = [name for name in all_child_names if name not in current_child_aliases]
         
         if speaker == "child":
             # 当孩子A在场时，不要泄露孩子B的信息

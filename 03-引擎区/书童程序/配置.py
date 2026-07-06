@@ -3,6 +3,8 @@
 import os
 from pathlib import Path
 
+from .工具.项目根目录 import get_project_root
+
 
 def _load_dotenv():
     """从本地 .env 文件加载环境变量，优先于 config.json 中的硬编码值。"""
@@ -29,7 +31,7 @@ def _load_dotenv():
 
 _load_dotenv()
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = get_project_root()
 DATA_DIR = PROJECT_ROOT / "02-知识库区" / "训练素材"
 
 CONFIG = {

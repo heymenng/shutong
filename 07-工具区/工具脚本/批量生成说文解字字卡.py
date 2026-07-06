@@ -6,18 +6,17 @@
 
 import os
 import json
+import sys
 from pathlib import Path
 
+project_root = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / "03-引擎区"))
 
-def _project_root() -> Path:
-    p = Path(__file__).resolve()
-    for parent in p.parents:
-        if (parent / "01-配置区").exists():
-            return parent
-    return p.parents[2]
+from 书童程序.工具.项目根目录 import get_project_root  # noqa: E402
 
 
-_PROJECT_ROOT = _project_root()
+_PROJECT_ROOT = get_project_root()
 
 # 字卡输出目录
 OUTPUT_DIR = str(_PROJECT_ROOT / "02-知识库区" / "知识库" / "中华文明" / "说文解字" / "字卡")

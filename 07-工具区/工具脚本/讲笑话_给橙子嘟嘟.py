@@ -41,23 +41,26 @@ SCRIPT = [
 
 
 def speak_with_voice(text, dialect):
-    """用指定方言播报"""
+    """用指定方言播报（强制走 edge-tts）"""
     voice_map = {
         "普通话": "zh-CN-XiaoxiaoNeural",
         "东北话": "zh-CN-liaoning-XiaobeiNeural",
         "台湾话": "zh-TW-HsiaoChenNeural",
         "陕西话": "zh-CN-shaanxi-XiaoniNeural",
     }
-    
+
     voice = voice_map.get(dialect, "zh-CN-XiaoxiaoNeural")
-    original = CONFIG.get("voice_name")
+    original_name = CONFIG.get("voice_name")
+    original_backend = CONFIG.get("voice_backend")
     CONFIG["voice_name"] = voice
-    
+    CONFIG["voice_backend"] = "edge-tts"
+
     try:
         engine = VoiceEngine()
         engine.speak(text)
     finally:
-        CONFIG["voice_name"] = original
+        CONFIG["voice_name"] = original_name
+        CONFIG["voice_backend"] = original_backend
 
 
 def play_laughter():

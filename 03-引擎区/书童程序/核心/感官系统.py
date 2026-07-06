@@ -25,16 +25,10 @@ try:
 except ImportError:
     CONFIG = {}
 
-
-def _project_root() -> Path:
-    p = Path(__file__).resolve()
-    for parent in p.parents:
-        if (parent / "01-配置区").exists():
-            return parent
-    return p.parents[3]
+from ..工具.项目根目录 import get_project_root
 
 
-_PROJECT_ROOT = _project_root()
+_PROJECT_ROOT = get_project_root()
 
 
 class SensorySystem:

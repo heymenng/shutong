@@ -13,16 +13,10 @@ from pathlib import Path
 import numpy as np
 from scipy import ndimage
 
-
-def _project_root() -> Path:
-    p = Path(__file__).resolve()
-    for parent in p.parents:
-        if (parent / "01-配置区").exists():
-            return parent
-    return p.parents[3]
+from .项目根目录 import get_project_root
 
 
-ROOT = _project_root()
+ROOT = get_project_root()
 OUT = ROOT / "05-交付区" / "临时交付"
 OUT.mkdir(parents=True, exist_ok=True)
 

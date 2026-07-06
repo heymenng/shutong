@@ -29,7 +29,11 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "03-引擎区"))
 
 from 书童程序.核心.讯飞超拟人语音 import XfyunOralTTS  # noqa: E402
+from 书童程序.工具.项目根目录 import get_project_root  # noqa: E402
 from 书童程序.配置 import CONFIG  # noqa: E402
+
+
+PROJECT_ROOT = get_project_root()
 
 
 # 讯飞超拟人音色：只使用已授权音色

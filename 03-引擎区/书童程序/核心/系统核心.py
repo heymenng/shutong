@@ -16,17 +16,10 @@ import cv2
 from datetime import datetime
 from pathlib import Path
 from ..配置 import CONFIG
+from ..工具.项目根目录 import get_project_root
 
 
-def _project_root() -> Path:
-    p = Path(__file__).resolve()
-    for parent in p.parents:
-        if (parent / "01-配置区").exists():
-            return parent
-    return p.parents[3]
-
-
-_PROJECT_ROOT = _project_root()
+_PROJECT_ROOT = get_project_root()
 from .语言模型 import chat_completion, get_backend
 from .语音模块 import VoiceEngine
 from .记忆模块 import Memory
