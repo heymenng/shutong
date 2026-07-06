@@ -122,10 +122,11 @@ def start_server():
     log_file = open(PROJECT_ROOT / "04-工作区" / "书童运行日志.txt", "a", encoding="utf-8")
     log_file.write(f"\\n===== 启动时间：{time.strftime('%Y-%m-%d %H:%M:%S')} =====\\n")
     proc = subprocess.Popen(
-        [str(PYTHON), str(server_script)],
+        [str(PYTHON), "-u", str(server_script)],
         stdout=log_file,
         stderr=subprocess.STDOUT,
         cwd=PROJECT_ROOT,
+        env={**os.environ, "PYTHONUNBUFFERED": "1"},
     )
     print(f"[OK] 服务进程已启动，PID: {proc.pid}")
     print(f"[OK] 服务脚本：{server_script.name}")

@@ -10,11 +10,11 @@
     然后在浏览器打开: http://localhost:3876
 """
 
+import base64
 import json
-import os
+import mimetypes
 import subprocess
 import sys
-import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -36,8 +36,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "03-引擎区"))
 
-from 书童程序.核心.语言模型 import chat_completion, get_backend
-from 书童程序.配置 import CONFIG
+from 书童程序.核心.语言模型 import chat_completion, get_backend  # noqa: E402
+from 书童程序.配置 import CONFIG  # noqa: E402
 
 # ═══════════════════════════════════════════
 # 配置
@@ -47,7 +47,8 @@ HOST = "127.0.0.1"
 MAX_HISTORY = 10
 
 PROMPTS_DIR = PROJECT_ROOT / "03-引擎区" / "书童程序" / "数据" / "提示词"
-CHILDREN_DIR = PROJECT_ROOT / "04-工作区" / "档案区" / "孩子档案"
+FAMILY_GROUP_DIR = PROJECT_ROOT / "04-工作区" / "档案区" / "家庭群"
+STATIC_DIR = PROJECT_ROOT / "03-引擎区" / "static"
 SYSTEM_PROMPT_FILE = PROMPTS_DIR / "系统提示词整合版_可运行.md"
 
 # ═══════════════════════════════════════════
@@ -81,28 +82,33 @@ def load_system_prompt():
 
 
 def load_children():
-    """加载所有孩子档案"""
+    """从 04-工作区/档案区/家庭群 下的 family.json 加载所有孩子"""
     global children, current_child_id
-    if not CHILDREN_DIR.exists():
+    if not FAMILY_GROUP_DIR.exists():
         return
-    for file_path in CHILDREN_DIR.glob("*.json"):
+    for family_json in FAMILY_GROUP_DIR.rglob("family.json"):
         try:
-            data = json.loads(file_path.read_text(encoding="utf-8"))
-            info = data.get("档案信息", {})
-            child_id = info.get("姓名") or file_path.stem
-            children[child_id] = {
-                "id": child_id,
-                "name": info.get("姓名", child_id),
-                "age": info.get("年龄", "未知"),
-                "stage": info.get("发育阶段", "未知"),
-                "grade": info.get("年级", "未知"),
-                "relation": info.get("关系", ""),
-                "status": data.get("预警状态", {}).get("当前级别", "绿色"),
-                "data": data,
-            }
-            histories[child_id] = []
+            family_data = json.loads(family_json.read_text(encoding="utf-8"))
+            family_id = family_data.get("family_id", family_json.parent.name)
+            for member in family_data.get("members", []):
+                if member.get("role") != "孩子":
+                    continue
+                child_id = str(member.get("name", "")).strip()
+                if not child_id:
+                    continue
+                children[child_id] = {
+                    "id": child_id,
+                    "name": child_id,
+                    "age": member.get("age", "未知"),
+                    "stage": member.get("stage", "未知"),
+                    "grade": member.get("grade", "未知"),
+                    "relation": member.get("relation", ""),
+                    "status": "绿色",
+                    "data": {"member": member, "family_id": family_id},
+                }
+                histories[child_id] = []
         except Exception as e:
-            print(f"[加载档案失败] {file_path}: {e}")
+            print(f"[加载家庭档案失败] {family_json}: {e}")
     if children:
         current_child_id = list(children.keys())[0]
 
@@ -112,23 +118,19 @@ def get_child_context(child_id):
     if not child_id or child_id not in children:
         return ""
     child = children[child_id]
-    info = child["data"].get("档案信息", {})
-    name = info.get("姓名", child_id)
-    age = info.get("年龄", "")
-    stage = info.get("发育阶段", "")
-    grade = info.get("年级", "")
-    observation = child["data"].get("观察记录", {})
-    personality = observation.get("性格特点", {}).get("具体表现", [])
-    interests = observation.get("兴趣方向", [])
-    preference = observation.get("交互表现", {}).get("偏好", "")
+    member = child["data"].get("member", {})
+    name = member.get("name", child_id)
+    age = member.get("age", "")
+    stage = member.get("stage", "")
+    grade = member.get("grade", "")
+    quick_tips = member.get("quick_tips_child", [])
+    welcome = member.get("welcome_child", "")
 
     context = f"\n【当前陪伴对象】\n姓名：{name}\n年龄：{age}岁\n阶段：{stage}\n年级：{grade}"
-    if personality:
-        context += f"\n性格：{', '.join(personality[:3])}"
-    if interests:
-        context += f"\n兴趣：{', '.join(interests[:3])}"
-    if preference:
-        context += f"\n偏好：{preference}"
+    if quick_tips:
+        context += f"\n常用话题：{', '.join(quick_tips[:3])}"
+    if welcome:
+        context += f"\n欢迎语：{welcome}"
     context += "\n"
     return context
 
@@ -190,13 +192,62 @@ class BookboyHandler(BaseHTTPRequestHandler):
             content = content.encode("utf-8")
         self.wfile.write(content)
 
+    def _send_file(self, file_path: Path):
+        """发送本地文件，自动判断 MIME"""
+        if not file_path.exists():
+            self.send_error(404)
+            return
+        content_type = mimetypes.guess_type(str(file_path))[0] or "application/octet-stream"
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(file_path.read_bytes())
+
+    def _inject_avatar(self, html_content: str) -> str:
+        """把 static/书童头像.jpg 以 base64 内嵌到 HTML"""
+        avatar_path = STATIC_DIR / "书童头像.jpg"
+        if not avatar_path.exists():
+            return html_content
+        try:
+            avatar_b64 = base64.b64encode(avatar_path.read_bytes()).decode("utf-8")
+            avatar_data_url = f"data:image/jpeg;base64,{avatar_b64}"
+            script = f"<script>window.BOOKBOY_AVATAR = '{avatar_data_url}';</script>"
+            html_content = html_content.replace("</head>", f"{script}\n</head>")
+            # 替换顶部品牌图标里的默认卷轴 emoji
+            html_content = html_content.replace(
+                '<div class="brand-icon">📜</div>',
+                f'<div class="brand-icon"><img src="{avatar_data_url}" alt="书童" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>'
+            )
+        except Exception:
+            pass
+        return html_content
+
     def do_GET(self):
         if self.path == "/":
             html_path = PROJECT_ROOT / "06-对接区" / "前端页面" / "本地书童界面.html"
             if html_path.exists():
-                self._send_static(html_path.read_text(encoding="utf-8"))
+                content = self._inject_avatar(html_path.read_text(encoding="utf-8"))
+                self._send_static(content)
             else:
                 self._send_json({"error": "前端文件不存在"}, 500)
+        elif self.path == "/entry":
+            # 本地完整模式下 /entry 就是主界面
+            self.send_response(302)
+            self.send_header("Location", "/")
+            self.end_headers()
+        elif self.path.startswith("/static/"):
+            file_path = STATIC_DIR / self.path[len("/static/"):]
+            if file_path.exists() and file_path.is_file():
+                self._send_file(file_path)
+            else:
+                self.send_error(404)
+        elif self.path == "/avatar.jpg":
+            avatar_path = STATIC_DIR / "书童头像.jpg"
+            if avatar_path.exists():
+                self._send_file(avatar_path)
+            else:
+                self.send_error(404)
         elif self.path == "/api/status":
             self._send_json({
                 "children": list(children.values()),
@@ -208,7 +259,7 @@ class BookboyHandler(BaseHTTPRequestHandler):
                 "histories": {k: len(v) for k, v in histories.items()},
             })
         else:
-            self._send_json({"error": "not found"}, 404)
+            self.send_error(404)
 
     def do_POST(self):
         global current_child_id
