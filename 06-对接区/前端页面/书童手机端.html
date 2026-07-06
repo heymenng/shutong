@@ -87,6 +87,25 @@
         .typing span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes typing { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
 
+        /* 今日安排面板 */
+        .schedule-sheet { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 2500; display: none; align-items: flex-end; }
+        .schedule-sheet.active { display: flex; }
+        .schedule-panel { width: 100%; max-height: 80vh; background: white; border-radius: 20px 20px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); animation: slideUp 0.2s ease; display: flex; flex-direction: column; }
+        .schedule-title { text-align: center; font-size: 16px; color: #333; margin-bottom: 12px; position: relative; font-weight: 600; }
+        .schedule-close { position: absolute; right: 0; top: -4px; width: 28px; height: 28px; line-height: 28px; text-align: center; color: #999; font-size: 20px; cursor: pointer; }
+        .schedule-list { flex: 1; overflow-y: auto; margin-bottom: 12px; }
+        .schedule-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #f0f0f0; }
+        .schedule-item:last-child { border-bottom: none; }
+        .schedule-time { font-size: 13px; color: #4a90a4; width: 44px; flex: 0 0 auto; font-weight: 600; }
+        .schedule-info { flex: 1; }
+        .schedule-name { font-size: 15px; color: #333; }
+        .schedule-type { font-size: 11px; color: #888; }
+        .schedule-check { width: 22px; height: 22px; accent-color: #4a90a4; }
+        .schedule-empty { text-align: center; color: #888; padding: 30px 0; font-size: 14px; }
+        .schedule-add { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid #e8e8e8; }
+        .schedule-add input, .schedule-add select { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; outline: none; }
+        .schedule-add button { padding: 10px 16px; background: #4a90a4; color: white; border: none; border-radius: 10px; font-size: 14px; }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -119,6 +138,7 @@
             <div class="quick-tip" data-text="我心情不好">心情不好</div>
             <div class="quick-tip" data-text="讲一个睡前故事">睡前故事</div>
             <div class="quick-tip" data-text="为什么我要早睡">为什么早睡</div>
+            <div class="quick-tip" onclick="openSchedulePanel()">📅 今日安排</div>
             <div class="quick-tip" style="background:#fff3cd;color:#856404;" onclick="testAudio()">🔊 测试声音</div>
         </div>
 
@@ -155,6 +175,27 @@
         </div>
     </div>
 
+    <!-- 今日安排面板 -->
+    <div id="scheduleSheet" class="schedule-sheet">
+        <div class="schedule-panel">
+            <div class="schedule-title">今日安排<span class="schedule-close" onclick="closeSchedulePanel()">&times;</span></div>
+            <div id="scheduleList" class="schedule-list"></div>
+            <div class="schedule-add">
+                <input type="time" id="scheduleTime" value="08:00">
+                <input type="text" id="scheduleTitle" placeholder="例如：做数学作业">
+                <select id="scheduleType">
+                    <option value="study">学习</option>
+                    <option value="rest">休息</option>
+                    <option value="play">玩耍</option>
+                    <option value="sport">运动</option>
+                    <option value="chore">家务</option>
+                    <option value="sleep">睡觉</option>
+                </select>
+                <button onclick="addScheduleItem()">添加</button>
+            </div>
+        </div>
+    </div>
+
     <div id="errorToast" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:16px 24px;border-radius:12px;z-index:9999;font-size:15px;max-width:80%;text-align:center;"></div>
 
     <script src="/static/书童公共.js?v=12"></script>
@@ -177,6 +218,10 @@
         window.appState = appState;
 
         const $ = id => document.getElementById(id);
+
+        function escapeHtml(text) {
+            return String(text).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
 
         // 选择图片
         function handleImageSelect(event) {
@@ -664,6 +709,95 @@
                 displayGlobalError('发送失败: ' + e.message);
             } finally {
                 sendBtn.disabled = false;
+            }
+        }
+
+        // 今日安排
+        function openSchedulePanel() {
+            $('scheduleSheet').classList.add('active');
+            loadSchedule();
+        }
+        function closeSchedulePanel() {
+            $('scheduleSheet').classList.remove('active');
+        }
+        $('scheduleSheet').addEventListener('click', e => {
+            if (e.target === $('scheduleSheet')) closeSchedulePanel();
+        });
+
+        async function loadSchedule() {
+            const list = $('scheduleList');
+            list.innerHTML = '<div class="schedule-empty">加载中...</div>';
+            try {
+                const data = await apiFetch('/api/schedule', { method: 'GET' });
+                if (!data.success) {
+                    list.innerHTML = '<div class="schedule-empty">加载失败</div>';
+                    return;
+                }
+                renderSchedule(data.items || []);
+            } catch (e) {
+                list.innerHTML = '<div class="schedule-empty">网络异常</div>';
+            }
+        }
+
+        function renderSchedule(items) {
+            const list = $('scheduleList');
+            if (!items.length) {
+                list.innerHTML = '<div class="schedule-empty">今天还没有安排，添加一个吧</div>';
+                return;
+            }
+            const typeLabels = { study: '学习', rest: '休息', play: '玩耍', sport: '运动', chore: '家务', sleep: '睡觉' };
+            list.innerHTML = items.map(item => `
+                <div class="schedule-item">
+                    <input type="checkbox" class="schedule-check" ${item.checked ? 'checked' : ''} onchange="checkScheduleItem('${item.id}', this.checked)">
+                    <div class="schedule-time">${item.time || '--:--'}</div>
+                    <div class="schedule-info">
+                        <div class="schedule-name">${escapeHtml(item.title)}</div>
+                        <div class="schedule-type">${typeLabels[item.type] || item.type}</div>
+                    </div>
+                    <button onclick="deleteScheduleItem('${item.id}')" style="background:none;border:none;color:#999;font-size:16px;">🗑</button>
+                </div>
+            `).join('');
+        }
+
+        async function addScheduleItem() {
+            const time = $('scheduleTime').value;
+            const title = $('scheduleTitle').value.trim();
+            const type = $('scheduleType').value;
+            if (!title) return;
+            try {
+                const data = await apiFetch('/api/schedule', {
+                    method: 'POST',
+                    body: JSON.stringify({ time, title, type })
+                });
+                if (data.success) {
+                    $('scheduleTitle').value = '';
+                    loadSchedule();
+                } else {
+                    showErrorToast(data.error || '添加失败');
+                }
+            } catch (e) {
+                showErrorToast('添加失败');
+            }
+        }
+
+        async function checkScheduleItem(id, checked) {
+            try {
+                await apiFetch('/api/schedule/checkin', {
+                    method: 'POST',
+                    body: JSON.stringify({ id, checked })
+                });
+            } catch (e) {
+                showErrorToast('打卡失败');
+            }
+        }
+
+        async function deleteScheduleItem(id) {
+            if (!confirm('确定删除这条安排吗？')) return;
+            try {
+                const data = await apiFetch('/api/schedule/' + id, { method: 'DELETE' });
+                if (data.success) loadSchedule();
+            } catch (e) {
+                showErrorToast('删除失败');
             }
         }
 

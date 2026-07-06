@@ -87,6 +87,7 @@ DEFAULT_EDGE_VOICE = "zh-CN-YunxiNeural"
 
 from 书童程序.核心.语言模型 import chat_completion
 from 书童程序.核心.语音模块 import VoiceEngine
+from 书童程序.核心 import 日程安排 as schedule_lib
 
 # 云端强制使用讯飞 STT（whisper 模型太大不适合服务器）
 try:
@@ -188,7 +189,12 @@ SOUL_FILES = {
 }
 
 # 临时缓存目录（语音、日志等）
-CACHE_DIR = PROJECT_ROOT / "04-工作区" / "云端数据区"
+# 云端运行时数据目录：优先使用项目根目录下的 云端数据区（与线上部署一致），
+# 本地开发环境若不存在则回退到 04-工作区/云端数据区。
+if (PROJECT_ROOT / "云端数据区").exists():
+    CACHE_DIR = PROJECT_ROOT / "云端数据区"
+else:
+    CACHE_DIR = PROJECT_ROOT / "04-工作区" / "云端数据区"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 VOICE_CACHE_DIR = CACHE_DIR / "语音缓存"
 VOICE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -1267,6 +1273,88 @@ def cloud_chat():
         print(f"[云端聊天] 动作生成失败: {e}")
 
     return jsonify(response)
+
+
+# ═══════════════════════════════════════════════════
+# 每日安排/日程接口
+# ═══════════════════════════════════════════════════
+
+def _get_family_schedule_dir(family_id: str) -> Path:
+    return CLOUD_FAMILY_DIR / family_id
+
+
+@app.route("/api/cloud/schedule", methods=["GET"])
+def cloud_schedule_get():
+    """获取今日日程"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    try:
+        data_dir = _get_family_schedule_dir(family_id)
+        items = schedule_lib.get_today_items(data_dir)
+        stats = schedule_lib.get_stats(data_dir)
+        return jsonify({"success": True, "items": items, "stats": stats})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/cloud/schedule", methods=["POST"])
+def cloud_schedule_post():
+    """新增或更新日程项"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    data = request.get_json(silent=True) or {}
+    item_id = data.get("id")
+    try:
+        data_dir = _get_family_schedule_dir(family_id)
+        if item_id:
+            item = schedule_lib.update_item(data_dir, item_id, data)
+            if not item:
+                return jsonify({"success": False, "error": "日程项不存在"}), 404
+        else:
+            item = schedule_lib.add_item(data_dir, data)
+        return jsonify({"success": True, "item": item})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/cloud/schedule/checkin", methods=["POST"])
+def cloud_schedule_checkin():
+    """打卡/取消打卡"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    data = request.get_json(silent=True) or {}
+    item_id = data.get("id")
+    checked = data.get("checked", True)
+    if not item_id:
+        return jsonify({"success": False, "error": "缺少日程项 ID"}), 400
+    try:
+        data_dir = _get_family_schedule_dir(family_id)
+        item = schedule_lib.checkin_item(data_dir, item_id, checked)
+        return jsonify({"success": True, "item": item})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/cloud/schedule/<item_id>", methods=["DELETE"])
+def cloud_schedule_delete(item_id):
+    """删除日程项"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    try:
+        data_dir = _get_family_schedule_dir(family_id)
+        if schedule_lib.delete_item(data_dir, item_id):
+            return jsonify({"success": True})
+        return jsonify({"success": False, "error": "日程项不存在"}), 404
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route("/api/cloud/tts", methods=["POST"])

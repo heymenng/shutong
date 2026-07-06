@@ -892,6 +892,17 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
                 "message": "已从云端同步" if result else "同步失败或本地已存在",
             })
 
+        # 每日安排/日程：本地透传到云端
+        if path == "/api/schedule" and method == "GET":
+            return self._send_json(cloud_request("/api/cloud/schedule", {}))
+        if path == "/api/schedule" and method == "POST":
+            return self._send_json(cloud_request("/api/cloud/schedule", data))
+        if path == "/api/schedule/checkin" and method == "POST":
+            return self._send_json(cloud_request("/api/cloud/schedule/checkin", data))
+        if path.startswith("/api/schedule/") and method == "DELETE":
+            item_id = path[len("/api/schedule/"):]
+            return self._send_json(cloud_request(f"/api/cloud/schedule/{item_id}", {}, method="DELETE"))
+
         # 切换当前孩子
         if path == "/api/switch_child":
             token = self.headers.get("Authorization", "").replace("Bearer ", "")

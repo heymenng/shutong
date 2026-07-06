@@ -1242,6 +1242,32 @@
         </div>
     </div>
 
+    <!-- 今日安排弹窗 -->
+    <div class="modal-overlay" id="scheduleModal" onclick="closeSchedulePanel(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">今日安排</div>
+                <button class="modal-close" onclick="closeSchedulePanel()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="scheduleList" style="max-height:50vh;overflow-y:auto;margin-bottom:16px;"></div>
+                <div style="display:grid;grid-template-columns:90px 1fr 90px 80px;gap:8px;align-items:center;padding-top:12px;border-top:1px solid #e8e0d3;">
+                    <input type="time" id="scheduleTime" value="08:00" style="padding:8px;border:1px solid #d9cfc0;border-radius:8px;">
+                    <input type="text" id="scheduleTitle" placeholder="例如：做数学作业" style="padding:8px;border:1px solid #d9cfc0;border-radius:8px;">
+                    <select id="scheduleType" style="padding:8px;border:1px solid #d9cfc0;border-radius:8px;">
+                        <option value="study">学习</option>
+                        <option value="rest">休息</option>
+                        <option value="play">玩耍</option>
+                        <option value="sport">运动</option>
+                        <option value="chore">家务</option>
+                        <option value="sleep">睡觉</option>
+                    </select>
+                    <button class="btn-small" onclick="addScheduleItem()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="app">
         <!-- 侧边栏 -->
         <aside class="sidebar">
@@ -1386,6 +1412,10 @@
                     <div class="dashboard-card" onclick="document.getElementById('activitiesSection').scrollIntoView({behavior:'smooth'})">
                         <div class="dashboard-icon">📅</div>
                         <div class="dashboard-label" data-i18n="todayLabel">今日动态</div>
+                    </div>
+                    <div class="dashboard-card" onclick="openSchedulePanel()">
+                        <div class="dashboard-icon">✅</div>
+                        <div class="dashboard-label">今日安排</div>
                     </div>
                     <div class="dashboard-card" onclick="document.getElementById('alertsSection').scrollIntoView({behavior:'smooth'})">
                         <div class="dashboard-icon">🔔</div>
@@ -1609,6 +1639,92 @@
                 }
             } catch (e) {
                 console.log('自动登录失败:', e);
+            }
+        }
+
+        // 今日安排
+        function openSchedulePanel() {
+            document.getElementById('scheduleModal').classList.add('active');
+            loadSchedule();
+        }
+        function closeSchedulePanel() {
+            document.getElementById('scheduleModal').classList.remove('active');
+        }
+
+        async function loadSchedule() {
+            const list = document.getElementById('scheduleList');
+            list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">加载中...</div>';
+            try {
+                const data = await apiFetch('/api/schedule', { method: 'GET' });
+                if (!data.success) {
+                    list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">加载失败</div>';
+                    return;
+                }
+                renderSchedule(data.items || []);
+            } catch (e) {
+                list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">网络异常</div>';
+            }
+        }
+
+        function renderSchedule(items) {
+            const list = document.getElementById('scheduleList');
+            if (!items.length) {
+                list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">今天还没有安排，添加一个吧</div>';
+                return;
+            }
+            const typeLabels = { study: '学习', rest: '休息', play: '玩耍', sport: '运动', chore: '家务', sleep: '睡觉' };
+            list.innerHTML = items.map(item => `
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="checkScheduleItem('${item.id}', this.checked)" style="width:18px;height:18px;accent-color:var(--green-soft);">
+                    <div style="font-weight:600;color:var(--accent);width:46px;">${item.time || '--:--'}</div>
+                    <div style="flex:1;">
+                        <div>${safeEscape(item.title)}</div>
+                        <div style="font-size:12px;color:#888;">${typeLabels[item.type] || item.type}</div>
+                    </div>
+                    <button onclick="deleteScheduleItem('${item.id}')" style="background:none;border:none;color:#999;cursor:pointer;">🗑</button>
+                </div>
+            `).join('');
+        }
+
+        async function addScheduleItem() {
+            const time = document.getElementById('scheduleTime').value;
+            const title = document.getElementById('scheduleTitle').value.trim();
+            const type = document.getElementById('scheduleType').value;
+            if (!title) return;
+            try {
+                const data = await apiFetch('/api/schedule', {
+                    method: 'POST',
+                    body: JSON.stringify({ time, title, type })
+                });
+                if (data.success) {
+                    document.getElementById('scheduleTitle').value = '';
+                    loadSchedule();
+                } else {
+                    showError(data.error || '添加失败');
+                }
+            } catch (e) {
+                showError('添加失败');
+            }
+        }
+
+        async function checkScheduleItem(id, checked) {
+            try {
+                await apiFetch('/api/schedule/checkin', {
+                    method: 'POST',
+                    body: JSON.stringify({ id, checked })
+                });
+            } catch (e) {
+                showError('打卡失败');
+            }
+        }
+
+        async function deleteScheduleItem(id) {
+            if (!confirm('确定删除这条安排吗？')) return;
+            try {
+                const data = await apiFetch('/api/schedule/' + id, { method: 'DELETE' });
+                if (data.success) loadSchedule();
+            } catch (e) {
+                showError('删除失败');
             }
         }
 
