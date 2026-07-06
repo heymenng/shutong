@@ -1,4 +1,5 @@
 #!/bin/bash
 # 伴读书童AI 一键启动器（Mac）
-cd "/Users/lingjue/Documents/shutong"
-"/Users/lingjue/Documents/shutong/.venv/bin/python" 01-配置区/start.py
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
+"$SCRIPT_DIR/../.venv/bin/python" "$SCRIPT_DIR/start.py"

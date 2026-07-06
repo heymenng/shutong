@@ -9,7 +9,7 @@
     python3 07-工具区/工具脚本/语音对话守护.py --speaker master
 
 后台运行方式：
-    nohup python3 07-工具区/工具脚本/语音对话守护.py > 05-交付区/临时交付/语音守护.log 2>&1 &
+    nohup python3 07-工具区/工具脚本/语音对话守护.py > 04-工作区/日志/语音守护.log 2>&1 &
 
 停止方式：
     pkill -f 语音对话守护.py
@@ -40,8 +40,8 @@ def log(message):
     log_line = f"[{timestamp}] {message}"
     print(log_line)
     
-    log_dir = project_root / "05-交付区" / "临时交付"
-    log_dir.mkdir(exist_ok=True)
+    log_dir = project_root / "04-工作区" / "日志"
+    log_dir.mkdir(parents=True, exist_ok=True)
     log_file = log_dir / "语音守护.log"
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(log_line + "\n")
