@@ -2136,7 +2136,7 @@
         }
 
         // 打开家庭设置
-        function openFamilySettings() {
+        async function openFamilySettings() {
             if (appState.role === 'child') {
                 alert(bookboyI18n.getText('childModeCantModify'));
                 return;
@@ -2145,7 +2145,71 @@
             document.getElementById('familyName').value = family.name || '';
             document.getElementById('familyDesc').value = family.description || '';
             renderFamilyMembers(family.members || []);
+            populateDefaultChildSelect();
+            await loadFamilySettings();
             document.getElementById('familyModal').classList.add('active');
+        }
+
+        async function loadFamilySettings() {
+            try {
+                const data = await apiFetch('/api/settings', { method: 'GET' });
+                if (data.success && data.settings) {
+                    const s = data.settings;
+                    document.getElementById('settingsVoice').value = String(s.voice_enabled !== false);
+                    document.getElementById('settingsLang').value = s.language || 'zh';
+                    document.getElementById('settingsChatMode').value = s.chat_mode || 'child';
+                    populateDefaultChildSelect();
+                    document.getElementById('settingsDefaultChild').value = s.default_child || '';
+                    applyFamilySettings(s);
+                }
+            } catch (e) {
+                console.log('加载设置失败', e);
+            }
+        }
+
+        function populateDefaultChildSelect() {
+            const sel = document.getElementById('settingsDefaultChild');
+            const current = sel.value;
+            sel.innerHTML = '<option value="">不指定</option>';
+            const family = appState.family || { members: [] };
+            family.members.forEach(m => {
+                if (m.role === '孩子') {
+                    sel.innerHTML += `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`;
+                }
+            });
+            sel.value = current;
+        }
+
+        function applyFamilySettings(settings) {
+            if (!settings) return;
+            if (settings.voice_enabled !== undefined) {
+                appState.voice = settings.voice_enabled;
+                const vt = document.getElementById('voiceToggle');
+                if (vt) vt.checked = appState.voice;
+            }
+            if (settings.language) {
+                window.__bookboyLang = settings.language;
+                localStorage.setItem('bookboy_language', settings.language);
+                if (typeof bookboyI18n !== 'undefined') bookboyI18n.applyLanguage(settings.language);
+            }
+            if (settings.chat_mode) {
+                appState.chatMode = settings.chat_mode;
+            }
+            if (settings.default_child) {
+                const children = (appState.family?.members || []).filter(m => m.role === '孩子');
+                if (children.some(m => m.name === settings.default_child)) {
+                    appState.currentChild = settings.default_child;
+                    renderChildren();
+                    renderMessages();
+                }
+            }
+        }
+
+        function clearChatHistory() {
+            const cid = appState.currentChild || 'default';
+            if (!confirm('确定清空当前孩子的聊天记录吗？')) return;
+            appState.childMessages[cid] = [];
+            renderMessages();
         }
 
         function closeFamilySettings() {
@@ -2245,14 +2309,23 @@
                 description: document.getElementById('familyDesc').value.trim(),
                 members: members
             };
+            const settingsPayload = {
+                settings: {
+                    voice_enabled: document.getElementById('settingsVoice').value === 'true',
+                    language: document.getElementById('settingsLang').value,
+                    chat_mode: document.getElementById('settingsChatMode').value,
+                    default_child: document.getElementById('settingsDefaultChild').value
+                }
+            };
             try {
-                const res = await apiFetch('/api/family', {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
+                const [res, sres] = await Promise.all([
+                    apiFetch('/api/family', { method: 'POST', body: JSON.stringify(payload) }),
+                    apiFetch('/api/settings', { method: 'POST', body: JSON.stringify(settingsPayload) })
+                ]);
                 if (res && res.success) {
                     appState.family = res.family;
                     document.title = res.family.name + ' · 书童';
+                    applyFamilySettings(settingsPayload.settings);
                     closeFamilySettings();
                     await loadStatus();
                     renderChildren();
@@ -2275,6 +2348,7 @@
                 renderChildren();
                 renderProfile();
                 updateHeader();
+                await loadFamilySettings();
                 document.getElementById('voiceToggle').checked = appState.voice;
                 // setupAvatarUpload(); // 已移除
                 loadBrowserVoices();
@@ -3573,6 +3647,35 @@
                 <div style="font-size:14px;font-weight:600;margin:18px 0 10px;" data-i18n="familyMembersTitle">家庭成员</div>
                 <div id="familyMembers"></div>
                 <button class="btn-add" data-i18n="addMember" onclick="addFamilyMember()">+ 添加成员</button>
+
+                <div style="font-size:14px;font-weight:600;margin:24px 0 10px;">偏好设置</div>
+                <div class="form-group">
+                    <label>默认语音回复</label>
+                    <select id="settingsVoice">
+                        <option value="true">开启</option>
+                        <option value="false">关闭</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>界面语言</label>
+                    <select id="settingsLang">
+                        <option value="zh">简体中文</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>默认聊天模式</label>
+                    <select id="settingsChatMode">
+                        <option value="child">孩子模式</option>
+                        <option value="parent">家长模式</option>
+                        <option value="auto">自动</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>默认孩子</label>
+                    <select id="settingsDefaultChild"><option value="">不指定</option></select>
+                </div>
+                <button class="btn-remove" type="button" onclick="clearChatHistory()" style="margin-top:8px;">🗑 清空当前聊天记录</button>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" data-i18n="cancel" onclick="closeFamilySettings()">取消</button>

@@ -141,6 +141,18 @@
         .bulletin-add input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; outline: none; }
         .bulletin-add button { padding: 10px 16px; background: #1565c0; color: white; border: none; border-radius: 10px; font-size: 14px; }
 
+        /* 设置面板 */
+        .settings-sheet { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 2800; display: none; align-items: flex-end; }
+        .settings-sheet.active { display: flex; }
+        .settings-panel { width: 100%; max-height: 85vh; background: white; border-radius: 20px 20px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); animation: slideUp 0.2s ease; display: flex; flex-direction: column; }
+        .settings-title { text-align: center; font-size: 16px; color: #333; margin-bottom: 12px; position: relative; font-weight: 600; }
+        .settings-close { position: absolute; right: 0; top: -4px; width: 28px; height: 28px; line-height: 28px; text-align: center; color: #999; font-size: 20px; cursor: pointer; }
+        .settings-body { flex: 1; overflow-y: auto; }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .settings-row label { font-size: 14px; color: #333; }
+        .settings-row select, .settings-row input[type="checkbox"] { padding: 6px; border: 1px solid #ddd; border-radius: 8px; }
+        .settings-btn { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 10px; background: #f5f5f5; color: #333; font-size: 14px; }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -176,6 +188,7 @@
             <div class="quick-tip" onclick="openSchedulePanel()">📅 今日安排</div>
             <div class="quick-tip" style="background:#e8f5e9;color:#2e7d32;" onclick="openGrowthPanel()">🌱 成长记录</div>
             <div class="quick-tip" style="background:#e3f2fd;color:#1565c0;" onclick="openBulletinPanel()">💬 家庭留言</div>
+            <div class="quick-tip" style="background:#f3e5f5;color:#6a1b9a;" onclick="openSettingsPanel()">⚙ 设置</div>
             <div class="quick-tip" style="background:#fff3cd;color:#856404;" onclick="testAudio()">🔊 测试声音</div>
         </div>
 
@@ -265,6 +278,36 @@
             <div class="bulletin-add">
                 <input type="text" id="bulletinText" placeholder="给家人留句话...">
                 <button onclick="addBulletinItem()">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置面板 -->
+    <div id="settingsSheet" class="settings-sheet">
+        <div class="settings-panel">
+            <div class="settings-title">设置<span class="settings-close" onclick="closeSettingsPanel()">&times;</span></div>
+            <div class="settings-body">
+                <div class="settings-row">
+                    <label>语音回复</label>
+                    <input type="checkbox" id="settingsVoice" checked>
+                </div>
+                <div class="settings-row">
+                    <label>界面语言</label>
+                    <select id="settingsLang">
+                        <option value="zh">简体中文</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <div class="settings-row">
+                    <label>聊天模式</label>
+                    <select id="settingsChatMode">
+                        <option value="child">孩子模式</option>
+                        <option value="parent">家长模式</option>
+                        <option value="auto">自动</option>
+                    </select>
+                </div>
+                <button class="settings-btn" onclick="saveMobileSettings()">保存设置</button>
+                <button class="settings-btn" onclick="clearMobileChatHistory()">🗑 清空聊天记录</button>
             </div>
         </div>
     </div>
@@ -425,6 +468,7 @@
                         // 没有专属家庭：加载家庭列表，loadFamilies 内部决定显示选择还是自动进入
                         await loadFamilies();
                     }
+                    await loadMobileSettings();
                 } else {
                     if (loading) loading.textContent = '进入失败，请刷新页面重试';
                 }
@@ -1075,6 +1119,74 @@
             } catch (e) {
                 showErrorToast('删除失败');
             }
+        }
+
+        // 设置
+        async function openSettingsPanel() {
+            $('settingsSheet').classList.add('active');
+            await loadMobileSettings();
+        }
+        function closeSettingsPanel() {
+            $('settingsSheet').classList.remove('active');
+        }
+        $('settingsSheet').addEventListener('click', e => {
+            if (e.target === $('settingsSheet')) closeSettingsPanel();
+        });
+
+        async function loadMobileSettings() {
+            try {
+                const data = await apiFetch('/api/settings', { method: 'GET' });
+                if (data.success && data.settings) {
+                    const s = data.settings;
+                    $('settingsVoice').checked = s.voice_enabled !== false;
+                    $('settingsLang').value = s.language || 'zh';
+                    $('settingsChatMode').value = s.chat_mode || 'child';
+                    applyMobileSettings(s);
+                }
+            } catch (e) {
+                console.log('加载设置失败', e);
+            }
+        }
+
+        function applyMobileSettings(settings) {
+            if (!settings) return;
+            if (settings.voice_enabled !== undefined) appState.voice = settings.voice_enabled;
+            if (settings.language) {
+                window.__bookboyLang = settings.language;
+                localStorage.setItem('bookboy_language', settings.language);
+                if (typeof bookboyI18n !== 'undefined') bookboyI18n.applyLanguage(settings.language);
+            }
+            if (settings.chat_mode) appState.chatMode = settings.chat_mode;
+        }
+
+        async function saveMobileSettings() {
+            const settings = {
+                voice_enabled: $('settingsVoice').checked,
+                language: $('settingsLang').value,
+                chat_mode: $('settingsChatMode').value
+            };
+            try {
+                const data = await apiFetch('/api/settings', {
+                    method: 'POST',
+                    body: JSON.stringify({ settings })
+                });
+                if (data.success) {
+                    applyMobileSettings(settings);
+                    showErrorToast('设置已保存');
+                    closeSettingsPanel();
+                } else {
+                    showErrorToast(data.error || '保存失败');
+                }
+            } catch (e) {
+                showErrorToast('保存失败');
+            }
+        }
+
+        function clearMobileChatHistory() {
+            if (!confirm('确定清空聊天记录吗？')) return;
+            appState.messages = [];
+            $('chatContainer').innerHTML = '<div id="typingIndicator" class="typing message assistant hidden"><span></span><span></span><span></span></div>';
+            showErrorToast('聊天记录已清空');
         }
 
         // 初始欢迎语（等用户选完身份后显示）

@@ -921,6 +921,12 @@ class BookBoyCloudHandler(BaseHTTPRequestHandler):
             message_id = path[len("/api/bulletin/"):]
             return self._send_json(cloud_request(f"/api/cloud/bulletin/{message_id}", {}, method="DELETE"))
 
+        # 设置中心：本地透传到云端
+        if path == "/api/settings" and method == "GET":
+            return self._send_json(cloud_request("/api/cloud/settings", {}))
+        if path == "/api/settings" and method == "POST":
+            return self._send_json(cloud_request("/api/cloud/settings", data))
+
         # 切换当前孩子
         if path == "/api/switch_child":
             token = self.headers.get("Authorization", "").replace("Bearer ", "")

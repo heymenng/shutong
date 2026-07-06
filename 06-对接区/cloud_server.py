@@ -90,6 +90,7 @@ from 书童程序.核心.语音模块 import VoiceEngine
 from 书童程序.核心 import 日程安排 as schedule_lib
 from 书童程序.核心 import 成长记录 as growth_lib
 from 书童程序.核心 import 家庭留言板 as bulletin_lib
+from 书童程序.核心 import 设置中心 as settings_lib
 
 # 云端强制使用讯飞 STT（whisper 模型太大不适合服务器）
 try:
@@ -1491,6 +1492,45 @@ def cloud_bulletin_delete(message_id):
         if bulletin_lib.delete_message(data_dir, message_id):
             return jsonify({"success": True})
         return jsonify({"success": False, "error": "留言不存在"}), 404
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════
+# 设置中心接口
+# ═══════════════════════════════════════════════════
+
+def _get_family_settings_dir(family_id: str) -> Path:
+    return CLOUD_FAMILY_DIR / family_id
+
+
+@app.route("/api/cloud/settings", methods=["GET"])
+def cloud_settings_get():
+    """获取家庭设置"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    try:
+        data_dir = _get_family_settings_dir(family_id)
+        settings = settings_lib.load_settings(data_dir)
+        return jsonify({"success": True, "settings": settings})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/cloud/settings", methods=["POST"])
+def cloud_settings_post():
+    """保存家庭设置"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    data = request.get_json(silent=True) or {}
+    try:
+        data_dir = _get_family_settings_dir(family_id)
+        settings = settings_lib.save_settings(data_dir, data.get("settings", {}))
+        return jsonify({"success": True, "settings": settings})
     except Exception as e:
         traceback.print_exc()
         return jsonify({"success": False, "error": str(e)}), 500
