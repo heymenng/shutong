@@ -56,8 +56,12 @@
         /* 输入区 */
         .input-area { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e8e8e8; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); display: flex; align-items: flex-end; gap: 8px; z-index: 100; }
         .input-box { flex: 1; min-height: 40px; max-height: 120px; border: 1px solid #ddd; border-radius: 20px; padding: 10px 14px; font-size: 15px; line-height: 1.4; resize: none; outline: none; -webkit-appearance: none; }
-        .send-btn, .voice-btn { width: 42px; height: 42px; border: none; border-radius: 50%; background: #4a90a4; color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+        .send-btn, .voice-btn, .image-btn { width: 42px; height: 42px; border: none; border-radius: 50%; background: #4a90a4; color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
         .send-btn:disabled { background: #a0c4d0; }
+        .image-btn { background: #8b7355; }
+        .image-preview { position: fixed; bottom: 66px; left: 12px; z-index: 101; }
+        .image-preview img { max-height: 80px; border-radius: 8px; border: 2px solid #4a90a4; }
+        .msg-image { max-width: 70vw; max-height: 200px; border-radius: 10px; margin-top: 6px; display: block; }
 
         /* 登录 */
         .login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #4a90a4 0%, #3b7a8c 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; color: white; padding: 24px; }
@@ -125,7 +129,10 @@
         </div>
 
         <div class="input-area">
-            <textarea id="messageInput" class="input-box" rows="1" placeholder="想问书童什么？"></textarea>
+            <button id="imageBtn" class="image-btn" title="拍照/传图" onclick="$('mobileImageInput').click()">📷</button>
+            <input type="file" id="mobileImageInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+            <div id="imagePreview" class="image-preview"></div>
+            <textarea id="messageInput" class="input-box" rows="1" placeholder="想问书童什么，或点 📷 拍照问作业..."></textarea>
             <button id="sendBtn" class="send-btn" title="发送">➤</button>
         </div>
     </div>
@@ -164,11 +171,27 @@
             messages: [],
             lastAudioUrl: '',
             lastVoiceLabel: '书童',
-            audioUnlocked: false
+            audioUnlocked: false,
+            pendingImage: null
         };
         window.appState = appState;
 
         const $ = id => document.getElementById(id);
+
+        // 选择图片
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                appState.pendingImage = e.target.result;
+                $('imagePreview').innerHTML =
+                    `<img src="${appState.pendingImage}" onclick="appState.pendingImage=null;$('imagePreview').innerHTML='';$('mobileImageInput').value='';$('messageInput').focus()">`;
+                $('messageInput').placeholder = '已选图片，可补充文字后发送...';
+                $('messageInput').focus();
+            };
+            reader.readAsDataURL(file);
+        }
 
         // 页面加载时根据是否已有身份更新输入框提示
         setTimeout(updateInputPlaceholder, 0);
@@ -547,13 +570,14 @@
         });
         $('sendBtn').addEventListener('click', sendMessage);
 
-        function appendMessage(role, text, audioUrl, voiceLabel) {
+        function appendMessage(role, text, audioUrl, voiceLabel, imageData = null) {
             const div = document.createElement('div');
             div.className = `message ${role}`;
             div.dataset.role = role;
             const safeText = escapeHtml(text).replace(/\n/g, '<br>');
             const safeUrl = audioUrl ? escapeHtml(audioUrl) : '';
             const safeLabel = voiceLabel ? escapeHtml(voiceLabel) : '书童';
+            const imageHtml = imageData ? `<img src="${escapeHtml(imageData)}" class="msg-image" onclick="window.open(this.src)">` : '';
             let audioBtn = '';
             if (role === 'assistant') {
                 if (safeUrl) {
@@ -562,11 +586,11 @@
                     audioBtn = `<button class="msg-audio-btn audio-play-hint" onclick="handleAudioPlay(this, '${safeLabel}')" title="点击播放语音">🔊 点击播放</button>`;
                 }
             }
-            div.innerHTML = `<div class="msg-bubble">${safeText}${audioBtn}</div>`;
+            div.innerHTML = `<div class="msg-bubble">${safeText}${imageHtml}${audioBtn}</div>`;
             const container = $('chatContainer');
             container.insertBefore(div, $('typingIndicator'));
             scrollToBottom();
-            appState.messages.push({ role, text, audioUrl, voiceLabel });
+            appState.messages.push({ role, text, audioUrl, voiceLabel, image: imageData });
             return div;
         }
 
@@ -579,7 +603,8 @@
 
         async function sendMessage() {
             const text = input.value.trim();
-            if (!text) return;
+            const image = appState.pendingImage;
+            if (!text && !image) return;
             if (!appState.userId) {
                 showErrorToast('请先点左上角 👤 选择身份');
                 updateInputPlaceholder();
@@ -588,7 +613,11 @@
 
             input.value = '';
             input.style.height = 'auto';
-            appendMessage('user', text);
+            input.placeholder = '想问书童什么，或点 📷 拍照问作业...';
+            appendMessage('user', text || '请看看这张照片', null, null, image);
+            appState.pendingImage = null;
+            $('imagePreview').innerHTML = '';
+            $('mobileImageInput').value = '';
 
             const sendBtn = $('sendBtn');
             sendBtn.disabled = true;
@@ -601,6 +630,7 @@
             try {
                 const payload = {
                     message: text,
+                    image: image,
                     role: appState.role,
                     mode: appState.role === 'child' ? 'child' : 'parent',
                     user_id: appState.userId,

@@ -13,8 +13,29 @@ SIMULATION_DB = {
     "我觉得活着没意思": "你跟我说实话。\n\n是不是...心里有个黑洞？\n\n吞掉了所有的光？\n\n这不是你的错。\n\n但这件事，我必须告诉你爸妈。\n\n不是告密。\n\n是你需要帮忙。\n\n需要大人帮你一起，把光找回来。\n\n我陪着你。\n\n我们一起想办法。\n\n但你不能一个人扛着。",
 }
 
+def _normalize_openai_messages(messages):
+    """兼容文本与图文混合消息：content 为 list 时保留多模态格式。"""
+    out = []
+    for m in messages:
+        content = m.get("content")
+        if isinstance(content, list):
+            out.append({"role": m["role"], "content": content})
+        else:
+            out.append({"role": m["role"], "content": content})
+    return out
+
+
 def call_openai(messages):
     try:
+        # 若包含图片，自动切换到支持 vision 的模型
+        has_image = any(
+            isinstance(m.get("content"), list) and any(
+                item.get("type") == "image_url" for item in m["content"]
+            )
+            for m in messages
+        )
+        model = CONFIG.get("openai_vision_model", "gpt-4o-mini") if has_image else CONFIG["openai_model"]
+
         response = requests.post(
             "https://api.openai.com/v1/chat/completions",
             headers={
@@ -22,16 +43,43 @@ def call_openai(messages):
                 "Content-Type": "application/json"
             },
             json={
-                "model": CONFIG["openai_model"],
-                "messages": messages,
+                "model": model,
+                "messages": _normalize_openai_messages(messages),
                 "temperature": CONFIG["temperature"],
                 "max_tokens": CONFIG["max_tokens"]
             },
-            timeout=60
+            timeout=120
         )
         return response.json()["choices"][0]["message"]["content"]
     except Exception as e:
         return f"【调用失败】{str(e)}\n请检查API Key"
+
+
+def _normalize_ollama_messages(messages):
+    """Ollama /api/chat 支持 messages[*].images，需把图文 list 拆成 content + images。"""
+    out = []
+    for m in messages:
+        content = m.get("content")
+        if isinstance(content, list):
+            text_parts = []
+            images = []
+            for item in content:
+                if item.get("type") == "text":
+                    text_parts.append(item.get("text", ""))
+                elif item.get("type") == "image_url":
+                    url = item.get("image_url", {}).get("url", "")
+                    if url.startswith("data:image"):
+                        images.append(url.split(",", 1)[1])
+                    elif url:
+                        try:
+                            images.append(base64.b64encode(requests.get(url, timeout=10).content).decode("utf-8"))
+                        except Exception:
+                            pass
+            out.append({"role": m["role"], "content": "\n".join(text_parts), "images": images})
+        else:
+            out.append({"role": m["role"], "content": str(content)})
+    return out
+
 
 def call_ollama(messages):
     try:
@@ -39,14 +87,14 @@ def call_ollama(messages):
             CONFIG["ollama_url"],
             json={
                 "model": CONFIG["ollama_model"],
-                "messages": messages,
+                "messages": _normalize_ollama_messages(messages),
                 "stream": False,
                 "options": {
                     "temperature": CONFIG["temperature"],
                     "num_predict": CONFIG["max_tokens"]
                 }
             },
-            timeout=60
+            timeout=120
         )
         return response.json()["message"]["content"]
     except Exception as e:

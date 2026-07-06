@@ -467,6 +467,37 @@
 
         .btn-send:disabled {
             background: #c9bdb0;
+        }
+
+        .btn-image {
+            background: var(--wood);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-image:hover {
+            background: var(--wood-dark);
+        }
+
+        #imagePreview img {
+            max-height: 54px;
+            border-radius: 8px;
+            border: 1px solid #d9cfc0;
+        }
+
+        .message-image {
+            max-width: 240px;
+            max-height: 240px;
+            border-radius: 10px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
             cursor: not-allowed;
         }
 
@@ -582,10 +613,13 @@
                     </div>
                 </div>
                 <div class="input-box">
-                    <textarea id="messageInput" rows="1" placeholder="想对书童说什么..." onkeydown="handleKeyDown(event)"></textarea>
+                    <button class="btn-image" id="imageBtn" onclick="document.getElementById('imageInput').click()" title="拍照/传图">📷</button>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+                    <span id="imagePreview"></span>
+                    <textarea id="messageInput" rows="1" placeholder="想对书童说什么，或点 📷 拍照问作业..." onkeydown="handleKeyDown(event)"></textarea>
                     <button class="btn-send" id="sendBtn" onclick="sendMessage()">发送</button>
                 </div>
-                <div class="hint">按 Enter 发送，Shift+Enter 换行</div>
+                <div class="hint">按 Enter 发送，Shift+Enter 换行，📷 可拍照答疑</div>
             </div>
         </main>
     </div>
@@ -603,6 +637,21 @@
 
         const typingIndicator = document.getElementById('typingIndicator');
         typingIndicator.style.display = 'none';
+        let pendingImage = null;
+
+        // 选择图片
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                pendingImage = e.target.result;
+                document.getElementById('imagePreview').innerHTML =
+                    `<img src="${pendingImage}" style="max-height:54px;border-radius:8px;border:1px solid #d9cfc0;" onclick="pendingImage=null;this.parentElement.innerHTML='';document.getElementById('imageInput').value=''">`;
+                document.getElementById('messageInput').placeholder = '已选图片，可补充文字后发送...';
+            };
+            reader.readAsDataURL(file);
+        }
 
         // 初始化
         async function init() {
@@ -726,16 +775,21 @@
             const input = document.getElementById('messageInput');
             const btn = document.getElementById('sendBtn');
             const message = input.value.trim();
-            if (!message) return;
+            const image = pendingImage;
+            if (!message && !image) return;
 
             input.value = '';
             input.style.height = 'auto';
+            input.placeholder = '想对书童说什么，或点 📷 拍照问作业...';
             btn.disabled = true;
             appState.voice = document.getElementById('voiceToggle').checked;
 
-            addMessage('user', message);
+            addMessage('user', message || '请看看这张照片', image);
+            pendingImage = null;
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('imageInput').value = '';
             showTyping(true);
-            updateStatus('书童正在思考...');
+            updateStatus('书童正在看图思考...');
 
             try {
                 const res = await fetch('/api/chat', {
@@ -743,6 +797,7 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         message: message,
+                        image: image,
                         child_id: appState.currentChild
                     })
                 });
@@ -769,7 +824,7 @@
         }
 
         // 添加消息到界面
-        function addMessage(role, text, autoSpeak = false) {
+        function addMessage(role, text, imageData = null, autoSpeak = false) {
             const container = document.getElementById('chatContainer');
             // 移除 welcome
             const welcome = container.querySelector('.welcome');
@@ -777,11 +832,12 @@
 
             const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
             const avatar = role === 'user' ? '👤' : '📜';
+            const imageHtml = imageData ? `<br><img src="${imageData}" class="message-image" onclick="window.open(this.src)">` : '';
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
             msgDiv.innerHTML = `
                 <div class="avatar">${avatar}</div>
-                <div class="bubble">${escapeHtml(text)}</div>
+                <div class="bubble">${escapeHtml(text)}${imageHtml}</div>
                 <div class="message-time">${time}</div>
             `;
             container.appendChild(msgDiv);

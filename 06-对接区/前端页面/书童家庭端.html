@@ -1426,15 +1426,15 @@
                 </div>
                 <div class="input-box">
                     <button class="btn-mic" id="micBtn" onclick="toggleRecording()" data-i18n="micTitle" data-i18n-attr="title" title="点击开始/结束录音">🎙️</button>
-                    <button class="btn-image" id="imageBtn" onclick="document.getElementById('imageInput').click()" data-i18n="uploadImageTitle" data-i18n-attr="title" title="上传图片">📷</button>
+                    <button class="btn-image" id="imageBtn" onclick="document.getElementById('imageInput').click()" data-i18n="uploadImageTitle" data-i18n-attr="title" title="拍照答疑 / 上传图片">📷</button>
                     <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
                     <span id="imagePreview"></span>
                     <select class="mic-select" id="micSelect" title="选择麦克风"></select>
                     <button class="mic-refresh" id="micRefresh" onclick="refreshMicDevices()" data-i18n="refreshMicTitle" data-i18n-attr="title" title="刷新麦克风列表">🔄</button>
-                    <textarea id="messageInput" rows="1" data-i18n="messagePlaceholder" data-i18n-attr="placeholder" placeholder="想对书童说什么..." onkeydown="handleKeyDown(event)"></textarea>
+                    <textarea id="messageInput" rows="1" data-i18n="messagePlaceholder" data-i18n-attr="placeholder" placeholder="想对书童说什么，或点 📷 拍照问作业..." onkeydown="handleKeyDown(event)"></textarea>
                     <button class="btn-send" id="sendBtn" data-i18n="send" onclick="sendMessage()">发送</button>
                 </div>
-                <div class="hint" id="inputHint" data-i18n="messageHint">按 Enter 发送 · 点击麦克风开始录音，再点一次结束</div>
+                <div class="hint" id="inputHint" data-i18n="messageHint">按 Enter 发送 · 🎙️ 语音 · 📷 拍照答疑</div>
             </div>
         </main>
     </div>

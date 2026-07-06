@@ -135,15 +135,23 @@ def get_child_context(child_id):
     return context
 
 
-def build_messages(child_id, user_message):
-    """构建发送给LLM的消息列表"""
+def build_messages(child_id, user_message, image_data=None):
+    """构建发送给LLM的消息列表，支持图片"""
     messages = [{"role": "system", "content": system_prompt + get_child_context(child_id)}]
     history = histories.get(child_id, [])
-    # 只保留最近 MAX_HISTORY 轮
+    # 只保留最近 MAX_HISTORY 轮（历史消息为纯文本；当前图片仅参与当前轮）
     for h in history[-MAX_HISTORY:]:
         messages.append({"role": "user", "content": h["user"]})
         messages.append({"role": "assistant", "content": h["assistant"]})
-    messages.append({"role": "user", "content": user_message})
+
+    if image_data:
+        content = [
+            {"type": "text", "text": user_message or "请看看这张照片，帮我解答或讲解。"},
+            {"type": "image_url", "image_url": {"url": image_data}},
+        ]
+    else:
+        content = user_message
+    messages.append({"role": "user", "content": content})
     return messages
 
 
@@ -272,22 +280,26 @@ class BookboyHandler(BaseHTTPRequestHandler):
 
         if self.path == "/api/chat":
             message = data.get("message", "").strip()
+            image_data = data.get("image", "").strip()
             child_id = data.get("child_id") or current_child_id
-            if not message:
-                self._send_json({"error": "消息不能为空"}, 400)
+            if not message and not image_data:
+                self._send_json({"error": "消息或图片至少填一项"}, 400)
                 return
             if child_id not in children:
                 child_id = current_child_id
             
             # 构建消息并调用LLM
-            messages = build_messages(child_id, message)
+            messages = build_messages(child_id, message, image_data)
             reply = chat_completion(messages)
             
-            # 记录历史
+            # 记录历史（图片仅记占位，避免历史膨胀）
+            history_user = message
+            if image_data:
+                history_user += " [图片]"
             if child_id not in histories:
                 histories[child_id] = []
             histories[child_id].append({
-                "user": message,
+                "user": history_user,
                 "assistant": reply,
                 "time": time.strftime("%H:%M"),
             })
@@ -296,6 +308,7 @@ class BookboyHandler(BaseHTTPRequestHandler):
                 "reply": reply,
                 "child_id": child_id,
                 "backend": get_backend(),
+                "has_image": bool(image_data),
             })
 
         elif self.path == "/api/speak":
