@@ -1299,6 +1299,23 @@
         </div>
     </div>
 
+    <!-- 家庭留言弹窗 -->
+    <div class="modal-overlay" id="bulletinModal" onclick="closeBulletinPanel(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">家庭留言</div>
+                <button class="modal-close" onclick="closeBulletinPanel()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="bulletinList" style="max-height:50vh;overflow-y:auto;margin-bottom:16px;"></div>
+                <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid #e8e0d3;">
+                    <input type="text" id="bulletinText" placeholder="给家人留句话..." style="flex:1;padding:8px;border:1px solid #d9cfc0;border-radius:8px;">
+                    <button class="btn-small" onclick="addBulletinItem()" style="background:#1565c0;color:#fff;">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="app">
         <!-- 侧边栏 -->
         <aside class="sidebar">
@@ -1451,6 +1468,10 @@
                     <div class="dashboard-card" onclick="openGrowthPanel()">
                         <div class="dashboard-icon">🌱</div>
                         <div class="dashboard-label">成长记录</div>
+                    </div>
+                    <div class="dashboard-card" onclick="openBulletinPanel()">
+                        <div class="dashboard-icon">💬</div>
+                        <div class="dashboard-label">家庭留言</div>
                     </div>
                     <div class="dashboard-card" onclick="document.getElementById('alertsSection').scrollIntoView({behavior:'smooth'})">
                         <div class="dashboard-icon">🔔</div>
@@ -1858,6 +1879,76 @@
             try {
                 const data = await apiFetch('/api/growth/' + id, { method: 'DELETE' });
                 if (data.success) loadGrowth();
+            } catch (e) {
+                showError('删除失败');
+            }
+        }
+
+        // 家庭留言板
+        function openBulletinPanel() {
+            document.getElementById('bulletinModal').classList.add('active');
+            loadBulletin();
+        }
+        function closeBulletinPanel() {
+            document.getElementById('bulletinModal').classList.remove('active');
+        }
+
+        async function loadBulletin() {
+            const list = document.getElementById('bulletinList');
+            list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">加载中...</div>';
+            try {
+                const data = await apiFetch('/api/bulletin', { method: 'GET' });
+                if (!data.success) {
+                    list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">加载失败</div>';
+                    return;
+                }
+                renderBulletin(data.items || []);
+            } catch (e) {
+                list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">网络异常</div>';
+            }
+        }
+
+        function renderBulletin(items) {
+            const list = document.getElementById('bulletinList');
+            if (!items.length) {
+                list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">还没有留言，写一句给家人吧</div>';
+                return;
+            }
+            list.innerHTML = items.map(item => `
+                <div style="padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                    <div style="font-size:12px;color:#4a90a4;font-weight:600;">${safeEscape(item.author || '家人')}</div>
+                    <div style="font-size:14px;color:#333;margin-top:4px;line-height:1.5;">${safeEscape(item.text || '')}</div>
+                    <div style="font-size:11px;color:#888;margin-top:4px;">${(item.created_at || '').slice(0, 16).replace('T', ' ')}</div>
+                    <button onclick="deleteBulletinItem('${item.id}')" style="background:none;border:none;color:#999;font-size:13px;padding:4px 0;cursor:pointer;">🗑 删除</button>
+                </div>
+            `).join('');
+        }
+
+        async function addBulletinItem() {
+            const text = document.getElementById('bulletinText').value.trim();
+            if (!text) return;
+            const author = appState.userName || appState.userRole || '家人';
+            try {
+                const data = await apiFetch('/api/bulletin', {
+                    method: 'POST',
+                    body: JSON.stringify({ text, author })
+                });
+                if (data.success) {
+                    document.getElementById('bulletinText').value = '';
+                    loadBulletin();
+                } else {
+                    showError(data.error || '发送失败');
+                }
+            } catch (e) {
+                showError('发送失败');
+            }
+        }
+
+        async function deleteBulletinItem(id) {
+            if (!confirm('确定删除这条留言吗？')) return;
+            try {
+                const data = await apiFetch('/api/bulletin/' + id, { method: 'DELETE' });
+                if (data.success) loadBulletin();
             } catch (e) {
                 showError('删除失败');
             }

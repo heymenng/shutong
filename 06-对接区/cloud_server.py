@@ -89,6 +89,7 @@ from 书童程序.核心.语言模型 import chat_completion
 from 书童程序.核心.语音模块 import VoiceEngine
 from 书童程序.核心 import 日程安排 as schedule_lib
 from 书童程序.核心 import 成长记录 as growth_lib
+from 书童程序.核心 import 家庭留言板 as bulletin_lib
 
 # 云端强制使用讯飞 STT（whisper 模型太大不适合服务器）
 try:
@@ -1431,6 +1432,65 @@ def cloud_growth_delete(record_id):
         if growth_lib.delete_record(data_dir, record_id):
             return jsonify({"success": True})
         return jsonify({"success": False, "error": "记录不存在"}), 404
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════
+# 家庭留言板接口
+# ═══════════════════════════════════════════════════
+
+def _get_family_bulletin_dir(family_id: str) -> Path:
+    return CLOUD_FAMILY_DIR / family_id
+
+
+@app.route("/api/cloud/bulletin", methods=["GET"])
+def cloud_bulletin_get():
+    """获取家庭留言板"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    try:
+        data_dir = _get_family_bulletin_dir(family_id)
+        items = bulletin_lib.list_messages(data_dir)
+        stats = bulletin_lib.get_stats(data_dir)
+        return jsonify({"success": True, "items": items, "stats": stats})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/cloud/bulletin", methods=["POST"])
+def cloud_bulletin_post():
+    """新增留言"""
+    family_id, sub, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    data = request.get_json(silent=True) or {}
+    author = ""
+    if sub:
+        author = sub.get("role", "")
+    try:
+        data_dir = _get_family_bulletin_dir(family_id)
+        item = bulletin_lib.add_message(data_dir, {**data, "author": data.get("author") or author})
+        return jsonify({"success": True, "item": item})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/cloud/bulletin/<message_id>", methods=["DELETE"])
+def cloud_bulletin_delete(message_id):
+    """删除留言"""
+    family_id, _, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+    try:
+        data_dir = _get_family_bulletin_dir(family_id)
+        if bulletin_lib.delete_message(data_dir, message_id):
+            return jsonify({"success": True})
+        return jsonify({"success": False, "error": "留言不存在"}), 404
     except Exception as e:
         traceback.print_exc()
         return jsonify({"success": False, "error": str(e)}), 500

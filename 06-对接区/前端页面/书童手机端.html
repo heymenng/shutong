@@ -125,6 +125,22 @@
         .growth-add button { padding: 10px 16px; background: #7a9e7e; color: white; border: none; border-radius: 10px; font-size: 14px; }
         .growth-photo-btn { background: #8b7355; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 14px; }
 
+        /* 家庭留言板面板 */
+        .bulletin-sheet { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 2700; display: none; align-items: flex-end; }
+        .bulletin-sheet.active { display: flex; }
+        .bulletin-panel { width: 100%; max-height: 85vh; background: white; border-radius: 20px 20px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); animation: slideUp 0.2s ease; display: flex; flex-direction: column; }
+        .bulletin-title { text-align: center; font-size: 16px; color: #333; margin-bottom: 12px; position: relative; font-weight: 600; }
+        .bulletin-close { position: absolute; right: 0; top: -4px; width: 28px; height: 28px; line-height: 28px; text-align: center; color: #999; font-size: 20px; cursor: pointer; }
+        .bulletin-list { flex: 1; overflow-y: auto; margin-bottom: 12px; }
+        .bulletin-item { padding: 12px; border-bottom: 1px solid #f0f0f0; }
+        .bulletin-author { font-size: 12px; color: #4a90a4; font-weight: 600; }
+        .bulletin-text { font-size: 14px; color: #333; margin-top: 4px; line-height: 1.5; }
+        .bulletin-time { font-size: 11px; color: #888; margin-top: 4px; }
+        .bulletin-empty { text-align: center; color: #888; padding: 30px 0; font-size: 14px; }
+        .bulletin-add { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid #e8e8e8; }
+        .bulletin-add input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; outline: none; }
+        .bulletin-add button { padding: 10px 16px; background: #1565c0; color: white; border: none; border-radius: 10px; font-size: 14px; }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -159,6 +175,7 @@
             <div class="quick-tip" data-text="为什么我要早睡">为什么早睡</div>
             <div class="quick-tip" onclick="openSchedulePanel()">📅 今日安排</div>
             <div class="quick-tip" style="background:#e8f5e9;color:#2e7d32;" onclick="openGrowthPanel()">🌱 成长记录</div>
+            <div class="quick-tip" style="background:#e3f2fd;color:#1565c0;" onclick="openBulletinPanel()">💬 家庭留言</div>
             <div class="quick-tip" style="background:#fff3cd;color:#856404;" onclick="testAudio()">🔊 测试声音</div>
         </div>
 
@@ -236,6 +253,18 @@
                 <button class="growth-photo-btn" onclick="$('growthImageInput').click()">📷 添加照片</button>
                 <div id="growthImagePreview"></div>
                 <button onclick="addGrowthItem()">保存记录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 家庭留言板面板 -->
+    <div id="bulletinSheet" class="bulletin-sheet">
+        <div class="bulletin-panel">
+            <div class="bulletin-title">家庭留言<span class="bulletin-close" onclick="closeBulletinPanel()">&times;</span></div>
+            <div id="bulletinList" class="bulletin-list"></div>
+            <div class="bulletin-add">
+                <input type="text" id="bulletinText" placeholder="给家人留句话...">
+                <button onclick="addBulletinItem()">发送</button>
             </div>
         </div>
     </div>
@@ -971,6 +1000,78 @@
             try {
                 const data = await apiFetch('/api/growth/' + id, { method: 'DELETE' });
                 if (data.success) loadGrowth();
+            } catch (e) {
+                showErrorToast('删除失败');
+            }
+        }
+
+        // 家庭留言板
+        function openBulletinPanel() {
+            $('bulletinSheet').classList.add('active');
+            loadBulletin();
+        }
+        function closeBulletinPanel() {
+            $('bulletinSheet').classList.remove('active');
+        }
+        $('bulletinSheet').addEventListener('click', e => {
+            if (e.target === $('bulletinSheet')) closeBulletinPanel();
+        });
+
+        async function loadBulletin() {
+            const list = $('bulletinList');
+            list.innerHTML = '<div class="bulletin-empty">加载中...</div>';
+            try {
+                const data = await apiFetch('/api/bulletin', { method: 'GET' });
+                if (!data.success) {
+                    list.innerHTML = '<div class="bulletin-empty">加载失败</div>';
+                    return;
+                }
+                renderBulletin(data.items || []);
+            } catch (e) {
+                list.innerHTML = '<div class="bulletin-empty">网络异常</div>';
+            }
+        }
+
+        function renderBulletin(items) {
+            const list = $('bulletinList');
+            if (!items.length) {
+                list.innerHTML = '<div class="bulletin-empty">还没有留言，写一句给家人吧</div>';
+                return;
+            }
+            list.innerHTML = items.map(item => `
+                <div class="bulletin-item">
+                    <div class="bulletin-author">${escapeHtml(item.author || '家人')}</div>
+                    <div class="bulletin-text">${escapeHtml(item.text || '')}</div>
+                    <div class="bulletin-time">${(item.created_at || '').slice(0, 16).replace('T', ' ')}</div>
+                    <button onclick="deleteBulletinItem('${item.id}')" style="background:none;border:none;color:#999;font-size:14px;padding:4px 0;">🗑 删除</button>
+                </div>
+            `).join('');
+        }
+
+        async function addBulletinItem() {
+            const text = $('bulletinText').value.trim();
+            if (!text) return;
+            try {
+                const data = await apiFetch('/api/bulletin', {
+                    method: 'POST',
+                    body: JSON.stringify({ text, author: appState.userName || appState.userRole || '家人' })
+                });
+                if (data.success) {
+                    $('bulletinText').value = '';
+                    loadBulletin();
+                } else {
+                    showErrorToast(data.error || '发送失败');
+                }
+            } catch (e) {
+                showErrorToast('发送失败');
+            }
+        }
+
+        async function deleteBulletinItem(id) {
+            if (!confirm('确定删除这条留言吗？')) return;
+            try {
+                const data = await apiFetch('/api/bulletin/' + id, { method: 'DELETE' });
+                if (data.success) loadBulletin();
             } catch (e) {
                 showErrorToast('删除失败');
             }
