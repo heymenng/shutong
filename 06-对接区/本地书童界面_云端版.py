@@ -48,6 +48,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "03-引擎区"))
 
 from 书童程序.核心.语音模块 import VoiceEngine
+from 书童程序.核心 import 家庭档案管理 as archive_mgr
 
 try:
     from 书童程序.核心.机器人对接.G1_HTTP客户端 import G1HTTPClient
@@ -275,13 +276,18 @@ def load_family_json(family_id):
 
 
 def save_family_json(family_id, data):
-    """保存本地家庭数据"""
+    """保存本地家庭数据，并同步更新档案索引"""
     try:
         family_dir = FAMILY_DATA_DIR / family_id
         family_dir.mkdir(parents=True, exist_ok=True)
         path = family_dir / "family.json"
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+        try:
+            idx = archive_mgr.FamilyArchiveIndex(archive_mgr.LOCAL_INDEX_PATH, FAMILY_DATA_DIR)
+            idx.index_family(family_id, data)
+        except Exception as e2:
+            print(f"[档案索引] 更新 {family_id} 失败: {e2}")
         return True
     except Exception as e:
         print(f"[本地家庭] 保存失败: {e}")

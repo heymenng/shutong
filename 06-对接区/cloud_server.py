@@ -91,6 +91,7 @@ from 书童程序.核心 import 日程安排 as schedule_lib
 from 书童程序.核心 import 成长记录 as growth_lib
 from 书童程序.核心 import 家庭留言板 as bulletin_lib
 from 书童程序.核心 import 设置中心 as settings_lib
+from 书童程序.核心 import 家庭档案管理 as archive_mgr
 
 # 云端强制使用讯飞 STT（whisper 模型太大不适合服务器）
 try:
@@ -555,7 +556,7 @@ def load_cloud_family(family_id: str) -> dict:
 
 
 def save_cloud_family(family_id: str, data: dict) -> bool:
-    """保存云端家庭基本信息文件"""
+    """保存云端家庭基本信息文件，并同步更新档案索引"""
     try:
         family_dir = CLOUD_FAMILY_DIR / family_id
         family_dir.mkdir(parents=True, exist_ok=True)
@@ -563,6 +564,11 @@ def save_cloud_family(family_id: str, data: dict) -> bool:
         with open(p, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         cloud_family_cache[family_id] = data
+        try:
+            idx = archive_mgr.FamilyArchiveIndex(archive_mgr.CLOUD_INDEX_PATH, CLOUD_FAMILY_DIR)
+            idx.index_family(family_id, data)
+        except Exception as e2:
+            print(f"[档案索引] 更新 {family_id} 失败: {e2}")
         return True
     except Exception as e:
         print(f"[云端家庭] 保存 {family_id} 失败: {e}")
@@ -1531,6 +1537,48 @@ def cloud_settings_post():
         data_dir = _get_family_settings_dir(family_id)
         settings = settings_lib.save_settings(data_dir, data.get("settings", {}))
         return jsonify({"success": True, "settings": settings})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════
+# 家庭档案脱敏分析接口
+# ═══════════════════════════════════════════════════
+
+@app.route("/api/cloud/archive/analytics", methods=["POST"])
+def cloud_archive_analytics():
+    """家庭档案脱敏聚合分析（师父/管理密钥可访问全量）"""
+    family_id, sub, _, error = auth_subscription_or_master()
+    if error:
+        return jsonify({"success": False, "error": error}), 401
+
+    data = request.get_json(silent=True) or {}
+    action = data.get("action", "distribution")
+    min_k = int(data.get("min_k", 10))
+
+    try:
+        idx = archive_mgr.FamilyArchiveIndex(archive_mgr.CLOUD_INDEX_PATH, CLOUD_FAMILY_DIR)
+        if action == "rebuild":
+            result = idx.rebuild_from_disk()
+            return jsonify({"success": True, "indexed": result["indexed"]})
+        if action == "distribution":
+            return jsonify({"success": True, "data": idx.label_distribution(min_k=min_k)})
+        if action == "count_by_label":
+            label = data.get("label", "")
+            if not label:
+                return jsonify({"success": False, "error": "缺少 label 参数"}), 400
+            return jsonify({"success": True, "data": idx.count_by_label(label, min_k=min_k)})
+        if action == "query":
+            filters = data.get("filters", {})
+            return jsonify({"success": True, "data": idx.query(filters, min_k=min_k)})
+        if action == "search":
+            filters = data.get("filters", {})
+            limit = int(data.get("limit", 20))
+            offset = int(data.get("offset", 0))
+            results = idx.search(filters, limit=limit, offset=offset, desensitize=True)
+            return jsonify({"success": True, "data": results})
+        return jsonify({"success": False, "error": "未知 action"}), 400
     except Exception as e:
         traceback.print_exc()
         return jsonify({"success": False, "error": str(e)}), 500
