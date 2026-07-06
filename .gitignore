@@ -1,5 +1,6 @@
 # macOS
 .DS_Store
+**/.DS_Store
 
 # Python
 __pycache__/
@@ -27,10 +28,13 @@ ENV/
 *.gguf
 *.safetensors
 
-# Logs and temporary files
+# Logs, backups and temporary files
 *.log
+*.bak
+*.tmp
 /tmp/
 /04-工作区/日志/
+/04-工作区/书童运行日志.txt
 /05-交付区/临时交付/
 
 # Secrets and local credentials (never commit)
@@ -52,13 +56,16 @@ ENV/
 /03-引擎区/书童程序/数据/当前对话身份.json
 /03-引擎区/书童程序/数据/师父认证配置.json
 
-# Child data archives
-/04-工作区/档案区/陪伴日志/
-/04-工作区/档案区/陪伴计划/
-/04-工作区/档案区/孩子档案/*_偏好设置.json
+# Cloud sync runtime data
+/04-工作区/云端数据区/
 
-# Daily records
+# Child data archives (runtime generated, privacy sensitive)
+**/陪伴日志/
+**/云端同步/
+**/对话记录/
+**/孩子作品/
 /04-工作区/档案区/每日陪伴记录/
+/04-工作区/档案区/孩子档案/*_偏好设置.json
 
 # Docker build artifacts
 **/docker-compose.override.yml
