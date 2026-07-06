@@ -18,7 +18,7 @@ from 书童程序.工具.项目根目录 import get_project_root  # noqa: E402
 
 BASE = get_project_root()
 GENERATOR = BASE / "07-工具区/工具脚本/生成笑话音频.py"
-AUDIO_DIR = BASE / "05-交付区/产品交付/书童音频节目/音频节目"
+AUDIO_DIR = BASE / "05-交付区/产品交付/书童音频节目/笑话库/音频节目"
 JOKE_BASE = BASE / "05-交付区/产品交付/书童音频节目/笑话库"
 
 # 保留的精选笑话（相对 JOKE_BASE 的路径）
