@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""把笑话库 .md 文本按角色合成多音色音频（edge-tts）
+"""把笑话库 .md 文本按角色合成多音色音频
+
+支持双后端：
+- 讯飞超拟人语音（xfyun_oral）：用于已有授权音色的角色
+- edge-tts：用于方言角色、童声、以及讯飞失败时的回退
 
 用法：
     .venv/bin/python 07-工具区/工具脚本/生成笑话音频.py \
@@ -11,6 +15,7 @@
 import argparse
 import asyncio
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -18,19 +23,45 @@ from pathlib import Path
 import edge_tts
 from pydub import AudioSegment
 
+# 把项目根目录加入路径，以便导入讯飞模块
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT / "03-引擎区"))
 
-# 角色 -> edge-tts 声音映射
-# 按最新《角色声音分配表》：东北/陕西/台湾书童用女声；普通话成人用男声；伴读书童用女声
-VOICE_MAP = {
+from 书童程序.核心.讯飞超拟人语音 import XfyunOralTTS  # noqa: E402
+from 书童程序.配置 import CONFIG  # noqa: E402
+
+
+# 讯飞超拟人音色：只使用已授权音色
+# 当前已开通：天津少女、聆伯松（男）、凌语嫣、惠芳女、凌小月、凌小璇、凌小雪、灵晓棠、灵玉照、紫金、古风仙女
+XF_VOICE_MAP = {
+    # 伴读书童 / 小书童：项目默认天津少女
+    "伴读书童": "x6_tianjingshaonv_pro",
+    # 成人男性角色统一用聆伯松（沉稳男声）
+    "师父": "x6_lingbosong_pro",
+    "禅师": "x6_lingbosong_pro",
+    "王阳明": "x6_lingbosong_pro",
+    "庄子": "x6_lingbosong_pro",
+    "佛印": "x6_lingbosong_pro",
+    "王爷爷": "x6_lingbosong_pro",
+    "爸爸": "x6_lingbosong_pro",
+    "老板": "x6_lingbosong_pro",
+    # 成人女性角色
+    "妈妈": "x6_lingyuyan_pro",
+    "李奶奶": "x6_huifangnv_pro",
+}
+
+# edge-tts 音色：方言、童声、以及讯飞未覆盖角色的回退
+EDGE_VOICE_MAP = {
     "伴读书童": "zh-CN-XiaoxiaoNeural",
     "东北书童": "zh-CN-liaoning-XiaobeiNeural",
     "台湾书童": "zh-TW-HsiaoChenNeural",
     "陕西书童": "zh-CN-shaanxi-XiaoniNeural",
     "师父": "zh-CN-YunjianNeural",
     "禅师": "zh-CN-YunjianNeural",
-    "佛印": "zh-CN-YunjianNeural",
     "王阳明": "zh-CN-YunjianNeural",
     "庄子": "zh-CN-YunjianNeural",
+    "佛印": "zh-CN-YunjianNeural",
     "惠子": "zh-CN-YunxiNeural",
     "老板": "zh-CN-YunxiNeural",
     "爸爸": "zh-CN-YunxiNeural",
@@ -41,8 +72,7 @@ VOICE_MAP = {
     "李奶奶": "zh-CN-XiaoyiNeural",
 }
 
-DEFAULT_VOICE = "zh-CN-XiaoxiaoNeural"
-DEFAULT_ROLE = "伴读书童"
+DEFAULT_EDGE_VOICE = "zh-CN-XiaoxiaoNeural"
 
 
 def parse_markdown(md_path: Path):
@@ -57,7 +87,7 @@ def parse_markdown(md_path: Path):
     body = parts[0] if parts else text
 
     segments = []
-    current_role = DEFAULT_ROLE
+    current_role = "伴读书童"
     for line in body.splitlines():
         line = line.strip()
         if not line:
@@ -76,22 +106,56 @@ def parse_markdown(md_path: Path):
             # 无角色名的行当作旁白/舞台说明，默认伴读书童读
             cleaned = re.sub(r"[（(].*?[）)]", " ", line).strip()
             if cleaned:
-                segments.append((DEFAULT_ROLE, cleaned))
+                segments.append((current_role, cleaned))
     return segments
 
 
+async def synthesize_edge(text: str, voice: str, out_path: Path):
+    """使用 edge-tts 合成音频"""
+    communicate = edge_tts.Communicate(text, voice)
+    await communicate.save(str(out_path))
+
+
+def synthesize_xfyun(text: str, voice: str, out_path: Path) -> bool:
+    """使用讯飞超拟人语音合成音频；成功返回 True"""
+    original_voice = CONFIG.get("voice_name")
+    try:
+        CONFIG["voice_name"] = voice
+        tts = XfyunOralTTS()
+        audio = tts.synthesize_to_bytes(text)
+        if audio:
+            out_path.write_bytes(audio)
+            return True
+        print(f"    [讯飞] 合成失败: {tts.error_msg}")
+        return False
+    except Exception as e:
+        print(f"    [讯飞] 异常: {e}")
+        return False
+    finally:
+        CONFIG["voice_name"] = original_voice
+
+
 async def synthesize_segment(role: str, text: str, out_path: Path, retries: int = 3):
-    """合成单段音频，带重试"""
-    voice = VOICE_MAP.get(role, DEFAULT_VOICE)
+    """合成单段音频，优先讯飞，失败回退 edge-tts"""
+    xfyun_voice = XF_VOICE_MAP.get(role)
+    edge_voice = EDGE_VOICE_MAP.get(role, DEFAULT_EDGE_VOICE)
+
+    if xfyun_voice:
+        for attempt in range(1, retries + 1):
+            print(f"  [{role}] 讯飞 {xfyun_voice} 合成（{attempt}/{retries}）...")
+            if synthesize_xfyun(text, xfyun_voice, out_path):
+                return
+            await asyncio.sleep(1.0 * attempt)
+        print(f"  [{role}] 讯飞连续失败，回退 edge-tts: {edge_voice}")
+
     last_err = None
     for attempt in range(1, retries + 1):
         try:
-            communicate = edge_tts.Communicate(text, voice)
-            await communicate.save(str(out_path))
+            await synthesize_edge(text, edge_voice, out_path)
             return
         except Exception as e:
             last_err = e
-            print(f"  [{role}] 合成失败（第 {attempt}/{retries} 次）: {e}")
+            print(f"  [{role}] edge-tts 合成失败（{attempt}/{retries}）: {e}")
             await asyncio.sleep(1.5 * attempt)
     raise last_err
 
@@ -116,7 +180,6 @@ async def build_audio(segments, out_path: Path, play: bool = False):
     print(f"\n已生成：{out_path}")
 
     if play:
-        import subprocess
         subprocess.run(["afplay", str(out_path)], check=False)
 
 
@@ -146,7 +209,10 @@ def main():
     print(f"共 {len(segments)} 段台词，角色分布：")
     roles = sorted(set(r for r, _ in segments))
     for r in roles:
-        print(f"  - {r}: {VOICE_MAP.get(r, DEFAULT_VOICE)}")
+        xf = XF_VOICE_MAP.get(r)
+        edge = EDGE_VOICE_MAP.get(r, DEFAULT_EDGE_VOICE)
+        backend = f"讯飞 {xf}" if xf else f"edge-tts {edge}"
+        print(f"  - {r}: {backend}")
 
     asyncio.run(build_audio(segments, out_path, args.play))
 
