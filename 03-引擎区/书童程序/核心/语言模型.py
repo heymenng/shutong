@@ -1,5 +1,6 @@
 """伴读书童AI - LLM接口模块"""
 
+import base64
 import requests
 from ..配置 import CONFIG, OPENAI_API_KEY
 

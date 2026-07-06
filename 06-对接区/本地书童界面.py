@@ -135,9 +135,22 @@ def get_child_context(child_id):
     return context
 
 
+VISION_PROMPT = (
+    "\n\n【图片/拍题答疑指令】\n"
+    "用户可能上传了作业或题目照片。请像一位耐心的学习伙伴：\n"
+    "1. 先肯定孩子愿意提问；\n"
+    "2. 用孩子能听懂的话，逐步分析图片里的内容；\n"
+    "3. 不要直接给出最终答案，而是给出思考方向或一个简单示例；\n"
+    "4. 鼓励孩子自己再试一次，并问他“你想从哪一步开始？”"
+)
+
+
 def build_messages(child_id, user_message, image_data=None):
     """构建发送给LLM的消息列表，支持图片"""
-    messages = [{"role": "system", "content": system_prompt + get_child_context(child_id)}]
+    prompt = system_prompt + get_child_context(child_id)
+    if image_data:
+        prompt += VISION_PROMPT
+    messages = [{"role": "system", "content": prompt}]
     history = histories.get(child_id, [])
     # 只保留最近 MAX_HISTORY 轮（历史消息为纯文本；当前图片仅参与当前轮）
     for h in history[-MAX_HISTORY:]:

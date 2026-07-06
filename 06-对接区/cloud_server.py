@@ -1206,6 +1206,23 @@ def cloud_chat():
                 context += f"{k}: {v}\n"
             base_prompt += context
 
+    # 如果消息里包含图片，追加“拍题答疑”引导指令
+    has_image = any(
+        isinstance(m.get("content"), list) and any(
+            item.get("type") == "image_url" for item in m.get("content")
+        )
+        for m in messages
+    )
+    if has_image:
+        base_prompt += (
+            "\n\n【图片/拍题答疑指令】\n"
+            "用户可能上传了作业或题目照片。请像一位耐心的学习伙伴：\n"
+            "1. 先肯定孩子愿意提问；\n"
+            "2. 用孩子能听懂的话，逐步分析图片里的内容；\n"
+            "3. 不要直接给出最终答案，而是给出思考方向或一个简单示例；\n"
+            "4. 鼓励孩子自己再试一次，并问他“你想从哪一步开始？”"
+        )
+
     # 如果用户请求多角色/方言，追加语音标签指令
     last_user_text = ""
     for m in reversed(messages):
