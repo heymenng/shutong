@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    ".opencode/instructions/startup-soul.md",
+    ".opencode/instructions/voice-reply.md",
+    ".opencode/instructions/vpn-confirm.md"
+  ]
+}
